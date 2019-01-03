@@ -242,8 +242,9 @@ int main() {
           	vector<double> next_x_vals;
           	vector<double> next_y_vals;
 
-
           	// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+						Driver(next_x_vals, next_y_vals, sensor_fusion);
+						
           	msgJson["next_x"] = next_x_vals;
           	msgJson["next_y"] = next_y_vals;
 
