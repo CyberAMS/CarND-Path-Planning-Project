@@ -9,6 +9,10 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 
+#include "Driver.h"
+#include "Car.h"
+#include "Path.h"
+
 using namespace std;
 
 // for convenience
@@ -200,7 +204,12 @@ int main() {
   	map_waypoints_dy.push_back(d_y);
   }
 
-  h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+	// define objects
+	Driver driver;
+	Car car;
+	Path path;
+	
+  h.onMessage([&driver,&car,&path,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -243,7 +252,17 @@ int main() {
           	vector<double> next_y_vals;
 
           	// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
-						Driver(next_x_vals, next_y_vals, sensor_fusion);
+						
+						// update objects with data from simulator
+						car.set_state(car_x, car_y, car_s, car_d, car_yaw, car_speed);
+						path.set(previous_path_x, previous_path_y, end_path_s, end_path_d);
+						
+						// determine automatic driver reaction
+						vector<Cars> sensor_fusions;
+						driver.plan_behavior(car, path, sensor_fusions);
+						driver.calculate_trajectory();
+						next_x_vals = driver.get_next_x();
+						next_y_vals = driver.get_next_y();
 						
           	msgJson["next_x"] = next_x_vals;
           	msgJson["next_y"] = next_y_vals;
