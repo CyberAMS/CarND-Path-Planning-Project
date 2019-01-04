@@ -46,7 +46,7 @@ public:
 	std::vector<double> get_next_y();
 	
 	// determine next action
-	void plan_behavior(Car car, Path path, std::vector<Cars> sensor_fusion);
+	void plan_behavior(Car myCar, Path myPreviousPath, std::vector<Cars> sensor_fusion);
 	
 	// calculate next trajectory
 	void calculate_trajectory();

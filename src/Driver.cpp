@@ -30,7 +30,7 @@ std::vector<double> Driver::get_next_y() {
 }
 
 // determine next action
-void Driver::plan_behavior(Car car, Path path, std::vector<Cars> sensor_fusion) {
+void Driver::plan_behavior(Car myCar, Path myPreviousPath, std::vector<Cars> sensor_fusion) {
 	
 	
 	
