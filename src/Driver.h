@@ -116,10 +116,10 @@ public:
 	vector<double> get_next_y();
 	
 	// determine next action
-	void plan_behavior(const Car &myCar, const Path &myPreviousPath, const vector<Cars> &sensor_fusion);
+	void plan_behavior(Car myCar, Path myPreviousPath, const vector<Cars> &sensor_fusion);
 	
 	// calculate next trajectory
-	void calculate_trajectory();
+	void calculate_trajectory(Car myCar);
 
 private:
 	

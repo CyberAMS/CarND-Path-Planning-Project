@@ -18,6 +18,7 @@
 
 using std::vector;
 using std::string;
+using std::to_string;
 using std::cout;
 using std::endl;
 
@@ -33,6 +34,9 @@ public:
 	
 	// set path
 	void set(vector<double> path_x, vector<double> path_y, double end_path_s, double end_path_d);
+	
+	// display Path object as string
+	string createString();
 
 private:
 	

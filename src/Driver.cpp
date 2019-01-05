@@ -34,13 +34,16 @@ vector<double> Driver::get_next_y() {
 }
 
 // determine next action
-void Driver::plan_behavior(const Car &myCar, const Path &myPreviousPath, const vector<Cars> &sensor_fusion) {
+void Driver::plan_behavior(Car myCar, Path myPreviousPath, const vector<Cars> &sensor_fusion) {
 	
 	// display message if required
 	if (bDISPLAY) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "DRIVER: plan_behavior - Start" << endl;
+		cout << "  myCar: " << endl << myCar.createString();
+		cout << "  myPreviousPath: " << endl << myPreviousPath.createString();
+		cout << "  sensor_fusion: " << endl << createCarsVectorString(sensor_fusion);
 		
 	}
 	
@@ -59,13 +62,14 @@ void Driver::plan_behavior(const Car &myCar, const Path &myPreviousPath, const v
 }
 
 // calculate next trajectory
-void Driver::calculate_trajectory() {
+void Driver::calculate_trajectory(Car myCar) {
 	
 	// display message if required
 	if (bDISPLAY) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "DRIVER: calculate_trajectory - Start" << endl;
+		cout << "  myCar: " << endl << myCar.createString();
 		
 	}
 	
@@ -89,6 +93,9 @@ void Driver::calculate_trajectory() {
 		Driver::trajectory.set(STRAIGHT_S, Driver::trajectory.calculate_d_from_lane((vector<unsigned int>){Driver::lane, Driver::lane}, LANE_WIDTH), STRAIGHT_CONSTANT_MAX_SPEED_V, MAX_ACCELERATION_S, SAMPLE_TIME);
 		
 	};
+	
+	// start trajectory with car state
+	Driver::trajectory.start_trajectory_with_car(myCar, MAX_ACCELERATION_S, SAMPLE_TIME);
 	
 	// return path based on trajectory
 	path_xy = Driver::trajectory.get_xy(Driver::trajectory.get_s(), Driver::trajectory.get_d(), Driver::maps_s, Driver::maps_x, Driver::maps_y);
