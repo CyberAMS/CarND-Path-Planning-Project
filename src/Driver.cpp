@@ -98,11 +98,11 @@ void Driver::calculate_trajectory() {
 	// display message if required
 	if (bDISPLAY) {
 		
-		cout << "  Driver::trajectory.get_s(): " << createDoubleVectorString(Driver::trajectory.get_s());
-		cout << "  Driver::trajectory.get_d(): " << createDoubleVectorString(Driver::trajectory.get_d());
-		cout << "  Driver::trajectory.get_v(): " << createDoubleVectorString(Driver::trajectory.get_v());
-		cout << "  Driver::next_x_vals: " << createDoubleVectorString(Driver::next_x_vals);
-		cout << "  Driver::next_y_vals: " << createDoubleVectorString(Driver::next_y_vals);
+		cout << "  Driver::trajectory.get_s(): " << endl << createDoubleVectorString(Driver::trajectory.get_s());
+		cout << "  Driver::trajectory.get_d(): " << endl << createDoubleVectorString(Driver::trajectory.get_d());
+		cout << "  Driver::trajectory.get_v(): " << endl << createDoubleVectorString(Driver::trajectory.get_v());
+		cout << "  Driver::next_x_vals: " << endl << createDoubleVectorString(Driver::next_x_vals);
+		cout << "  Driver::next_y_vals: " << endl << createDoubleVectorString(Driver::next_y_vals);
 		cout << "--- DRIVER: calculate_trajectory - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

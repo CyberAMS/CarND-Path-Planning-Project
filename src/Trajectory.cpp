@@ -31,9 +31,9 @@ void Trajectory::set(const vector<double> &s_values, const vector<double> &d_val
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: set - Start" << endl;
-		cout << "  s_values: " << createDoubleVectorString(s_values);
-		cout << "  d_values: " << createDoubleVectorString(d_values);
-		cout << "  v_values: " << createDoubleVectorString(v_values);
+		cout << "  s_values: " << endl << createDoubleVectorString(s_values);
+		cout << "  d_values: " << endl << createDoubleVectorString(d_values);
+		cout << "  v_values: " << endl << createDoubleVectorString(v_values);
 		cout << "  max_acceleration_s: " << max_acceleration_s << endl;
 		cout << "  sample_time: " << sample_time << endl;
 		
@@ -101,9 +101,9 @@ void Trajectory::set(const vector<double> &s_values, const vector<double> &d_val
 	if (bDISPLAY) {
 		
 		cout << "  max_speed_change: " << max_speed_change << endl;
-		cout << "  Trajectory::s_values: " << createDoubleVectorString(Trajectory::s_values);
-		cout << "  Trajectory::d_values: " << createDoubleVectorString(Trajectory::d_values);
-		cout << "  Trajectory::v_values: " << createDoubleVectorString(Trajectory::v_values);
+		cout << "  Trajectory::s_values: " << endl << createDoubleVectorString(Trajectory::s_values);
+		cout << "  Trajectory::d_values: " << endl << createDoubleVectorString(Trajectory::d_values);
+		cout << "  Trajectory::v_values: " << endl << createDoubleVectorString(Trajectory::v_values);
 		cout << "--- TRAJECTORY: set - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -140,7 +140,7 @@ vector<double> Trajectory::calculate_d_from_lane(const vector<unsigned int> &lan
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: calculate_d_from_lane - Start" << endl;
-		cout << "  lane_values: " << createUnsignedIntegerVectorString(lane_values);
+		cout << "  lane_values: " << endl << createUnsignedIntegerVectorString(lane_values);
 		cout << "  lane_width: " << lane_width << endl;
 		
 	}
@@ -162,7 +162,7 @@ vector<double> Trajectory::calculate_d_from_lane(const vector<unsigned int> &lan
 	// display message if required
 	if (bDISPLAY) {
 		
-		cout << "  d_values: " << createDoubleVectorString(d_values);
+		cout << "  d_values: " << endl << createDoubleVectorString(d_values);
 		cout << "--- TRAJECTORY: calculate_d_from_lane - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -180,11 +180,11 @@ vector<vector<double>> Trajectory::get_xy(const vector<double> &s_values, const 
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: get_xy - Start" << endl;
-		cout << "  s_values: " << createDoubleVectorString(s_values);
-		cout << "  d_values: " << createDoubleVectorString(d_values);
-		//cout << "  maps_s: " << createDoubleVectorString(maps_s);
-		//cout << "  maps_x: " << createDoubleVectorString(maps_x);
-		//cout << "  maps_y: " << createDoubleVectorString(maps_y);
+		cout << "  s_values: " << endl << createDoubleVectorString(s_values);
+		cout << "  d_values: " << endl << createDoubleVectorString(d_values);
+		//cout << "  maps_s: " << endl << createDoubleVectorString(maps_s);
+		//cout << "  maps_x: " << endl << createDoubleVectorString(maps_x);
+		//cout << "  maps_y: " << endl << createDoubleVectorString(maps_y);
 		
 	}
 	
@@ -245,8 +245,8 @@ vector<vector<double>> Trajectory::get_xy(const vector<double> &s_values, const 
 	// display message if required
 	if (bDISPLAY) {
 		
-		cout << "  x_values: " << createDoubleVectorString(x_values);
-		cout << "  y_values: " << createDoubleVectorString(y_values);
+		cout << "  x_values: " << endl << createDoubleVectorString(x_values);
+		cout << "  y_values: " << endl << createDoubleVectorString(y_values);
 		cout << "--- TRAJECTORY: get_xy - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
