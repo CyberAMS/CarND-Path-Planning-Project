@@ -212,7 +212,7 @@ vector<vector<double>> Trajectory::get_xy(const vector<double> &s_values, const 
 			prev_wp++;
 			
 		}
-		cout << "prev_wp: ", prev_wp << endl;
+		cout << "prev_wp: " << prev_wp << endl;
 		
 		int wp2 = (prev_wp + 1) % maps_x.size();
 		cout << "wp2: " << wp2 << endl;
