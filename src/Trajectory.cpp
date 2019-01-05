@@ -25,10 +25,10 @@ using std::min;
 using std::max;
 
 // set trajectory
-void Trajectory::set(const vector<double> &s_values, const vector<double> &d_values, const vector<double> &v_values, const double &max_acceleration_s, const double &sample_time) {
+void Trajectory::set(const vector<double> &s_values, const vector<double> &d_values, const vector<double> &v_values, const double &max_acceleration_s, const double &max_acceleration_d, const double &sample_time) {
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_SET) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: set - Start" << endl;
@@ -36,12 +36,15 @@ void Trajectory::set(const vector<double> &s_values, const vector<double> &d_val
 		cout << "  d_values: " << endl << createDoubleVectorString(d_values);
 		cout << "  v_values: " << endl << createDoubleVectorString(v_values);
 		cout << "  max_acceleration_s: " << max_acceleration_s << endl;
+		cout << "  max_acceleration_d: " << max_acceleration_d << endl;
 		cout << "  sample_time: " << sample_time << endl;
 		
 	}
 	
 	// define variables
 	double max_speed_change = max_acceleration_s * sample_time;
+	double max_lateral_change = max_acceleration_d * sample_time;
+	double lateral_speed = 0;
 	unsigned int count = 0;
 	vector<double> new_s_values;
 	vector<double> new_d_values;
@@ -52,8 +55,8 @@ void Trajectory::set(const vector<double> &s_values, const vector<double> &d_val
 	bool bDone = false;
 	
 	// create spline
-	tk::spline s;
-	s.set_points(s_values, d_values);
+	//tk::spline s;
+	//s.set_points(s_values, d_values);
 	
 	// initialize new values
 	new_s_values.push_back(s_values[0]);
@@ -69,13 +72,15 @@ void Trajectory::set(const vector<double> &s_values, const vector<double> &d_val
 		while ((new_s_values.back() < s_values[count]) && !bDone) {
 			
 			// next speed value is old speed value plus maximum delta to achieve next target value
-			new_v_value = new_v_values.back() + max(min((v_values[count] - new_v_values.back()), max_speed_change), -max_speed_change);
+			new_v_value = v_values[count]; // new_v_values.back() + max(min((v_values[count] - new_v_values.back()), max_speed_change), -max_speed_change);
 			
 			// next s value is old s value plus distance driven at new speed value during sample time
 			new_s_value = new_s_values.back() + (new_v_value * sample_time);
 			
 			// next d value is 
-			new_d_value = s(new_s_value);
+			//new_d_value = s(new_s_value);
+			lateral_speed = d_values[count] / sample_time; // max(min((d_values[count] - new_d_values.back()), max_lateral_change), -max_lateral_change);
+			new_d_value = d_values[count]; // new_d_values.back() + (lateral_speed * sample_time);
 			
 			// save new values if not exceeding s range
 			if (new_s_value <= s_values[count]) {
@@ -99,7 +104,7 @@ void Trajectory::set(const vector<double> &s_values, const vector<double> &d_val
 	Trajectory::v_values = new_v_values;
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_SET) {
 		
 		cout << "  max_speed_change: " << max_speed_change << endl;
 		cout << "  Trajectory::s_values: " << endl << createDoubleVectorString(Trajectory::s_values);
@@ -113,10 +118,10 @@ void Trajectory::set(const vector<double> &s_values, const vector<double> &d_val
 }
 
 // start trajectory with car state
-void Trajectory::start_trajectory_with_car(Car &myCar, const double &max_acceleration_s, const double &sample_time) {
+void Trajectory::start_trajectory_with_car(Car &myCar, const double &max_acceleration_s, const double &max_acceleration_d, const double &sample_time) {
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_START_TRAJECTORY_WITH_CAR) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: start_trajectory_with_car - Start" << endl;
@@ -141,20 +146,23 @@ void Trajectory::start_trajectory_with_car(Car &myCar, const double &max_acceler
 		new_s_values[count] += car_s;
 		
 	}
-	for (count = 0; count < new_d_values.size(); count++) {
+	if ((new_s_values[0] != car_s) || (new_d_values[0] != car_d)) {
 		
-		new_d_values[count] += car_d;
+		new_s_values.insert(new_s_values.begin(), car_s);
+		new_d_values.insert(new_d_values.begin(), car_d);
+		new_v_values.insert(new_v_values.begin(), car_v);
+		
+	} else if (new_v_values[0] != car_v) {
+		
+		new_v_values[0] = car_v;
 		
 	}
-	new_s_values.insert(new_s_values.begin(), car_s);
-	new_d_values.insert(new_d_values.begin(), car_d);
-	new_v_values.insert(new_v_values.begin(), car_v);
 	
 	// set new trajectory
-	Trajectory::set(new_s_values, new_d_values, new_v_values, max_acceleration_s, sample_time);
+	Trajectory::set(new_s_values, new_d_values, new_v_values, max_acceleration_s, max_acceleration_d, sample_time);
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_START_TRAJECTORY_WITH_CAR) {
 		
 		cout << "  new_s_values: " << endl << createDoubleVectorString(new_s_values);
 		cout << "  new_d_values: " << endl << createDoubleVectorString(new_d_values);
@@ -191,7 +199,7 @@ vector<double> Trajectory::get_v() {
 vector<double> Trajectory::calculate_d_from_lane(const vector<unsigned int> &lane_values, const double &lane_width) {
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_CALCULATE_D_FROM_LANE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: calculate_d_from_lane - Start" << endl;
@@ -215,7 +223,7 @@ vector<double> Trajectory::calculate_d_from_lane(const vector<unsigned int> &lan
 	}
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_CALCULATE_D_FROM_LANE) {
 		
 		cout << "  d_values: " << endl << createDoubleVectorString(d_values);
 		cout << "--- TRAJECTORY: calculate_d_from_lane - End" << endl;
@@ -231,7 +239,7 @@ vector<double> Trajectory::calculate_d_from_lane(const vector<unsigned int> &lan
 int Trajectory::ClosestWaypoint(const double &x, const double &y, const vector<double> &maps_x, const vector<double> &maps_y) {
 	// display message if required
 	
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: ClosestWaypoint - Start" << endl;
@@ -261,7 +269,7 @@ int Trajectory::ClosestWaypoint(const double &x, const double &y, const vector<d
 	}
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT) {
 		
 		cout << "  closestWaypoint: " << closestWaypoint << endl;
 		cout << "--- TRAJECTORY: ClosestWaypoint - End" << endl;
@@ -276,7 +284,7 @@ int Trajectory::ClosestWaypoint(const double &x, const double &y, const vector<d
 // determine next waypoint
 int Trajectory::NextWaypoint(const double &x, const double &y, const double &theta, const vector<double> &maps_x, const vector<double> &maps_y) {
 	
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_NEXTWAYPOINT) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: NextWaypoint - Start" << endl;
@@ -311,7 +319,7 @@ int Trajectory::NextWaypoint(const double &x, const double &y, const double &the
 	}
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_NEXTWAYPOINT) {
 		
 		cout << "  closestWaypoint: " << closestWaypoint << endl;
 		cout << "--- TRAJECTORY: NextWaypoint - End" << endl;
@@ -326,7 +334,7 @@ int Trajectory::NextWaypoint(const double &x, const double &y, const double &the
 // transform from Cartesian x,y coordinates to Frenet s,d coordinates
 vector<vector<double>> Trajectory::getFrenet(const vector<double> &x_values, const vector<double> &y_values, const vector<double> &theta_values, const vector<double> &maps_x, const vector<double> &maps_y) {
 	
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_GETFRENET) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: getFrenet - Start" << endl;
@@ -408,7 +416,7 @@ vector<vector<double>> Trajectory::getFrenet(const vector<double> &x_values, con
 	}
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_GETFRENET) {
 		
 		cout << "  s_values: " << endl << createDoubleVectorString(s_values);
 		cout << "  d_values: " << endl << createDoubleVectorString(d_values);
@@ -425,7 +433,7 @@ vector<vector<double>> Trajectory::getFrenet(const vector<double> &x_values, con
 vector<vector<double>> Trajectory::get_xy(const vector<double> &s_values, const vector<double> &d_values, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y) {
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_GET_XY) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: get_xy - Start" << endl;
@@ -482,7 +490,7 @@ vector<vector<double>> Trajectory::get_xy(const vector<double> &s_values, const 
 	}
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_GET_XY) {
 		
 		cout << "  x_values: " << endl << createDoubleVectorString(x_values);
 		cout << "  y_values: " << endl << createDoubleVectorString(y_values);

@@ -24,7 +24,7 @@ using std::endl;
 void Path::set(vector<double> path_x, vector<double> path_y, double end_path_s, double end_path_d) {
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_PATH_SET) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "PATH: set - Start" << endl;
@@ -41,7 +41,7 @@ void Path::set(vector<double> path_x, vector<double> path_y, double end_path_s, 
 	Path::end_path_d = end_path_d;
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_PATH_SET) {
 		
 		cout << "--- PATH: set - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;

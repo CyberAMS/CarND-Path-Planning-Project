@@ -65,14 +65,15 @@ const vector<behavior_state> BEHAVIORS
 
 // longitudinal distance definitions
 const double ZERO_S = 0;
-const double MAX_S = 10; // define path with end point in 10 m ahead
-const double MAX_ACCELERATION_S = 10; // maximum total acceleration is 10 m/s^2 - lateral acceleration is neglected
+const double MAX_S = 25; // define path with end point in 25 m ahead
+const double MAX_ACCELERATION_S = 10; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
 
 // lateral distance definitions
 const double LANE_WIDTH = 4;
 const unsigned int LANE_1 = 1;
 const unsigned int LANE_2 = 2;
 const unsigned int LANE_3 = 3;
+const double MAX_ACCELERATION_D = 10; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
 
 // speed definitions
 const double ZERO_V = 0;

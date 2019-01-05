@@ -24,7 +24,7 @@ using std::endl;
 void Car::set_state(double car_x, double car_y, double car_s, double car_d, double car_yaw, double car_speed) {
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_CAR_SET_STATE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "CAR: set_state - Start" << endl;
@@ -45,7 +45,7 @@ void Car::set_state(double car_x, double car_y, double car_s, double car_d, doub
 	Car::car_speed = car_speed;
 	
 	// display message if required
-	if (bDISPLAY) {
+	if (bDISPLAY && bDISPLAY_CAR_SET_STATE) {
 		
 		cout << "--- CAR: set_state - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;

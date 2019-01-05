@@ -33,10 +33,10 @@ public:
 	~Trajectory() {}
 	
 	// set trajectory
-	void set(const vector<double> &s_values, const vector<double> &d_values, const vector<double> &v_values, const double &max_acceleration_s, const double &sample_time);
+	void set(const vector<double> &s_values, const vector<double> &d_values, const vector<double> &v_values, const double &max_acceleration_s, const double &max_acceleration_d, const double &sample_time);
 	
 	// start trajectory with car state
-	void start_trajectory_with_car(Car &myCar, const double &max_acceleration_s, const double &sample_time);
+	void start_trajectory_with_car(Car &myCar, const double &max_acceleration_s, const double &max_acceleration_d, const double &sample_time);
 	
 	// get trajectory s values
 	vector<double> get_s();
