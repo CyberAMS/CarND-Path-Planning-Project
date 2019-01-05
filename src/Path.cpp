@@ -13,10 +13,11 @@
 #include <vector>
 #include "Path.h"
 
-using namespace std;
+using std::vector;
+using std::string;
 
 // set path
-void Path::set(std::vector<double> path_x, std::vector<double> path_y, double end_path_s, double end_path_d) {
+void Path::set(vector<double> path_x, vector<double> path_y, double end_path_s, double end_path_d) {
 	
 	Path::path_x = path_x;
 	Path::path_y = path_y;

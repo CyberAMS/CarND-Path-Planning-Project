@@ -139,34 +139,6 @@ vector<double> getFrenet(double x, double y, double theta, const vector<double> 
 
 }
 
-// Transform from Frenet s,d coordinates to Cartesian x,y
-vector<double> getXY(double s, double d, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y)
-{
-	int prev_wp = -1;
-
-	while(s > maps_s[prev_wp+1] && (prev_wp < (int)(maps_s.size()-1) ))
-	{
-		prev_wp++;
-	}
-
-	int wp2 = (prev_wp+1)%maps_x.size();
-
-	double heading = atan2((maps_y[wp2]-maps_y[prev_wp]),(maps_x[wp2]-maps_x[prev_wp]));
-	// the x,y,s along the segment
-	double seg_s = (s-maps_s[prev_wp]);
-
-	double seg_x = maps_x[prev_wp]+seg_s*cos(heading);
-	double seg_y = maps_y[prev_wp]+seg_s*sin(heading);
-
-	double perp_heading = heading-pi()/2;
-
-	double x = seg_x + d*cos(perp_heading);
-	double y = seg_y + d*sin(perp_heading);
-
-	return {x,y};
-
-}
-
 int main() {
   uWS::Hub h;
 
@@ -205,7 +177,7 @@ int main() {
   }
 
 	// define objects
-	Driver myDriver;
+	Driver myDriver(map_waypoints_s, map_waypoints_x, map_waypoints_y);
 	Car myCar;
 	Path myPreviousPath;
 	
@@ -244,7 +216,7 @@ int main() {
           	double end_path_d = j[1]["end_path_d"];
 
           	// Sensor Fusion Data, a list of all other cars on the same side of the road.
-          	vector<Cars> sensor_fusion = j[1]["sensor_fusion"];
+          	auto sensor_fusion = j[1]["sensor_fusion"];
 
           	json msgJson;
 
@@ -259,7 +231,21 @@ int main() {
 						
 						// determine automatic driver reaction
 						vector<Cars> sensor_fusions;
-						myDriver.plan_behavior(myCar, myPreviousPath, sensor_fusion);
+						Cars new_sensor_fusion;
+						for (auto sf: sensor_fusion) {
+							
+							new_sensor_fusion.id = (unsigned int) sf[0];
+							new_sensor_fusion.x = (double) sf[1];
+							new_sensor_fusion.y = (double) sf[2];
+							new_sensor_fusion.vx = (double) sf[3];
+							new_sensor_fusion.vy = (double) sf[4];
+							new_sensor_fusion.s = (double) sf[5];
+							new_sensor_fusion.d = (double) sf[6];
+							
+							sensor_fusions.push_back(new_sensor_fusion);
+							
+						}
+						myDriver.plan_behavior(myCar, myPreviousPath, sensor_fusions);
 						myDriver.calculate_trajectory();
 						next_x_vals = myDriver.get_next_x();
 						next_y_vals = myDriver.get_next_y();

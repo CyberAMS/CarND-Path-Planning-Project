@@ -13,7 +13,8 @@
 #include <vector>
 #include "Car.h"
 
-using namespace std;
+using std::vector;
+using std::string;
 
 // set state of car
 void Car::set_state(double car_x, double car_y, double car_s, double car_d, double car_yaw, double car_speed) {

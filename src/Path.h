@@ -15,6 +15,9 @@
 #include <string>
 #include <vector>
 
+using std::vector;
+using std::string;
+
 class Path {
 
 public:
@@ -26,13 +29,13 @@ public:
 	~Path() {}
 	
 	// set path
-	void set(std::vector<double> path_x, std::vector<double> path_y, double end_path_s, double end_path_d);
+	void set(vector<double> path_x, vector<double> path_y, double end_path_s, double end_path_d);
 
 private:
 	
 	// path values
-	std::vector<double> path_x;
-	std::vector<double> path_y;
+	vector<double> path_x;
+	vector<double> path_y;
 	double end_path_s;
 	double end_path_d;
 
