@@ -15,7 +15,6 @@
 #include <string>
 #include <vector>
 #include "helper_functions.h"
-#include "Trajectory.h"
 
 using std::vector;
 using std::string;

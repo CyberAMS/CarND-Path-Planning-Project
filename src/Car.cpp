@@ -13,7 +13,6 @@
 #include <vector>
 #include "helper_functions.h"
 #include "Car.h"
-#include "Trajectory.h"
 
 using std::vector;
 using std::string;
@@ -72,7 +71,7 @@ double Car::get_d() {
 // get car_v value
 double Car::get_v() {
 	
-	return Car::car_v;
+	return Car::car_speed;
 	
 }
 

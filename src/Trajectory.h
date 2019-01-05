@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include "helper_functions.h"
+#include "Car.h"
 
 using std::vector;
 using std::string;

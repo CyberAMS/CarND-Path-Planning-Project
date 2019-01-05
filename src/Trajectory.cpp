@@ -14,6 +14,7 @@
 #include <vector>
 #include "helper_functions.h"
 #include "Trajectory.h"
+#include "Car.h"
 #include "spline.h"
 
 using std::vector;
@@ -127,9 +128,9 @@ void Trajectory::start_trajectory_with_car(Car &myCar, const double &max_acceler
 	
 	// define variables
 	unsigned int count = 0;
-	vector<double> new_s_values = Trajectory::s_values();
-	vector<double> new_d_values = Trajectory::d_values();
-	vector<double> new_v_values = Trajectory::v_values();
+	vector<double> new_s_values = Trajectory::s_values;
+	vector<double> new_d_values = Trajectory::d_values;
+	vector<double> new_v_values = Trajectory::v_values;
 	double car_s = myCar.get_s();
 	double car_d = myCar.get_d();
 	double car_v = myCar.get_v();
@@ -145,7 +146,7 @@ void Trajectory::start_trajectory_with_car(Car &myCar, const double &max_acceler
 		new_d_values[count] += car_d;
 		
 	}
-	new_s_values.insert(new_s_values.begin(), car_s;
+	new_s_values.insert(new_s_values.begin(), car_s);
 	new_d_values.insert(new_d_values.begin(), car_d);
 	new_v_values.insert(new_v_values.begin(), car_v);
 	
