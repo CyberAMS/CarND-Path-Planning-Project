@@ -14,9 +14,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "helper_functions.h"
 
 using std::vector;
 using std::string;
+using std::cout;
+using std::endl;
 
 class Path {
 

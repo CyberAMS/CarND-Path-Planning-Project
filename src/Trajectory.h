@@ -14,9 +14,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "helper_functions.h"
 
 using std::vector;
 using std::string;
+using std::cout;
+using std::endl;
 
 class Trajectory {
 
@@ -29,7 +32,7 @@ public:
 	~Trajectory() {}
 	
 	// set trajectory
-	void set(vector<double> s_values, vector<double> d_values, vector<double> v_values);
+	void set(const vector<double> &s_values, const vector<double> &d_values, const vector<double> &v_values, const double &max_acceleration_s, const double &sample_time);
 	
 	// get trajectory s values
 	vector<double> get_s();
@@ -41,7 +44,7 @@ public:
 	vector<double> get_v();
 	
 	// get distance from center lane for lane
-	vector<double> get_d_from_lane(const vector<double> &lane_values, const double &lane_width);
+	vector<double> calculate_d_from_lane(const vector<unsigned int> &lane_values, const double &lane_width);
 	
 	// transform from Frenet s,d coordinates to Cartesian x,y
 	vector<vector<double>> get_xy(const vector<double> &s_values, const vector<double> &d_values, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y);

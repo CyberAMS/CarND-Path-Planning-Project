@@ -14,12 +14,15 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "helper_functions.h"
 #include "Car.h"
 #include "Trajectory.h"
 #include "Path.h"
 
 using std::vector;
 using std::string;
+using std::cout;
+using std::endl;
 
 struct Cars {
 	
@@ -39,6 +42,9 @@ struct behavior_state {
 	vector<string> next_states;
 	
 };
+
+// general settings
+const double SAMPLE_TIME = 0.020; // 20 ms sample time (50 Hz)
 
 // possible behavior states and transition options
 // DS:   drive straight
@@ -60,9 +66,13 @@ const vector<behavior_state> BEHAVIORS
 // longitudinal distance definitions
 const double ZERO_S = 0;
 const double MAX_S = 10; // define path with end point in 10 m ahead
+const double MAX_ACCELERATION_S = 10; // maximum total acceleration is 10 m/s^2 - lateral acceleration is neglected
 
 // lateral distance definitions
 const double LANE_WIDTH = 4;
+const unsigned int LANE_1 = 1;
+const unsigned int LANE_2 = 2;
+const unsigned int LANE_3 = 3;
 
 // speed definitions
 const double ZERO_V = 0;
@@ -70,10 +80,6 @@ const double MAX_V = 22.352; // 50 mph in m/s
 
 // straight trajectory
 const vector<double> STRAIGHT_S = {ZERO_S, MAX_S};
-const vector<double> STRAIGHT_LANE_1 = {1, 1};
-const vector<double> STRAIGHT_LANE_2 = {2, 2};
-const vector<double> STRAIGHT_LANE_3 = {3, 3};
-const vector<double> STRAIGHT_LANE_4 = {4, 4};
 const vector<double> STRAIGHT_CONSTANT_MAX_SPEED_V = {MAX_V, MAX_V};
 const vector<double> STRAIGHT_ZERO_TO_MAX_SPEED_V = {ZERO_V, MAX_V};
 
@@ -95,6 +101,9 @@ public:
 		// start with straight driving
 		Driver::behavior = BEHAVIORS[0];
 		
+		// start in lane 1
+		Driver::lane = LANE_1;
+		
 	}
 	
 	// destructor
@@ -107,7 +116,7 @@ public:
 	vector<double> get_next_y();
 	
 	// determine next action
-	void plan_behavior(Car myCar, Path myPreviousPath, vector<Cars> sensor_fusion);
+	void plan_behavior(const Car &myCar, const Path &myPreviousPath, const vector<Cars> &sensor_fusion);
 	
 	// calculate next trajectory
 	void calculate_trajectory();
@@ -121,6 +130,9 @@ private:
 	
 	// trajectory
 	Trajectory trajectory;
+	
+	// lane
+	unsigned int lane;
 	
 	// path values
 	vector<double> next_x_vals;

@@ -11,10 +11,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "helper_functions.h"
 #include "Car.h"
 
 using std::vector;
 using std::string;
+using std::cout;
+using std::endl;
 
 // set state of car
 void Car::set_state(double car_x, double car_y, double car_s, double car_d, double car_yaw, double car_speed) {
