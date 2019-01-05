@@ -218,7 +218,7 @@ vector<vector<double>> Trajectory::get_xy(const vector<double> &s_values, const 
 		cout << "wp2: " << wp2 << endl;
 		
 		double heading = atan2((maps_y[wp2] - maps_y[prev_wp]), (maps_x[wp2] - maps_x[prev_wp]));
-		cout << "heading: ", heading << endl;
+		cout << "heading: " << heading << endl;
 		// the x,y,s along the segment
 		double seg_s = (s - maps_s[prev_wp]);
 		cout << "seg_s: " << seg_s << endl;
