@@ -152,7 +152,8 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	min_waypoint_distance = max(min_waypoint_distance_s, min_waypoint_distance_d);
 	
 	cout << "min_waypoint_distance_s: " << min_waypoint_distance_s << endl;
-	cout << "lane_distances: " << lane_distances << endl;
+	cout << "lane_distances[0]: " << lane_distances[0] << endl;
+	cout << "lane_distances[1]: " << lane_distances[1] << endl;
 	cout << "lateral_change: " << lateral_change << endl;
 	cout << "min_lateral_change_time: " << min_lateral_change_time << endl;
 	cout << "min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
@@ -485,7 +486,7 @@ int Trajectory::ClosestWaypoint(const double &x, const double &y, const vector<d
 		double map_y = maps_y[i];
 		double dist = distance(x, y, map_x, map_y);
 		
-		if(dist < closestLen) {
+		if ((dist < closestLen) && (dist > 0)) {
 			
 			closestLen = dist;
 			closestWaypoint = i;
