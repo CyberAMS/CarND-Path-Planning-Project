@@ -66,7 +66,7 @@ public:
 	vector<unsigned int> estimate_lanes(const vector<double> &d_values, const vector<unsigned int> &lanes, const double &lane_width);
 	
 	// determine closest waypoint
-	int ClosestWaypoint(const double &x, const double &y, const vector<double> &maps_x, const vector<double> &maps_y);
+	vector<unsigned int> ClosestWaypoint(const double &x, const double &y, const vector<double> &maps_x, const vector<double> &maps_y);
 	
 	// determine next waypoint
 	int NextWaypoint(const double &x, const double &y, const double &theta, const vector<double> &maps_x, const vector<double> &maps_y);

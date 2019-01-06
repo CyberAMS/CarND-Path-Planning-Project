@@ -140,7 +140,8 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	unsigned int num_found = 0;
 	vector<double> waypoints_x = {0, Trajectory::x_values.back()};
 	vector<double> waypoints_y = {0, Trajectory::y_values.back()};
-	int next_waypoint = -1;
+	vector<unsigned int> next_waypoints (2, 0);
+	unsigned int next_waypoint = 0;
 	vector<vector<double>> next_sd;
 	
 	// determine required distance to first waypoint
@@ -163,7 +164,16 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	while (num_found < 2) {
 		
 		// get next waypoint
-		next_waypoint = Trajectory::NextWaypoint(waypoints_x[1], waypoints_y[1], Trajectory::connect_theta, maps_x, maps_y);
+		next_waypoints = Trajectory::NextWaypoint(waypoints_x[1], waypoints_y[1], Trajectory::connect_theta, maps_x, maps_y);
+		if ((maps_x[next_waypoints[0]] == waypoints_x[1]) && (maps_y[next_waypoints[0]] == waypoints_y[1])) {
+			
+			next_waypoint = next_waypoints[1];
+			
+		} else {
+			
+			next_waypoint = next_waypoints[0];
+			
+		}
 		
 		cout << "num_found: " << num_found << endl;
 		cout << "waypoints_x[1]: " << waypoints_x[1] << endl;
@@ -463,7 +473,7 @@ vector<unsigned int> Trajectory::estimate_lanes(const vector<double> &d_values, 
 }
 
 // determine closest waypoint
-int Trajectory::ClosestWaypoint(const double &x, const double &y, const vector<double> &maps_x, const vector<double> &maps_y) {
+vector<unsigned int> Trajectory::ClosestWaypoint(const double &x, const double &y, const vector<double> &maps_x, const vector<double> &maps_y) {
 	// display message if required
 	
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT) {
@@ -477,19 +487,24 @@ int Trajectory::ClosestWaypoint(const double &x, const double &y, const vector<d
 		
 	}
 	
-	double closestLen = 100000; //large number
-	int closestWaypoint = 0;
+	vector<double> closestLen (2, 100000); //large number
+	vector<unsigned int> closestWaypoint (2, 0);
 	
-	for(int i = 0; i < maps_x.size(); i++) {
+	for(unsigned int i = 0; i < maps_x.size(); i++) {
 		
 		double map_x = maps_x[i];
 		double map_y = maps_y[i];
 		double dist = distance(x, y, map_x, map_y);
 		
-		if ((dist < closestLen) && (dist > 0)) {
+		if (dist < closestLen) {
 			
-			closestLen = dist;
-			closestWaypoint = i;
+			// save second closest waypoint
+			closestLen[1] = closestLen[0];
+			closestWaypoint[1] = closestWaypoint[0];
+			
+			// save closest waypoint
+			closestLen[0] = dist;
+			closestWaypoint[0] = i;
 			
 		}
 		
@@ -498,7 +513,7 @@ int Trajectory::ClosestWaypoint(const double &x, const double &y, const vector<d
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT) {
 		
-		cout << "  closestWaypoint: " << closestWaypoint << endl;
+		cout << "  closestWaypoint: " << endl << createUnsignedIntegerVectorString(closestWaypoint);
 		cout << "--- TRAJECTORY: ClosestWaypoint - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -509,7 +524,7 @@ int Trajectory::ClosestWaypoint(const double &x, const double &y, const vector<d
 }
 
 // determine next waypoint
-int Trajectory::NextWaypoint(const double &x, const double &y, const double &theta, const vector<double> &maps_x, const vector<double> &maps_y) {
+vector <unsigned int> Trajectory::NextWaypoint(const double &x, const double &y, const double &theta, const vector<double> &maps_x, const vector<double> &maps_y) {
 	
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_NEXTWAYPOINT) {
 		
@@ -523,23 +538,33 @@ int Trajectory::NextWaypoint(const double &x, const double &y, const double &the
 		
 	}
 	
-	int closestWaypoint = Trajectory::ClosestWaypoint(x, y, maps_x, maps_y);
+	// define variables
+	unsigned int count = 0;
+	unsigned int current_waypoint = 0;
 	
-	double map_x = maps_x[closestWaypoint];
-	double map_y = maps_y[closestWaypoint];
+	vector<unsigned int> closestWaypoint = Trajectory::ClosestWaypoint(x, y, maps_x, maps_y);
 	
-	double heading = atan2((map_y - y), (map_x - x));
-	
-	double angle = fabs(theta - heading);
-	angle = min((2 * M_PI) - angle, angle);
-	
-	if(angle > (M_PI / 4)) {
+	for (count = 0; count < closestWaypoint.size(); count++) {
 		
-		closestWaypoint++;
+		current_waypoint = closestWaypoint[count];
 		
-		if (closestWaypoint == maps_x.size()) {
+		double map_x = maps_x[current_waypoint];
+		double map_y = maps_y[current_waypoint];
+		
+		double heading = atan2((map_y - y), (map_x - x));
+		
+		double angle = fabs(theta - heading);
+		angle = min((2 * M_PI) - angle, angle);
+		
+		if(angle > (M_PI / 4)) {
 			
-			closestWaypoint = 0;
+			closestWaypoint[count] = current_waypoint++;
+			
+			if (current_waypoint == maps_x.size()) {
+				
+				closestWaypoint[count] = 0;
+				
+			}
 			
 		}
 		
@@ -548,7 +573,7 @@ int Trajectory::NextWaypoint(const double &x, const double &y, const double &the
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_NEXTWAYPOINT) {
 		
-		cout << "  closestWaypoint: " << closestWaypoint << endl;
+		cout << "  closestWaypoint: " << endl << createUnsignedIntegerVectorString(closestWaypoint);
 		cout << "--- TRAJECTORY: NextWaypoint - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -588,7 +613,8 @@ vector<vector<double>> Trajectory::getFrenet(const vector<double> &x_values, con
 		x = x_values[count];
 		y = y_values[count];
 		
-		int next_wp = Trajectory::NextWaypoint(x, y, theta, maps_x,maps_y);
+		vector<unsigned int> next_wps = Trajectory::NextWaypoint(x, y, theta, maps_x,maps_y);
+		int next_wp = (int)next_wps[0];
 		
 		int prev_wp;
 		prev_wp = next_wp - 1;
