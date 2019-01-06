@@ -126,9 +126,9 @@ private:
 	// plan
 	behavior_state behavior;
 	unsigned int current_lane;
-	double current_speed
+	double current_speed;
 	unsigned int target_lane;
-	double target_speed
+	double target_speed;
 	
 	// trajectory
 	Trajectory trajectory;

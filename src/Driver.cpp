@@ -13,6 +13,9 @@
 #include <vector>
 #include "helper_functions.h"
 #include "Driver.h"
+#include "Car.h"
+#include "Trajectory.h"
+#include "Path.h"
 
 using std::vector;
 using std::string;
@@ -33,7 +36,7 @@ void Driver::plan_behavior(Car myCar, const vector<Cars> &sensor_fusion) {
 	}
 	
 	// define variables
-	vector<double> estimated_lanes;
+	vector<unsigned int> estimated_lanes;
 	
 	// select follow lane behavior
 	Driver::behavior = BEHAVIORS[0];
@@ -42,7 +45,7 @@ void Driver::plan_behavior(Car myCar, const vector<Cars> &sensor_fusion) {
 	if (Driver::behavior.name == BEHAVIORS[0].name) {
 		
 		// keep current lane at maximum speed
-		estimated_lanes = Trajectory::estimate_lanes((vector<double>){myCar.get_d}, LANES, LANE_WIDTH);
+		estimated_lanes = Driver::trajectory.estimate_lanes((vector<double>){myCar.get_d()}, LANES, LANE_WIDTH);
 		Driver::current_lane = estimated_lanes[0];
 		Driver::current_speed = myCar.get_v();
 		Driver::target_lane = Driver::current_lane;

@@ -54,7 +54,7 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const unsigned int &previo
 	vector<double> previous_path_y = myPreviousPath.get_y();
 	unsigned int count = 0;
 	double last_theta = 0;
-	vector<double> last_sd;
+	vector<vector<double>> last_sd;
 	
 	// initialize trajectory with car position xy
 	previous_x[1] = myCar.get_x();
@@ -69,19 +69,19 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const unsigned int &previo
 	last_d = myCar.get_d();
 	
 	// add short sequence of previous path positions
-	for (count = 0; count < min(previous_path_x.size(), previous_path_steps); count++) {
+	for (count = 0; count < min((unsigned int)previous_path_x.size(), previous_path_steps); count++) {
 		
 		// add path xy to trajectory
 		previous_x[0] = previous_x[1];
 		previous_y[0] = previous_y[1];
 		previous_x[1] = previous_path_x[count];
 		previous_y[1] = previous_path_y[count];
-		Trajectory::x_values.pushback(previous_x[1]);
-		Trajectory::y_values.pushback(previous_y[1]);
+		Trajectory::x_values.push_back(previous_x[1]);
+		Trajectory::y_values.push_back(previous_y[1]);
 		
 		// remember path end sdv
 		last_theta = tan((previous_y[1] - previous_y[0]) / (previous_x[1] - previous_x[0]));
-		last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, theta, maps_x, maps_y);
+		last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, last_theta, maps_x, maps_y);
 		last_v = (last_s - last_sd[0][0]) / sample_time;
 		last_s = last_sd[0][0];
 		last_d = last_sd[1][0];
@@ -131,7 +131,8 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	}
 	
 	// define variables
-	double min_waypoint_distance_s = 0:
+	double min_waypoint_distance_s = 0;
+	vector<double> lane_distances;
 	double lateral_change = 0;
 	double min_lateral_change_time = 0;
 	double min_waypoint_distance_d = 0;
@@ -140,19 +141,35 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	vector<double> waypoints_x = {0, Trajectory::x_values.back()};
 	vector<double> waypoints_y = {0, Trajectory::y_values.back()};
 	int next_waypoint = -1;
+	vector<vector<double>> next_sd;
 	
 	// determine required distance to first waypoint
 	min_waypoint_distance_s = pow((target_speed - current_speed), 2) / max_acceleration_s; // distance traveled in s to reach target speed
-	lateral_change = fabs(Trajectory::calculate_d_from_lane(target_lane, lane_width) - Trajectory::calculate_d_from_lane(current_lane, lane_width)); // distance from current to target lane
+	lane_distances = Trajectory::calculate_d_from_lane((vector<unsigned int>){current_lane, target_lane}, lane_width);
+	lateral_change = fabs(lane_distances[1] - lane_distances[0]); // distance from target lane to current lane
 	min_lateral_change_time = sqrt(2 * lateral_change / max_acceleration_d); // time needed to change lanes
 	min_waypoint_distance_d = current_speed * min_lateral_change_time; // distance traveled in s when changing lanes
 	min_waypoint_distance = max(min_waypoint_distance_s, min_waypoint_distance_d);
+	
+	cout << "min_waypoint_distance_s: " << min_waypoint_distance_s << endl;
+	cout << "lane_distances: " << lane_distances << endl;
+	cout << "lateral_change: " << lateral_change << endl;
+	cout << "min_lateral_change_time: " << min_lateral_change_time << endl;
+	cout << "min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
+	cout << "min_waypoint_distance: " << min_waypoint_distance << endl;
 	
 	// determine next two waypoints
 	while (num_found < 2) {
 		
 		// get next waypoint
 		next_waypoint = Trajectory::NextWaypoint(waypoints_x[1], waypoints_y[1], Trajectory::connect_theta, maps_x, maps_y);
+		
+		cout << "num_found: " << num_found << endl;
+		cout << "waypoints_x[1]: " << waypoints_x[1] << endl;
+		cout << "waypoints_y[1]: " << waypoints_y[1] << endl;
+		cout << "Trajectory::connect_theta: " << Trajectory::connect_theta << endl;
+		cout << "next_waypoint: " << next_waypoint << endl;
+		cout << "distance: " << distance(waypoints_x[1], waypoints_y[1], maps_x[next_waypoint], maps_y[next_waypoint]) << endl;
 		
 		// check for valid waypoint
 		if (distance(waypoints_x[1], waypoints_y[1], maps_x[next_waypoint], maps_y[next_waypoint]) >= min_waypoint_distance) {
@@ -218,6 +235,7 @@ void Trajectory::calculate(const double &back_distance, const double &sample_tim
 	double start_v = Trajectory::v_values.back();
 	double start_x = Trajectory::x_values.back();
 	double start_y = Trajectory::y_values.back();
+	vector<vector<double>> back_sd;
 	double back_s = 0;
 	double back_v = 0;
 	double back_x = 0;
@@ -229,6 +247,7 @@ void Trajectory::calculate(const double &back_distance, const double &sample_tim
 	vector<vector<double>> new_xy_values;
 	vector<double> new_x_values;
 	vector<double> new_y_values;
+	unsigned int count = 0;
 	tk::spline s_v;
 	tk::spline s_x;
 	tk::spline s_y;
@@ -238,10 +257,11 @@ void Trajectory::calculate(const double &back_distance, const double &sample_tim
 	double new_y_value = 0;
 	
 	// determine start of new spline trajectory segment with previous end
-	back_v = start_v
+	back_v = start_v;
 	back_x = start_x - (cos(Trajectory::connect_theta) * back_distance);
 	back_y = start_y - (sin(Trajectory::connect_theta) * back_distance);
-	back_s = Trajectory::getFrenet((vector<double>){back_x}, (vector<double>){back_y}, Trajectory::connect_theta, maps_x, maps_y);
+	back_sd = Trajectory::getFrenet((vector<double>){back_x}, (vector<double>){back_y}, Trajectory::connect_theta, maps_x, maps_y);
+	back_s = back_sd[0][0];
 	spline_s_values.push_back(back_s);
 	spline_v_values.push_back(back_v);
 	spline_x_values.push_back(back_x);
@@ -288,12 +308,6 @@ void Trajectory::calculate(const double &back_distance, const double &sample_tim
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CALCULATE) {
 		
-		cout << "  min_waypoint_distance_s: " << min_waypoint_distance_s << endl;
-		cout << "  lateral_change: " << lateral_change << endl;
-		cout << "  min_lateral_change_time: " << min_lateral_change_time << endl;
-		cout << "  min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
-		cout << "  min_waypoint_distance: " << min_waypoint_distance << endl;
-		cout << "  waypoints_x: " << endl << createDoubleVectorString(waypoints_x);
 		cout << "  spline_s_values: " << endl << createDoubleVectorString(spline_s_values);
 		cout << "  spline_v_values: " << endl << createDoubleVectorString(spline_v_values);
 		cout << "  spline_x_values: " << endl << createDoubleVectorString(spline_x_values);
@@ -399,29 +413,30 @@ vector<unsigned int> Trajectory::estimate_lanes(const vector<double> &d_values, 
 	// define variables
 	vector<double> lane_centers;
 	unsigned int count_d = 0;
-	unsigned int count_l = 0;
 	double min_distance = 0;
 	unsigned int best_lane = 0;
+	unsigned int count_l = 0;
+	double lane_distance = 0;
 	vector<unsigned int> estimated_lanes;
 	
 	// get center for all lanes
 	lane_centers = Trajectory::calculate_d_from_lane(lanes, lane_width);
 	
 	// determine lane for all given distance values
-	for (count_d = 0, count < d_values.size(); count++) {
+	for (count_d = 0; count_d < d_values.size(); count_d++) {
 		
 		// reset minimum distance and best lane
 		min_distance = std::numeric_limits<double>::max();
 		best_lane = 0;
 		
 		// check all lanes for minimum distance to current distance value
-		for (count = 0, count < lane_centers.size(); count++) {
+		for (count_l = 0; count_l < lane_centers.size(); count_l++) {
 			
-			distance = fabs(d_values[count_d] - lane_centers[count_l]);
+			lane_distance = fabs(d_values[count_d] - lane_centers[count_l]);
 			
-			if (distance < min_distance) {
+			if (lane_distance < min_distance) {
 				
-				min_distance = distance;
+				min_distance = lane_distance;
 				best_lane = lanes[count_l];
 				
 			}
