@@ -19,22 +19,8 @@ using std::string;
 using std::cout;
 using std::endl;
 
-// access x values of trajectory
-vector<double> Driver::get_next_x() {
-	
-	return Driver::next_x_vals;
-	
-}
-
-// access y values of trajectory
-vector<double> Driver::get_next_y() {
-	
-	return Driver::next_y_vals;
-	
-}
-
 // determine next action
-void Driver::plan_behavior(Car myCar, Path myPreviousPath, const vector<Cars> &sensor_fusion) {
+void Driver::plan_behavior(Car myCar, const vector<Cars> &sensor_fusion) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_PLAN_BEHAVIOR) {
@@ -42,18 +28,36 @@ void Driver::plan_behavior(Car myCar, Path myPreviousPath, const vector<Cars> &s
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "DRIVER: plan_behavior - Start" << endl;
 		cout << "  myCar: " << endl << myCar.createString();
-		cout << "  myPreviousPath: " << endl << myPreviousPath.createString();
 		cout << "  sensor_fusion: " << endl << createCarsVectorString(sensor_fusion);
 		
 	}
 	
+	// define variables
+	vector<double> estimated_lanes;
+	
 	// select follow lane behavior
-	Driver::behavior = BEHAVIORS[1];
+	Driver::behavior = BEHAVIORS[0];
+	
+	// determine plan based on selected behavior
+	if (Driver::behavior.name == BEHAVIORS[0].name) {
+		
+		// keep current lane at maximum speed
+		estimated_lanes = Trajectory::estimate_lanes((vector<double>){myCar.get_d}, LANES, LANE_WIDTH);
+		Driver::current_lane = estimated_lanes[0];
+		Driver::current_speed = myCar.get_v();
+		Driver::target_lane = Driver::current_lane;
+		Driver::target_speed = MAX_V;
+		
+	}
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_PLAN_BEHAVIOR) {
 		
 		cout << "  Driver::behavior.name: " << Driver::behavior.name << endl;
+		cout << "  Driver::current_lane: " << Driver::current_lane << endl;
+		cout << "  Driver::current_speed: " << Driver::current_speed << endl;
+		cout << "  Driver::target_lane: " << Driver::target_lane << endl;
+		cout << "  Driver::target_speed: " << Driver::target_speed << endl;
 		cout << "--- DRIVER: plan_behavior - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -62,7 +66,7 @@ void Driver::plan_behavior(Car myCar, Path myPreviousPath, const vector<Cars> &s
 }
 
 // calculate next trajectory
-void Driver::calculate_trajectory(Car myCar) {
+void Driver::calculate_trajectory(Car myCar, Path myPreviousPath) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_CALCULATE_TRAJECTORY) {
@@ -70,37 +74,22 @@ void Driver::calculate_trajectory(Car myCar) {
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "DRIVER: calculate_trajectory - Start" << endl;
 		cout << "  myCar: " << endl << myCar.createString();
+		cout << "  myPreviousPath: " << endl << myPreviousPath.createString();
 		
 	}
 	
-	// define variables
-	vector<vector<double>> path_xy;
+	// start each trajectory with current car position and short segment of previous path
+	Driver::trajectory.init(myCar, myPreviousPath, PREVIOUS_PATH_STEPS, SAMPLE_TIME, Driver::maps_x, Driver::maps_y);
 	
-	// determine trajectories
-	if (Driver::behavior.name == BEHAVIORS[0].name) {
-		// determine trajectory for straight driving
-		
-		// directly set xy parameters - TODO !!!!!!!!!!!!!
-		
-	} else if (Driver::behavior.name == BEHAVIORS[1].name) {
-		// determine trajectory for keep lane
-		
-		Driver::trajectory.set(STRAIGHT_S, Driver::trajectory.calculate_d_from_lane((vector<unsigned int>){Driver::lane, Driver::lane}, LANE_WIDTH), STRAIGHT_CONSTANT_MAX_SPEED_V, MAX_ACCELERATION_S, MAX_ACCELERATION_D, SAMPLE_TIME);
-		
-	} else {
-		// determine trajectory if behavior not defined
-		
-		Driver::trajectory.set(STRAIGHT_S, Driver::trajectory.calculate_d_from_lane((vector<unsigned int>){Driver::lane, Driver::lane}, LANE_WIDTH), STRAIGHT_CONSTANT_MAX_SPEED_V, MAX_ACCELERATION_S, MAX_ACCELERATION_D, SAMPLE_TIME);
-		
-	};
+	// determine new segment based on plan
+	Driver::trajectory.add(Driver::current_lane, Driver::current_speed, Driver::target_lane, Driver::target_speed, LANE_WIDTH, MAX_ACCELERATION_S, MAX_ACCELERATION_D, Driver::maps_x, Driver::maps_y);
 	
-	// start trajectory with car state
-	Driver::trajectory.start_trajectory_with_car(myCar, MAX_ACCELERATION_S, MAX_ACCELERATION_D, SAMPLE_TIME);
+	// calculate xy trajectory from init and additional segment
+	Driver::trajectory.calculate(BACK_DISTANCE, SAMPLE_TIME, Driver::maps_s, Driver::maps_x, Driver::maps_y);
 	
 	// return path based on trajectory
-	path_xy = Driver::trajectory.get_xy(Driver::trajectory.get_s(), Driver::trajectory.get_d(), Driver::maps_s, Driver::maps_x, Driver::maps_y);
-	Driver::next_x_vals = path_xy[0];
-	Driver::next_y_vals = path_xy[1];
+	Driver::next_x_vals = Driver::trajectory.get_x();
+	Driver::next_y_vals = Driver::trajectory.get_y();
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_CALCULATE_TRAJECTORY) {
@@ -114,5 +103,19 @@ void Driver::calculate_trajectory(Car myCar) {
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
+	
+}
+
+// access x values of trajectory
+vector<double> Driver::get_next_x() {
+	
+	return Driver::next_x_vals;
+	
+}
+
+// access y values of trajectory
+vector<double> Driver::get_next_y() {
+	
+	return Driver::next_y_vals;
 	
 }

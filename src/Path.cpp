@@ -50,6 +50,20 @@ void Path::set(vector<double> path_x, vector<double> path_y, double end_path_s, 
 	
 }
 
+// get path_x value
+vector<double> Path::get_x() {
+	
+	return Path::path_x;
+	
+}
+
+// get path_y value
+vector<double> Path::get_y() {
+	
+	return Path::path_y;
+	
+}
+
 // display Path object as string
 string Path::createString() {
 	

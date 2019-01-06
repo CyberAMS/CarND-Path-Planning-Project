@@ -35,11 +35,20 @@ public:
 	// set state of car
 	void set_state(double car_x, double car_y, double car_s, double car_d, double car_yaw, double car_speed);
 	
+	// get car_x value
+	double get_x();
+	
+	// get car_y value
+	double get_y();
+	
 	// get car_s value
 	double get_s();
 	
 	// get car_d value
 	double get_d();
+	
+	// get car_yaw value
+	double get_theta();
 	
 	// get car_speed value
 	double get_v();

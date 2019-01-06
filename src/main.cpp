@@ -178,8 +178,8 @@ int main() {
 						sensor_fusions.push_back(new_sensor_fusion);
 						
 					}
-					myDriver.plan_behavior(myCar, myPreviousPath, sensor_fusions);
-					myDriver.calculate_trajectory(myCar);
+					myDriver.plan_behavior(myCar, sensor_fusions);
+					myDriver.calculate_trajectory(myCar, myPreviousPath);
 					next_x_vals = myDriver.get_next_x();
 					next_y_vals = myDriver.get_next_y();
 					

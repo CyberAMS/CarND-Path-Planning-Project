@@ -54,6 +54,20 @@ void Car::set_state(double car_x, double car_y, double car_s, double car_d, doub
 	
 }
 
+// get car_x value
+double Car::get_x() {
+	
+	return Car::car_x;
+	
+}
+
+// get car_y value
+double Car::get_y() {
+	
+	return Car::car_y;
+	
+}
+
 // get car_s value
 double Car::get_s() {
 	
@@ -68,7 +82,14 @@ double Car::get_d() {
 	
 }
 
-// get car_v value
+// get car_yaw value
+double Car::get_theta() {
+	
+	return Car::car_yaw;
+	
+}
+
+// get car_speed value
 double Car::get_v() {
 	
 	return Car::car_speed;

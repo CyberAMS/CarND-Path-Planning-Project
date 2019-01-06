@@ -27,12 +27,14 @@ using std::ostringstream;
 
 // debugging settings
 const bool bDISPLAY = true;
-const bool bDISPLAY_DRIVER_PLAN_BEHAVIOR = false;
+const bool bDISPLAY_DRIVER_PLAN_BEHAVIOR = true;
 const bool bDISPLAY_DRIVER_CALCULATE_TRAJECTORY = true;
 const bool bDISPLAY_CAR_SET_STATE = true;
-const bool bDISPLAY_TRAJECTORY_SET = false;
-const bool bDISPLAY_TRAJECTORY_START_TRAJECTORY_WITH_CAR = false;
+const bool bDISPLAY_TRAJECTORY_INIT = true;
+const bool bDISPLAY_TRAJECTORY_ADD = true;
+const bool bDISPLAY_TRAJECTORY_CALCULATE = true;
 const bool bDISPLAY_TRAJECTORY_CALCULATE_D_FROM_LANE = false;
+const bool bDISPLAY_TRAJECTORY_ESTIMATE_LANES = true;
 const bool bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT = false;
 const bool bDISPLAY_TRAJECTORY_NEXTWAYPOINT = false;
 const bool bDISPLAY_TRAJECTORY_GETFRENET = false;

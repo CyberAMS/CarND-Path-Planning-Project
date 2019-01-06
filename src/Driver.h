@@ -44,7 +44,7 @@ struct behavior_state {
 };
 
 // general settings
-const double SAMPLE_TIME = 0.020; // 20 ms sample time (50 Hz)
+const double SAMPLE_TIME = 0.020; // 20 ms sample time of simulator (50 Hz)
 
 // possible behavior states and transition options
 // DS:   drive straight
@@ -55,8 +55,7 @@ const double SAMPLE_TIME = 0.020; // 20 ms sample time (50 Hz)
 // LCL:  lane change to left
 // LCR:  lane change to right
 const vector<behavior_state> BEHAVIORS 
-	{{.name = "DS", .next_states = {"DS"}},
-	 {.name = "FL", .next_states = {"FL"}},
+	{{.name = "FL", .next_states = {"FL"}},
 	 {.name = "KL", .next_states = {"KL", "PLCL", "PLCR"}},
 	 {.name = "PLCL", .next_states = {"KL", "PLCL", "LCL"}},
 	 {.name = "PLCR", .next_states = {"KL", "PLCR", "LCR"}},
@@ -64,8 +63,6 @@ const vector<behavior_state> BEHAVIORS
 	 {.name = "LCR", .next_states = {"KL"}}};
 
 // longitudinal distance definitions
-const double ZERO_S = 0;
-const double MAX_S = 25; // define path with end point in 25 m ahead
 const double MAX_ACCELERATION_S = 10; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
 
 // lateral distance definitions
@@ -73,16 +70,16 @@ const double LANE_WIDTH = 4;
 const unsigned int LANE_1 = 1;
 const unsigned int LANE_2 = 2;
 const unsigned int LANE_3 = 3;
+const vector<unsigned int> LANES = {LANE_1, LANE_2, LANE_3};
 const double MAX_ACCELERATION_D = 10; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
 
 // speed definitions
-const double ZERO_V = 0;
-const double MAX_V = 22.352; // 50 mph in m/s
+const double SAFETY_DELTA_V = 0.89408; // travel 2 mph below maximum speed
+const double MAX_V = 22.352 - SAFETY_DELTA_V; // 50 mph minus safety delta in m/s
 
-// straight trajectory
-const vector<double> STRAIGHT_S = {ZERO_S, MAX_S};
-const vector<double> STRAIGHT_CONSTANT_MAX_SPEED_V = {MAX_V, MAX_V};
-const vector<double> STRAIGHT_ZERO_TO_MAX_SPEED_V = {ZERO_V, MAX_V};
+// path and trajectory parameters
+const unsigned int PREVIOUS_PATH_STEPS = 3; // maximum steps considered from old trajectory
+const double BACK_DISTANCE = MAX_V * SAMPLE_TIME; // spline parameter for keeping theta at segment transition (taking a large time step)
 
 class Driver {
 
@@ -99,28 +96,25 @@ public:
 		Driver::maps_x = maps_x;
 		Driver::maps_y = maps_y;
 		
-		// start with straight driving
+		// start with following the lane
 		Driver::behavior = BEHAVIORS[0];
-		
-		// start in lane 1
-		Driver::lane = LANE_1;
 		
 	}
 	
 	// destructor
 	~Driver() {}
 	
+	// determine next action
+	void plan_behavior(Car myCar, const vector<Cars> &sensor_fusion);
+	
+	// calculate next trajectory
+	void calculate_trajectory(Car myCar, Path myPreviousPath);
+	
 	// access x values of path
 	vector<double> get_next_x();
 	
 	// access y values of path
 	vector<double> get_next_y();
-	
-	// determine next action
-	void plan_behavior(Car myCar, Path myPreviousPath, const vector<Cars> &sensor_fusion);
-	
-	// calculate next trajectory
-	void calculate_trajectory(Car myCar);
 
 private:
 	
@@ -129,18 +123,19 @@ private:
 	vector<double> maps_x;
 	vector<double> maps_y;
 	
+	// plan
+	behavior_state behavior;
+	unsigned int current_lane;
+	double current_speed
+	unsigned int target_lane;
+	double target_speed
+	
 	// trajectory
 	Trajectory trajectory;
-	
-	// lane
-	unsigned int lane;
 	
 	// path values
 	vector<double> next_x_vals;
 	vector<double> next_y_vals;
-	
-	// behavior
-	behavior_state behavior;
 
 };
 

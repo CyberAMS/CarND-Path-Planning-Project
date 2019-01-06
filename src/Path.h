@@ -35,6 +35,12 @@ public:
 	// set path
 	void set(vector<double> path_x, vector<double> path_y, double end_path_s, double end_path_d);
 	
+	// get path_x value
+	vector<double> get_x();
+	
+	// get path_y value
+	vector<double> get_y();
+	
 	// display Path object as string
 	string createString();
 
