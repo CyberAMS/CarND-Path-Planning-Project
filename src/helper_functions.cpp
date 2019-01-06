@@ -13,6 +13,9 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <numeric>
+#include <algorithm>
+#include <functional>
 #include "helper_functions.h"
 #include "Driver.h"
 
@@ -23,6 +26,13 @@ using std::cout;
 using std::endl;
 using std::ostringstream;
 using std::sqrt;
+using std::iota;
+using std::sort;
+using std::begin;
+using std::end;
+using std::copy;
+
+using namespace std::placeholders;
 
 // calculate distance
 double distance(double x1, double y1, double x2, double y2) {
@@ -106,5 +116,27 @@ string createCarsVectorString(const vector<Cars> &cars_vector) {
 	
 	// return output
 	return text;
+	
+}
+
+// sort vector of doubles and return index list
+vector<unsigned int> sortDoubleVector(const vector<double> &double_vector) {
+	
+	// define variables
+	double data[double_vector.size()];
+	vector<unsigned int> index (double_vector.size());
+	
+	// copy data to array
+	copy(double_vector.begin(), double_vector.end(), data);
+	
+	// fill index with increasing numbers starting with 0
+	iota(begin(index), end(index), 0);
+	
+	// sort array and retrieve sorted indices
+	sort(begin(index), end(index), [&](int i1, int i2) {return data[i1] < data[i2];});
+	
+	cout << "index.size(): " << index.size() << endl;
+	
+	return index;
 	
 }

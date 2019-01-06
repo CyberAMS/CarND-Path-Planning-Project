@@ -16,6 +16,9 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <numeric>
+#include <algorithm>
+#include <functional>
 #include "Driver.h"
 
 using std::vector;
@@ -24,6 +27,8 @@ using std::to_string;
 using std::cout;
 using std::endl;
 using std::ostringstream;
+
+using namespace std::placeholders;
 
 // debugging settings
 const bool bDISPLAY = true;
@@ -34,12 +39,12 @@ const bool bDISPLAY_TRAJECTORY_INIT = true;
 const bool bDISPLAY_TRAJECTORY_ADD = true;
 const bool bDISPLAY_TRAJECTORY_CALCULATE = true;
 const bool bDISPLAY_TRAJECTORY_CALCULATE_D_FROM_LANE = false;
-const bool bDISPLAY_TRAJECTORY_ESTIMATE_LANES = true;
+const bool bDISPLAY_TRAJECTORY_ESTIMATE_LANES = false;
 const bool bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT = false;
 const bool bDISPLAY_TRAJECTORY_NEXTWAYPOINT = false;
 const bool bDISPLAY_TRAJECTORY_GETFRENET = false;
 const bool bDISPLAY_TRAJECTORY_GET_XY = false;
-const bool bDISPLAY_PATH_SET = false;
+const bool bDISPLAY_PATH_SET = true;
 const string DISPLAY_PREFIX = "    ";
 
 // calculate distance
@@ -56,5 +61,8 @@ string createCarsString(const Cars &cars);
 
 // display vector of Cars structures as string
 string createCarsVectorString(const vector<Cars> &cars_vector);
+
+// sort vector of doubles and return index list
+vector<unsigned int> sortDoubleVector(const vector<double> &double_vector);
 
 #endif /* HELPER_FUNCTIONS_H_ */

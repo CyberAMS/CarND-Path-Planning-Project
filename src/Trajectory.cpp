@@ -111,7 +111,7 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const unsigned int &previo
 }
 
 // add new trajectory segment
-void Trajectory::add(const unsigned int &current_lane, const double &current_speed, const unsigned int &target_lane, const double &target_speed, const double &lane_width, const double &max_acceleration_s, const double &max_acceleration_d, const vector<double> &maps_x, const vector<double> &maps_y) {
+void Trajectory::add(const unsigned int &current_lane, const double &current_speed, const unsigned int &target_lane, const double &target_speed, const double &lane_width, const double &max_acceleration_s, const double &max_acceleration_d, const double &back_distance, const vector<double> &maps_x, const vector<double> &maps_y) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD) {
@@ -125,6 +125,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 		cout << "  lane_width: " << lane_width << endl;
 		cout << "  max_acceleration_s: " << max_acceleration_s << endl;
 		cout << "  max_acceleration_d: " << max_acceleration_d << endl;
+		cout << "  back_distance: " << back_distance << endl;
 		//cout << "  maps_x: " << endl << createDoubleVectorString(maps_x);
 		//cout << "  maps_y: " << endl << createDoubleVectorString(maps_y);
 		
@@ -138,10 +139,10 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	double min_waypoint_distance_d = 0;
 	double min_waypoint_distance = 0;
 	unsigned int num_found = 0;
-	vector<double> waypoints_x = {0, Trajectory::x_values.back()};
-	vector<double> waypoints_y = {0, Trajectory::y_values.back()};
-	vector<unsigned int> next_waypoints (2, 0);
-	unsigned int next_waypoint = 0;
+	vector<double> waypoints_x;
+	vector<double> waypoints_y;
+	vector<unsigned int> next_waypoints;
+	unsigned int count = 0;
 	vector<vector<double>> next_sd;
 	
 	// determine required distance to first waypoint
@@ -160,59 +161,46 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	cout << "min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
 	cout << "min_waypoint_distance: " << min_waypoint_distance << endl;
 	
-	// determine next two waypoints
-	while (num_found < 2) {
+	// get next waypoint
+	next_waypoints = Trajectory::NextWaypoint(Trajectory::x_values.back(), Trajectory::y_values.back(), Trajectory::connect_theta, maps_x, maps_y);
+	
+	// determine first waypoint
+	count = 0;
+	while ((distance(Trajectory::x_values.back(), Trajectory::y_values.back(), maps_x[next_waypoints[count]], maps_y[next_waypoints[count]]) < min_waypoint_distance) && (count < next_waypoints.size())) {
 		
-		// get next waypoint
-		next_waypoints = Trajectory::NextWaypoint(waypoints_x[1], waypoints_y[1], Trajectory::connect_theta, maps_x, maps_y);
-		if ((maps_x[next_waypoints[0]] == waypoints_x[1]) && (maps_y[next_waypoints[0]] == waypoints_y[1])) {
-			
-			next_waypoint = next_waypoints[1];
-			
-		} else {
-			
-			next_waypoint = next_waypoints[0];
-			
-		}
-		
-		cout << "num_found: " << num_found << endl;
-		cout << "waypoints_x[1]: " << waypoints_x[1] << endl;
-		cout << "waypoints_y[1]: " << waypoints_y[1] << endl;
-		cout << "Trajectory::connect_theta: " << Trajectory::connect_theta << endl;
-		cout << "next_waypoint: " << next_waypoint << endl;
-		cout << "distance: " << distance(waypoints_x[1], waypoints_y[1], maps_x[next_waypoint], maps_y[next_waypoint]) << endl;
-		
-		// check for valid waypoint
-		if (distance(waypoints_x[1], waypoints_y[1], maps_x[next_waypoint], maps_y[next_waypoint]) >= min_waypoint_distance) {
-			
-			// shift waypoint list
-			waypoints_x[0] = waypoints_x[1];
-			waypoints_y[0] = waypoints_y[1];
-			waypoints_x[1] = maps_x[next_waypoint];
-			waypoints_y[1] = maps_y[next_waypoint];
-			
-			// add waypoint to sdv
-			next_sd = Trajectory::getFrenet((vector<double>){waypoints_x[1]}, (vector<double>){waypoints_y[1]}, Trajectory::connect_theta, maps_x, maps_y);
-			Trajectory::s_values.push_back(next_sd[0][0]);
-			Trajectory::d_values.push_back(next_sd[1][0]);
-			Trajectory::v_values.push_back(target_speed);
-			
-			// prepare search for next waypoint
-			min_waypoint_distance = 0; // remove minimum distance requirement for second waypoint
-			num_found++; // increase next waypoint counter
-			
-		}
+		count++;
 		
 	}
+	waypoints_x.push_back(maps_x[next_waypoints[count]]);
+	waypoints_y.push_back(maps_y[next_waypoints[count]]);
+	next_sd = Trajectory::getFrenet((vector<double>){waypoints_x.back()}, (vector<double>){waypoints_y.back()}, Trajectory::connect_theta, maps_x, maps_y);
+	Trajectory::s_values.push_back(next_sd[0][0]);
+	Trajectory::d_values.push_back(next_sd[1][0]);
+	Trajectory::v_values.push_back(target_speed);
+	
+	// determine second waypoint (don't reset count for quicker search)
+	while ((distance(waypoints_x.back(), waypoints_y.back(), maps_x[next_waypoints[count]], maps_y[next_waypoints[count]]) < back_distance) && (count < next_waypoints.size())) {
+		
+		count++;
+		
+	}
+	waypoints_x.push_back(maps_x[next_waypoints[count]]);
+	waypoints_y.push_back(maps_y[next_waypoints[count]]);
+	next_sd = Trajectory::getFrenet((vector<double>){waypoints_x.back()}, (vector<double>){waypoints_y.back()}, Trajectory::connect_theta, maps_x, maps_y);
+	Trajectory::s_values.push_back(next_sd[0][0]);
+	Trajectory::d_values.push_back(next_sd[1][0]);
+	Trajectory::v_values.push_back(target_speed);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD) {
 		
 		cout << "  min_waypoint_distance_s: " << min_waypoint_distance_s << endl;
+		cout << "  lane_distances: " << endl << createDoubleVectorString(lane_distances);
 		cout << "  lateral_change: " << lateral_change << endl;
 		cout << "  min_lateral_change_time: " << min_lateral_change_time << endl;
 		cout << "  min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
 		cout << "  min_waypoint_distance: " << min_waypoint_distance << endl;
+		cout << "  next_waypoints: " << endl << createUnsignedIntegerVectorString(next_waypoints);
 		cout << "  waypoints_x: " << endl << createDoubleVectorString(waypoints_x);
 		cout << "  waypoints_y: " << endl << createDoubleVectorString(waypoints_y);
 		cout << "  Trajectory::s_values: " << endl << createDoubleVectorString(Trajectory::s_values);
@@ -487,32 +475,25 @@ vector<unsigned int> Trajectory::ClosestWaypoint(const double &x, const double &
 		
 	}
 	
-	vector<double> closestLen (2, 100000); //large number
-	vector<unsigned int> closestWaypoint (2, 0);
+	// define variables
+	unsigned int count = 0;
+	double dist = 0;
+	vector<double> distances;
+	vector<unsigned int> closestWaypoint;
 	
-	for(unsigned int i = 0; i < maps_x.size(); i++) {
+	for(count = 0; count < maps_x.size(); count++) {
 		
-		double map_x = maps_x[i];
-		double map_y = maps_y[i];
-		double dist = distance(x, y, map_x, map_y);
-		
-		if (dist < closestLen) {
-			
-			// save second closest waypoint
-			closestLen[1] = closestLen[0];
-			closestWaypoint[1] = closestWaypoint[0];
-			
-			// save closest waypoint
-			closestLen[0] = dist;
-			closestWaypoint[0] = i;
-			
-		}
+		dist = distance(x, y, maps_x[count], maps_y[count]);
+		distances.push_back(dist);
 		
 	}
+	
+	closestWaypoint = sortDoubleVector(distances);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT) {
 		
+		cout << "  distances: " << endl << createDoubleVectorString(distances);
 		cout << "  closestWaypoint: " << endl << createUnsignedIntegerVectorString(closestWaypoint);
 		cout << "--- TRAJECTORY: ClosestWaypoint - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
@@ -539,32 +520,26 @@ vector <unsigned int> Trajectory::NextWaypoint(const double &x, const double &y,
 	}
 	
 	// define variables
+	vector<unsigned int> closestWaypoint;
 	unsigned int count = 0;
 	unsigned int current_waypoint = 0;
+	vector<unsigned int> nextWaypoint;
+	double heading = 0;
+	double angle = 0;
 	
-	vector<unsigned int> closestWaypoint = Trajectory::ClosestWaypoint(x, y, maps_x, maps_y);
+	closestWaypoint = Trajectory::ClosestWaypoint(x, y, maps_x, maps_y);
 	
 	for (count = 0; count < closestWaypoint.size(); count++) {
 		
 		current_waypoint = closestWaypoint[count];
 		
-		double map_x = maps_x[current_waypoint];
-		double map_y = maps_y[current_waypoint];
-		
-		double heading = atan2((map_y - y), (map_x - x));
-		
-		double angle = fabs(theta - heading);
+		heading = atan2((maps_y[current_waypoint] - y), (maps_x[current_waypoint] - x));
+		angle = fabs(theta - heading);
 		angle = min((2 * M_PI) - angle, angle);
 		
-		if(angle > (M_PI / 4)) {
+		if(angle <= (M_PI / 4)) {
 			
-			closestWaypoint[count] = current_waypoint++;
-			
-			if (current_waypoint == maps_x.size()) {
-				
-				closestWaypoint[count] = 0;
-				
-			}
+			nextWaypoint.push_back(current_waypoint);
 			
 		}
 		
@@ -574,12 +549,13 @@ vector <unsigned int> Trajectory::NextWaypoint(const double &x, const double &y,
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_NEXTWAYPOINT) {
 		
 		cout << "  closestWaypoint: " << endl << createUnsignedIntegerVectorString(closestWaypoint);
+		cout << "  nextWaypoint: " << endl << createUnsignedIntegerVectorString(nextWaypoint);
 		cout << "--- TRAJECTORY: NextWaypoint - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
 	
-	return closestWaypoint;
+	return nextWaypoint;
 	
 }
 

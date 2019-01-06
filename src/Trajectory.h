@@ -39,7 +39,7 @@ public:
 	void init(Car myCar, Path myPreviousPath, const unsigned int &previous_path_steps, const double &sample_time, const vector<double> &maps_x, const vector<double> &maps_y);
 	
 	// add new trajectory segment
-	void add(const unsigned int &current_lane, const double &current_speed, const unsigned int &target_lane, const double &target_speed, const double &lane_width, const double &max_acceleration_s, const double &max_acceleration_d, const vector<double> &maps_x, const vector<double> &maps_y);
+	void add(const unsigned int &current_lane, const double &current_speed, const unsigned int &target_lane, const double &target_speed, const double &lane_width, const double &max_acceleration_s, const double &max_acceleration_d, const double &back_distance, const vector<double> &maps_x, const vector<double> &maps_y);
 	
 	// calculate full trajectory
 	void calculate(const double &back_distance, const double &sample_time, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y);
@@ -69,7 +69,7 @@ public:
 	vector<unsigned int> ClosestWaypoint(const double &x, const double &y, const vector<double> &maps_x, const vector<double> &maps_y);
 	
 	// determine next waypoint
-	int NextWaypoint(const double &x, const double &y, const double &theta, const vector<double> &maps_x, const vector<double> &maps_y);
+	vector<unsigned int> NextWaypoint(const double &x, const double &y, const double &theta, const vector<double> &maps_x, const vector<double> &maps_y);
 	
 	// transform from Cartesian x,y coordinates to Frenet s,d coordinates
 	vector<vector<double>> getFrenet(const vector<double> &x_values, const vector<double> &y_values, const double &theta, const vector<double> &maps_x, const vector<double> &maps_y);
