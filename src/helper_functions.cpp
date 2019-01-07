@@ -135,8 +135,6 @@ vector<unsigned int> sortDoubleVector(const vector<double> &double_vector) {
 	// sort array and retrieve sorted indices
 	sort(begin(index), end(index), [&](int i1, int i2) {return data[i1] < data[i2];});
 	
-	cout << "index.size(): " << index.size() << endl;
-	
 	return index;
 	
 }

@@ -63,15 +63,15 @@ const vector<behavior_state> BEHAVIORS
 	 {.name = "LCR", .next_states = {"KL"}}};
 
 // longitudinal distance definitions
-const double MAX_ACCELERATION_S = 10; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
+const double MAX_ACCELERATION_S = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
 
 // lateral distance definitions
-const double LANE_WIDTH = 4;
+const double LANE_WIDTH = 4.0;
 const unsigned int LANE_1 = 1;
 const unsigned int LANE_2 = 2;
 const unsigned int LANE_3 = 3;
 const vector<unsigned int> LANES = {LANE_1, LANE_2, LANE_3};
-const double MAX_ACCELERATION_D = 10; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
+const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
 
 // speed definitions
 const double SAFETY_DELTA_V = 0.89408; // travel 2 mph below maximum speed

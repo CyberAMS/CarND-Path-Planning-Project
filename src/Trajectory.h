@@ -42,7 +42,7 @@ public:
 	void add(const unsigned int &current_lane, const double &current_speed, const unsigned int &target_lane, const double &target_speed, const double &lane_width, const double &max_acceleration_s, const double &max_acceleration_d, const double &back_distance, const vector<double> &maps_x, const vector<double> &maps_y);
 	
 	// calculate full trajectory
-	void calculate(const double &back_distance, const double &sample_time, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y);
+	void calculate(Car myCar, const double &back_distance, const double &sample_time, const double &max_acceleration_s, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y);
 	
 	// get trajectory x values
 	vector<double> get_x();

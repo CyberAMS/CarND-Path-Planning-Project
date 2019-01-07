@@ -56,17 +56,23 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const unsigned int &previo
 	double last_theta = 0;
 	vector<vector<double>> last_sd;
 	
+	cout << "HELA 1" << endl;
+	
 	// initialize trajectory with car position xy
 	previous_x[1] = myCar.get_x();
 	previous_y[1] = myCar.get_y();
 	Trajectory::x_values = (vector<double>){previous_x[1]};
 	Trajectory::y_values = (vector<double>){previous_y[1]};
 	
+	cout << "HELA 2" << endl;
+	
 	// remember car position sdv
 	last_theta = myCar.get_theta();
 	last_v = myCar.get_v();
 	last_s = myCar.get_s();
 	last_d = myCar.get_d();
+	
+	cout << "HELA 3" << endl;
 	
 	// add short sequence of previous path positions
 	for (count = 0; count < min((unsigned int)previous_path_x.size(), previous_path_steps); count++) {
@@ -79,14 +85,42 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const unsigned int &previo
 		Trajectory::x_values.push_back(previous_x[1]);
 		Trajectory::y_values.push_back(previous_y[1]);
 		
+	cout << "HELA 4 " << count << endl;
+	
 		// remember path end sdv
-		last_theta = tan((previous_y[1] - previous_y[0]) / (previous_x[1] - previous_x[0]));
+		if (previous_x[1] == previous_x[0]) {
+			
+			if (previous_y[1] >= previous_y[0]) {
+				
+				last_theta = M_PI / 2;
+				
+			} else {
+				
+				last_theta = -M_PI / 2;
+				
+			}
+			
+		} else {
+			
+			last_theta = tan((previous_y[1] - previous_y[0]) / (previous_x[1] - previous_x[0]));
+			
+		}
+	cout << "HELA 4.1 " << count << endl;
 		last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, last_theta, maps_x, maps_y);
-		last_v = (last_s - last_sd[0][0]) / sample_time;
+	cout << "HELA 4.2 " << count << endl;
+		cout << "last_theta: " << last_theta << endl;
+		cout << "last_s: " << last_s << endl;
+		cout << "last_sd[0][0]: " << last_sd[0][0] << endl;
+		last_v = (last_sd[0][0] - last_s) / sample_time;
 		last_s = last_sd[0][0];
 		last_d = last_sd[1][0];
+		cout << "last_v: " << last_v << endl;
+		cout << "last_s: " << last_s << endl;
+		cout << "last_d: " << last_d << endl;
 		
 	}
+	
+	cout << "HELA 5" << endl;
 	
 	// initialize new trajectory segment with sdv
 	Trajectory::s_values = (vector<double>){last_s};
@@ -145,6 +179,8 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	unsigned int count = 0;
 	vector<vector<double>> next_sd;
 	
+	cout << "HELLO 1" << endl;
+	
 	// determine required distance to first waypoint
 	min_waypoint_distance_s = pow((target_speed - current_speed), 2) / max_acceleration_s; // distance traveled in s to reach target speed
 	lane_distances = Trajectory::calculate_d_from_lane((vector<unsigned int>){current_lane, target_lane}, lane_width);
@@ -153,30 +189,35 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	min_waypoint_distance_d = current_speed * min_lateral_change_time; // distance traveled in s when changing lanes
 	min_waypoint_distance = max(min_waypoint_distance_s, min_waypoint_distance_d);
 	
-	cout << "min_waypoint_distance_s: " << min_waypoint_distance_s << endl;
-	cout << "lane_distances[0]: " << lane_distances[0] << endl;
-	cout << "lane_distances[1]: " << lane_distances[1] << endl;
-	cout << "lateral_change: " << lateral_change << endl;
-	cout << "min_lateral_change_time: " << min_lateral_change_time << endl;
-	cout << "min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
-	cout << "min_waypoint_distance: " << min_waypoint_distance << endl;
+	cout << "HELLO 2" << endl;
 	
 	// get next waypoint
 	next_waypoints = Trajectory::NextWaypoint(Trajectory::x_values.back(), Trajectory::y_values.back(), Trajectory::connect_theta, maps_x, maps_y);
 	
+	cout << "HELLO 3" << endl;
+	
 	// determine first waypoint
 	count = 0;
+	cout << "count: " << count << endl;
+	cout << "next_waypoints[count]: " << next_waypoints[count] << " size: " << next_waypoints.size() << endl;
 	while ((distance(Trajectory::x_values.back(), Trajectory::y_values.back(), maps_x[next_waypoints[count]], maps_y[next_waypoints[count]]) < min_waypoint_distance) && (count < next_waypoints.size())) {
 		
 		count++;
+	cout << "count: " << count << endl;
+	cout << "next_waypoints[count]: " << next_waypoints[count] << " size: " << next_waypoints.size() << endl;
 		
 	}
+	cout << "HELLO 3.1" << endl;
 	waypoints_x.push_back(maps_x[next_waypoints[count]]);
 	waypoints_y.push_back(maps_y[next_waypoints[count]]);
+	cout << "HELLO 3.2" << endl;
 	next_sd = Trajectory::getFrenet((vector<double>){waypoints_x.back()}, (vector<double>){waypoints_y.back()}, Trajectory::connect_theta, maps_x, maps_y);
+	cout << "HELLO 3.3" << endl;
 	Trajectory::s_values.push_back(next_sd[0][0]);
-	Trajectory::d_values.push_back(next_sd[1][0]);
+	Trajectory::d_values.push_back(lane_distances[1]);
 	Trajectory::v_values.push_back(target_speed);
+	
+	cout << "HELLO 4" << endl;
 	
 	// determine second waypoint (don't reset count for quicker search)
 	while ((distance(waypoints_x.back(), waypoints_y.back(), maps_x[next_waypoints[count]], maps_y[next_waypoints[count]]) < back_distance) && (count < next_waypoints.size())) {
@@ -188,7 +229,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	waypoints_y.push_back(maps_y[next_waypoints[count]]);
 	next_sd = Trajectory::getFrenet((vector<double>){waypoints_x.back()}, (vector<double>){waypoints_y.back()}, Trajectory::connect_theta, maps_x, maps_y);
 	Trajectory::s_values.push_back(next_sd[0][0]);
-	Trajectory::d_values.push_back(next_sd[1][0]);
+	Trajectory::d_values.push_back(lane_distances[1]);
 	Trajectory::v_values.push_back(target_speed);
 	
 	// display message if required
@@ -200,7 +241,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 		cout << "  min_lateral_change_time: " << min_lateral_change_time << endl;
 		cout << "  min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
 		cout << "  min_waypoint_distance: " << min_waypoint_distance << endl;
-		cout << "  next_waypoints: " << endl << createUnsignedIntegerVectorString(next_waypoints);
+		//cout << "  next_waypoints: " << endl << createUnsignedIntegerVectorString(next_waypoints);
 		cout << "  waypoints_x: " << endl << createDoubleVectorString(waypoints_x);
 		cout << "  waypoints_y: " << endl << createDoubleVectorString(waypoints_y);
 		cout << "  Trajectory::s_values: " << endl << createDoubleVectorString(Trajectory::s_values);
@@ -214,7 +255,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 }
 
 // calculate full trajectory
-void Trajectory::calculate(const double &back_distance, const double &sample_time, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y) {
+void Trajectory::calculate(Car myCar, const double &back_distance, const double &sample_time, const double &max_acceleration_s, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CALCULATE) {
@@ -230,10 +271,10 @@ void Trajectory::calculate(const double &back_distance, const double &sample_tim
 	}
 	
 	// define variables
-	double start_s = Trajectory::s_values.back();
-	double start_v = Trajectory::v_values.back();
-	double start_x = Trajectory::x_values.back();
-	double start_y = Trajectory::y_values.back();
+	double start_s = Trajectory::s_values[0];
+	double start_v = Trajectory::v_values[0];
+	double start_x = Trajectory::x_values[0];
+	double start_y = Trajectory::y_values[0];
 	vector<vector<double>> back_sd;
 	double back_s = 0;
 	double back_v = 0;
@@ -254,9 +295,11 @@ void Trajectory::calculate(const double &back_distance, const double &sample_tim
 	double new_v_value = 0;
 	double new_x_value = 0;
 	double new_y_value = 0;
+	bool bAccelerate = false;
+	bool bDecelerate = false;
 	
 	// determine start of new spline trajectory segment with previous end
-	back_v = start_v;
+	back_v = myCar.get_v();
 	back_x = start_x - (cos(Trajectory::connect_theta) * back_distance);
 	back_y = start_y - (sin(Trajectory::connect_theta) * back_distance);
 	back_sd = Trajectory::getFrenet((vector<double>){back_x}, (vector<double>){back_y}, Trajectory::connect_theta, maps_x, maps_y);
@@ -287,11 +330,13 @@ void Trajectory::calculate(const double &back_distance, const double &sample_tim
 	// define trajectory segment start
 	next_s_value = start_s;
 	
+	cout << "next_s_value: " << next_s_value << endl;
+	
 	// determine trajectory segment points
 	while (next_s_value < Trajectory::s_values.back()) {
 		
 		// next speed value is old speed value plus maximum delta to achieve next target value
-		new_v_value = s_v(next_s_value);
+		new_v_value = (max(min(s_v(next_s_value), 25.0), 10.0));
 		new_x_value = s_x(next_s_value);
 		new_y_value = s_y(next_s_value);
 		
@@ -299,8 +344,38 @@ void Trajectory::calculate(const double &back_distance, const double &sample_tim
 		Trajectory::x_values.push_back(new_x_value);
 		Trajectory::y_values.push_back(new_y_value);
 		
+		// check what to do in case of standstill
+		bAccelerate = false;
+		bDecelerate = false;
+		if (0 == 0) {
+			
+			bAccelerate = true;
+			
+		} else if (0 == 1) {
+			
+			bDecelerate = true;
+			
+		}
+		
 		// determine next s value based on speed of current trajectory segment point
-		next_s_value =+ (new_v_value * sample_time);
+		if ((new_v_value == 0) && (bAccelerate)) {
+			
+			next_s_value += (max_acceleration_s / 50); //* sample_time * sample_time);
+			
+		} else if ((new_v_value == 0) && (bDecelerate)) {
+			
+			next_s_value -= (max_acceleration_s * sample_time * sample_time);
+			
+		} else {
+			
+			next_s_value += (new_v_value * sample_time);
+			
+		}
+		
+		//cout << "new_v_value: " << new_v_value << endl;
+		//cout << "new_x_value: " << new_x_value << endl;
+		//cout << "new_y_value: " << new_y_value << endl << endl;
+		//cout << "next_s_value: " << next_s_value << endl;
 		
 	}
 	
@@ -537,6 +612,8 @@ vector <unsigned int> Trajectory::NextWaypoint(const double &x, const double &y,
 		angle = fabs(theta - heading);
 		angle = min((2 * M_PI) - angle, angle);
 		
+		cout << "current_waypoint: " << current_waypoint << " heading: " << heading << " angle: " << angle << " M_PI / 4: " << (M_PI / 4) << endl;
+		
 		if(angle <= (M_PI / 4)) {
 			
 			nextWaypoint.push_back(current_waypoint);
@@ -590,6 +667,7 @@ vector<vector<double>> Trajectory::getFrenet(const vector<double> &x_values, con
 		y = y_values[count];
 		
 		vector<unsigned int> next_wps = Trajectory::NextWaypoint(x, y, theta, maps_x,maps_y);
+		
 		int next_wp = (int)next_wps[0];
 		
 		int prev_wp;

@@ -88,7 +88,7 @@ void Driver::calculate_trajectory(Car myCar, Path myPreviousPath) {
 	Driver::trajectory.add(Driver::current_lane, Driver::current_speed, Driver::target_lane, Driver::target_speed, LANE_WIDTH, MAX_ACCELERATION_S, MAX_ACCELERATION_D, BACK_DISTANCE, Driver::maps_x, Driver::maps_y);
 	
 	// calculate xy trajectory from init and additional segment
-	Driver::trajectory.calculate(BACK_DISTANCE, SAMPLE_TIME, Driver::maps_s, Driver::maps_x, Driver::maps_y);
+	Driver::trajectory.calculate(myCar, BACK_DISTANCE, SAMPLE_TIME, MAX_ACCELERATION_S, Driver::maps_s, Driver::maps_x, Driver::maps_y);
 	
 	// return path based on trajectory
 	Driver::next_x_vals = Driver::trajectory.get_x();
