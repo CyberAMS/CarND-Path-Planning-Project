@@ -29,7 +29,7 @@ using std::sqrt;
 using std::fabs;
 
 // init trajectory
-void Trajectory::init(Car myCar, Path myPreviousPath, const unsigned int &previous_path_steps, const double &sample_time, const vector<double> &maps_x, const vector<double> &maps_y) {
+void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed, const unsigned int &previous_path_steps, const double &sample_time, const vector<double> &maps_x, const vector<double> &maps_y) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_INIT) {
@@ -38,6 +38,7 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const unsigned int &previo
 		cout << "TRAJECTORY: init - Start" << endl;
 		cout << "  myCar: " << endl << myCar.createString();
 		cout << "  myPreviousPath: " << endl << myPreviousPath.createString();
+		cout << "  target_speed: " << target_speed << endl;
 		cout << "  previous_path_steps: " << previous_path_steps << endl;
 		cout << "  sample_time: " << sample_time << endl;
 		//cout << "  maps_x: " << endl << createDoubleVectorString(maps_x);
@@ -56,71 +57,66 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const unsigned int &previo
 	double last_theta = 0;
 	vector<vector<double>> last_sd;
 	
-	cout << "HELA 1" << endl;
-	
-	// initialize trajectory with car position xy
-	previous_x[1] = myCar.get_x();
-	previous_y[1] = myCar.get_y();
-	Trajectory::x_values = (vector<double>){previous_x[1]};
-	Trajectory::y_values = (vector<double>){previous_y[1]};
-	
-	cout << "HELA 2" << endl;
-	
-	// remember car position sdv
-	last_theta = myCar.get_theta();
-	last_v = myCar.get_v();
-	last_s = myCar.get_s();
-	last_d = myCar.get_d();
-	
-	cout << "HELA 3" << endl;
-	
-	// add short sequence of previous path positions
-	for (count = 0; count < min((unsigned int)previous_path_x.size(), previous_path_steps); count++) {
+	// 
+	if (previous_path_x.size() >= max(1, previous_path_steps)) {
 		
-		// add path xy to trajectory
-		previous_x[0] = previous_x[1];
-		previous_y[0] = previous_y[1];
-		previous_x[1] = previous_path_x[count];
-		previous_y[1] = previous_path_y[count];
-		Trajectory::x_values.push_back(previous_x[1]);
-		Trajectory::y_values.push_back(previous_y[1]);
+		// take current car position to determine angle and velocity of first previous path position
+		previous_x[1] = myCar.get_x();
+		previous_y[1] = myCar_get_y();
+		last_s = myCar.get_s();
 		
-	cout << "HELA 4 " << count << endl;
-	
-		// remember path end sdv
-		if (previous_x[1] == previous_x[0]) {
+		// add short sequence of previous path positions starting with second previous path position
+		for (count = 0; count < min((unsigned int)previous_path_x.size(), previous_path_steps); count++) {
 			
-			if (previous_y[1] >= previous_y[0]) {
+			// take last previous path position to determine angle of next previous path position
+			previous_x[0] = previous_x[1];
+			previous_y[0] = previous_y[1];
+			
+			// add path xy to trajectory
+			previous_x[1] = previous_path_x[count];
+			previous_y[1] = previous_path_y[count];
+			Trajectory::x_values.push_back(previous_x[1]);
+			Trajectory::y_values.push_back(previous_y[1]);
+			
+			// remember path end sdv
+			if (previous_x[1] == previous_x[0]) {
 				
-				last_theta = M_PI / 2;
+				if (previous_y[1] >= previous_y[0]) {
+					
+					last_theta = M_PI / 2;
+					
+				} else {
+					
+					last_theta = -M_PI / 2;
+					
+				}
 				
 			} else {
 				
-				last_theta = -M_PI / 2;
+				last_theta = atan2((previous_y[1] - previous_y[0]), (previous_x[1] - previous_x[0]));
 				
 			}
-			
-		} else {
-			
-			last_theta = tan((previous_y[1] - previous_y[0]) / (previous_x[1] - previous_x[0]));
+			last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, last_theta, maps_x, maps_y);
+			last_v = (last_sd[0][0] - last_s) / sample_time;
+			last_s = last_sd[0][0];
+			last_d = last_sd[1][0];
 			
 		}
-	cout << "HELA 4.1 " << count << endl;
-		last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, last_theta, maps_x, maps_y);
-	cout << "HELA 4.2 " << count << endl;
-		cout << "last_theta: " << last_theta << endl;
-		cout << "last_s: " << last_s << endl;
-		cout << "last_sd[0][0]: " << last_sd[0][0] << endl;
-		last_v = (last_sd[0][0] - last_s) / sample_time;
-		last_s = last_sd[0][0];
-		last_d = last_sd[1][0];
-		cout << "last_v: " << last_v << endl;
-		cout << "last_s: " << last_s << endl;
-		cout << "last_d: " << last_d << endl;
+		
+	} else {
+		
+		// predict car position in next step
+		last_theta = myCar.get_theta();
+		last_v = myCar.get_v();
+		if (last_v == 0) {
+			
+			last_v = target_speed;
+			
+		}
+		last_s = myCar.get_s() + (last_v * sample_time);
+		last_d = myCar.get_d();
 		
 	}
-	
-	cout << "HELA 5" << endl;
 	
 	// initialize new trajectory segment with sdv
 	Trajectory::s_values = (vector<double>){last_s};

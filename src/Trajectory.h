@@ -36,7 +36,7 @@ public:
 	~Trajectory() {}
 	
 	// init trajectory
-	void init(Car myCar, Path myPreviousPath, const unsigned int &previous_path_steps, const double &sample_time, const vector<double> &maps_x, const vector<double> &maps_y);
+	void init(Car myCar, Path myPreviousPath, const double &target_speed, const unsigned int &previous_path_steps, const double &sample_time, const vector<double> &maps_x, const vector<double> &maps_y);
 	
 	// add new trajectory segment
 	void add(const unsigned int &current_lane, const double &current_speed, const unsigned int &target_lane, const double &target_speed, const double &lane_width, const double &max_acceleration_s, const double &max_acceleration_d, const double &back_distance, const vector<double> &maps_x, const vector<double> &maps_y);
