@@ -38,18 +38,81 @@ void Driver::plan_behavior(Car myCar, const vector<Cars> &sensor_fusion) {
 	// define variables
 	vector<unsigned int> estimated_lanes;
 	
-	// select follow lane behavior
+	// determine vehicles around own vehicles
+	Driver::current_speed = myCar.get_v();
+	estimated_lanes = Driver::trajectory.estimate_lanes((vector<double>){myCar.get_d()}, LANES, LANE_WIDTH);
+	Driver::current_lane = estimated_lanes[0];
+	// sd coordinates from xy sensors
+	// predict vehicle positions in next seconds and use in the following
+	// vehicle in front of own vehicle in "radar" distance (if any)
+	// vehicles left and right of own vehicle in "radar" distance
+	// gap to the left and right (front and back)
+	// speed of lanes (slowest vehicle in front)
+	
+	// calculate gap distance (1.5 seconds * speed in front - also for other lanes?!?)
+	
+	// select follow lane behavior - should actually be a finite state logic
 	Driver::behavior = BEHAVIORS[0];
 	
 	// determine plan based on selected behavior
 	if (Driver::behavior.name == BEHAVIORS[0].name) {
+		// follow lane at maximum speed
 		
-		// keep current lane at maximum speed
-		estimated_lanes = Driver::trajectory.estimate_lanes((vector<double>){myCar.get_d()}, LANES, LANE_WIDTH);
-		Driver::current_lane = estimated_lanes[0];
-		Driver::current_speed = myCar.get_v();
-		Driver::target_lane = Driver::current_lane;
+		// determine target speed
 		Driver::target_speed = MAX_V;
+		
+		// determine target lane
+		Driver::target_lane = Driver::current_lane;
+		
+	} else if (Driver::behavior.name == BEHAVIORS[1].name) {
+		// keep lane and follow vehicle in front
+		
+		// determine target speed
+		
+		// US rules
+		// min(speed in front, max speed)
+		
+		// European rules
+		// min(spped in front and left of vehicle, max speed)
+		
+		// determine target lane
+		// need cost function ?!?
+		
+	} else if (Driver::behavior.name == BEHAVIORS[2].name) {
+		// prepare lane change to left
+		
+		// determine target speed
+		
+		
+		// determine target lane
+		
+		
+	} else if (Driver::behavior.name == BEHAVIORS[3].name) {
+		// prepare lane change to right
+		
+		// determine target speed
+		
+		
+		// determine target lane
+		
+		
+	} else if (Driver::behavior.name == BEHAVIORS[4].name) {
+		// lane change to left
+		
+		// determine target speed
+		
+		
+		// determine target lane
+		
+		
+	} else if (Driver::behavior.name == BEHAVIORS[5].name) {
+		// lane change to right
+		
+		// determine target speed
+		
+		
+		// determine target lane
+		
 		
 	}
 	

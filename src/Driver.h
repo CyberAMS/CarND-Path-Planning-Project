@@ -47,8 +47,7 @@ struct behavior_state {
 const double SAMPLE_TIME = 0.020; // 20 ms sample time of simulator (50 Hz)
 
 // possible behavior states and transition options
-// DS:   drive straight
-// FL:   follow lane at constant speed
+// FL:   follow lane at maximum speed
 // KL:   keep lane and follow vehicle in front
 // PLCL: prepare lane change to left
 // PLCR: prepare lane change to right
