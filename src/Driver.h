@@ -61,8 +61,13 @@ const vector<behavior_state> BEHAVIORS
 	 {.name = "LCL", .next_states = {"KL"}},
 	 {.name = "LCR", .next_states = {"KL"}}};
 
+// speed definitions
+const double SAFETY_DELTA_V = 0.89408; // travel 2 mph below maximum speed
+const double MAX_V = 22.352 - SAFETY_DELTA_V; // 50 mph minus safety delta in m/s
+
 // longitudinal distance definitions
 const double MAX_ACCELERATION_S = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
+const double MAX_WAYPOINT_DISTANCE = 30.0 * MAX_V; // don't look ahead more than 30 seconds at max speed
 
 // lateral distance definitions
 const double LANE_WIDTH = 4.0;
@@ -71,10 +76,6 @@ const unsigned int LANE_2 = 2;
 const unsigned int LANE_3 = 3;
 const vector<unsigned int> LANES = {LANE_1, LANE_2, LANE_3};
 const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
-
-// speed definitions
-const double SAFETY_DELTA_V = 0.89408; // travel 2 mph below maximum speed
-const double MAX_V = 22.352 - SAFETY_DELTA_V; // 50 mph minus safety delta in m/s
 
 // path and trajectory parameters
 const unsigned int PREVIOUS_PATH_STEPS = 3; // maximum steps considered from old trajectory
