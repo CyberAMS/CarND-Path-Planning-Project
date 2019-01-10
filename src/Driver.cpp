@@ -148,7 +148,15 @@ void Driver::calculate_trajectory(Car myCar, Path myPreviousPath) {
 	Driver::trajectory.init(myCar, myPreviousPath, Driver::target_speed, PREVIOUS_PATH_STEPS, SAMPLE_TIME, Driver::maps_x, Driver::maps_y);
 	
 	// determine new segment based on plan
-	Driver::trajectory.add(Driver::current_lane, Driver::current_speed, Driver::target_lane, Driver::target_speed, LANE_WIDTH, MAX_ACCELERATION_S, MAX_ACCELERATION_D, MAX_WAYPOINT_DISTANCE, BACK_DISTANCE, Driver::maps_x, Driver::maps_y);
+	if (USE_FIXED_DISTANCES) {
+		
+		Driver::trajectory.add_fixed(Driver::target_lane, Driver::target_speed, LANE_WIDTH, FIXED_S_DISTANCES);
+		
+	} else {
+		
+		Driver::trajectory.add(Driver::current_lane, Driver::current_speed, Driver::target_lane, Driver::target_speed, LANE_WIDTH, MAX_ACCELERATION_S, MAX_ACCELERATION_D, MAX_WAYPOINT_DISTANCE, BACK_DISTANCE, Driver::maps_x, Driver::maps_y);
+		
+	}
 	
 	// calculate xy trajectory from init and additional segment
 	Driver::trajectory.calculate(myCar, BACK_DISTANCE, SAMPLE_TIME, MAX_ACCELERATION_S, Driver::maps_s, Driver::maps_x, Driver::maps_y);

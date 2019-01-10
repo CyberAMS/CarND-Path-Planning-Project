@@ -151,7 +151,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	double lateral_change = 0;
 	double min_lateral_change_time = 0;
 	double min_waypoint_distance_d = 0;
-	double min_waypoint_distance = 0;
+	double min_waypoint_distance_calc = 0;
 	unsigned int num_found = 0;
 	vector<double> waypoints_x;
 	vector<double> waypoints_y;
@@ -166,7 +166,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	lateral_change = fabs(lane_distances[1] - lane_distances[0]); // distance from target lane to current lane
 	min_lateral_change_time = sqrt(2 * lateral_change / max_acceleration_d); // time needed to change lanes
 	min_waypoint_distance_d = current_speed * min_lateral_change_time; // distance traveled in s when changing lanes
-	min_waypoint_distance = max(min_waypoint_distance_s, min_waypoint_distance_d);
+	min_waypoint_distance_calc = max(min_waypoint_distance_s, min_waypoint_distance_d);
 	
 	// get next waypoint
 	next_waypoints = Trajectory::NextWaypoint(Trajectory::x_values.back(), Trajectory::y_values.back(), Trajectory::connect_theta, maps_x, maps_y);
@@ -174,7 +174,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	// determine first waypoint
 	for (count1 = 0; count1 < next_waypoints.size(); count1++) {
 		
-		if (distance(Trajectory::x_values.back(), Trajectory::y_values.back(), maps_x[next_waypoints[count1]], maps_y[next_waypoints[count1]]) < min(min_waypoint_distance, max_waypoint_distance)) {
+		if (distance(Trajectory::x_values.back(), Trajectory::y_values.back(), maps_x[next_waypoints[count1]], maps_y[next_waypoints[count1]]) < min(min_waypoint_distance_calc, max_waypoint_distance)) {
 			
 			break; // for loop
 			
@@ -221,6 +221,51 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 		cout << "  Trajectory::d_values: " << endl << createDoubleVectorString(Trajectory::d_values);
 		cout << "  Trajectory::v_values: " << endl << createDoubleVectorString(Trajectory::v_values);
 		cout << "--- TRAJECTORY: add - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+}
+
+// add new trajectory segment with fixed spacing
+void Trajectory::add_fixed(const unsigned int &target_lane, const double &target_speed, const double &lane_width, const vector<double> &fixed_s_distances) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD_FIXED) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "TRAJECTORY: add_fixed - Start" << endl;
+		cout << "  target_lane: " << target_lane << endl;
+		cout << "  target_speed: " << target_speed << endl;
+		cout << "  lane_width: " << lane_width << endl;
+		cout << "  fixed_s_distances: " << endl << createDoubleVectorString(fixed_s_distances);
+		
+	}
+	
+	// define variables
+	vector<double> lane_distances;
+	
+	// determine lane positions
+	lane_distances = Trajectory::calculate_d_from_lane((vector<unsigned int>){target_lane}, lane_width);
+	
+	// determine first waypoint
+	Trajectory::s_values.push_back((Trajectory::s_values.back() + fixed_s_distances[0]));
+	Trajectory::d_values.push_back(lane_distances[0]);
+	Trajectory::v_values.push_back(target_speed);
+	
+	// determine second waypoint
+	Trajectory::s_values.push_back((Trajectory::s_values.back() + fixed_s_distances[1]));
+	Trajectory::d_values.push_back(lane_distances[0]);
+	Trajectory::v_values.push_back(target_speed);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD_FIXED) {
+		
+		cout << "  lane_distances: " << endl << createDoubleVectorString(lane_distances);
+		cout << "  Trajectory::s_values: " << endl << createDoubleVectorString(Trajectory::s_values);
+		cout << "  Trajectory::d_values: " << endl << createDoubleVectorString(Trajectory::d_values);
+		cout << "  Trajectory::v_values: " << endl << createDoubleVectorString(Trajectory::v_values);
+		cout << "--- TRAJECTORY: add_fixed - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
@@ -305,6 +350,8 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 	
 	// determine trajectory segment points
 	while (next_s_value < Trajectory::s_values.back()) {
+		
+		// LOTS OF SIMPLIFICATIONS BELOW XXXXXXXXX !!!!!!!!!!!!!!!! TODO
 		
 		// next speed value is old speed value plus maximum delta to achieve next target value
 		new_v_value = (max(min(s_v(next_s_value), 25.0), 10.0));

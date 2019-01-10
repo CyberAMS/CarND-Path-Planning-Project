@@ -76,6 +76,8 @@ const unsigned int LANE_2 = 2;
 const unsigned int LANE_3 = 3;
 const vector<unsigned int> LANES = {LANE_1, LANE_2, LANE_3};
 const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
+const bool USE_FIXED_DISTANCES = false;
+const vector<double> FIXED_S_DISTANCES = {1.5 * MAX_V, 3.0 * MAX_V}; // determine positions in 1.5 s and 3.0 s ahead at maximum speed
 
 // path and trajectory parameters
 const unsigned int PREVIOUS_PATH_STEPS = 3; // maximum steps considered from old trajectory
