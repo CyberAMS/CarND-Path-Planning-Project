@@ -58,11 +58,11 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 	vector<vector<double>> last_sd;
 	
 	// 
-	if (previous_path_x.size() >= max(1, previous_path_steps)) {
+	if (previous_path_x.size() >= max((unsigned int)1, previous_path_steps)) {
 		
 		// take current car position to determine angle and velocity of first previous path position
 		previous_x[1] = myCar.get_x();
-		previous_y[1] = myCar_get_y();
+		previous_y[1] = myCar.get_y();
 		last_s = myCar.get_s();
 		
 		// add short sequence of previous path positions starting with second previous path position
@@ -99,6 +99,8 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 		}
 		last_s = myCar.get_s() + (last_v * sample_time);
 		last_d = myCar.get_d();
+		
+		// !!!!!! XXXXX TODO Do I need to save xy values of predicted position or will calculate take care of it?
 		
 	}
 	
@@ -139,6 +141,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 		cout << "  lane_width: " << lane_width << endl;
 		cout << "  max_acceleration_s: " << max_acceleration_s << endl;
 		cout << "  max_acceleration_d: " << max_acceleration_d << endl;
+		cout << "  max_waypoint_distance: " << max_waypoint_distance << endl;
 		cout << "  back_distance: " << back_distance << endl;
 		//cout << "  maps_x: " << endl << createDoubleVectorString(maps_x);
 		//cout << "  maps_y: " << endl << createDoubleVectorString(maps_y);
@@ -213,7 +216,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 		cout << "  lateral_change: " << lateral_change << endl;
 		cout << "  min_lateral_change_time: " << min_lateral_change_time << endl;
 		cout << "  min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
-		cout << "  min_waypoint_distance: " << min_waypoint_distance << endl;
+		cout << "  min_waypoint_distance_calc: " << min_waypoint_distance_calc << endl;
 		//cout << "  next_waypoints: " << endl << createUnsignedIntegerVectorString(next_waypoints);
 		cout << "  waypoints_x: " << endl << createDoubleVectorString(waypoints_x);
 		cout << "  waypoints_y: " << endl << createDoubleVectorString(waypoints_y);
