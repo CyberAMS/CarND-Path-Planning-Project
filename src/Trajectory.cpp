@@ -87,6 +87,8 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 			last_theta = atan2((previous_y[1] - previous_y[0]), (previous_x[1] - previous_x[0]));
 			last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, last_theta, maps_x, maps_y);
 			last_v = (last_sd[0][0] - last_s) / sample_time;
+			cout << "previous_x[1]: " << previous_x[1] << end;
+			cout << "last_s: " << last_s << end;
 			last_s = last_sd[0][0];
 			last_d = last_sd[1][0];
 			
