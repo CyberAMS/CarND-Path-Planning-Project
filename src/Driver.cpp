@@ -145,7 +145,7 @@ void Driver::calculate_trajectory(Car myCar, Path myPreviousPath) {
 	}
 	
 	// start each trajectory with current car position and short segment of previous path
-	Driver::trajectory.init(myCar, myPreviousPath, Driver::target_speed, PREVIOUS_PATH_STEPS, SAMPLE_TIME, Driver::maps_x, Driver::maps_y);
+	Driver::trajectory.init(myCar, myPreviousPath, Driver::target_speed, PREVIOUS_PATH_STEPS, SAMPLE_TIME, Driver::maps_s, Driver::maps_x, Driver::maps_y);
 	
 	// determine new segment based on plan
 	if (USE_FIXED_DISTANCES) {
