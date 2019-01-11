@@ -80,7 +80,7 @@ const bool USE_FIXED_DISTANCES = true;
 const vector<double> FIXED_S_DISTANCES = {1.5 * MAX_V, 3.0 * MAX_V}; // determine positions in 1.5 s and 3.0 s ahead at maximum speed
 
 // path and trajectory parameters
-const unsigned int PREVIOUS_PATH_STEPS = 3; // maximum steps considered from old trajectory
+const unsigned int PREVIOUS_PATH_STEPS = 30; // !!! XXX TODO Should be 3 not 30 // maximum steps considered from old trajectory
 const double BACK_DISTANCE = MAX_V * SAMPLE_TIME; // spline parameter for keeping theta at segment transition (taking a large time step)
 
 class Driver {

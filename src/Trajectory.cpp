@@ -55,21 +55,15 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 	vector<double> previous_path_x = myPreviousPath.get_x();
 	vector<double> previous_path_y = myPreviousPath.get_y();
 	unsigned int count = 0;
+	vector<double> new_x_values;
+	vector<double> new_y_values;
 	double last_theta = 0;
 	vector<vector<double>> last_sd;
 	vector<vector<double>> new_xy_values;
 	
-	// reset trajectory
-	Trajectory::x_values = {};
-	Trajectory::y_values = {};
-	Trajectory::s_values = {};
-	Trajectory::d_values = {};
-	Trajectory::v_values = {};
-	
-	
-	
-	// 
+	// determine initialization values
 	if (previous_path_x.size() >= max((unsigned int)1, previous_path_steps)) {
+		// enough previous path segments available
 		
 		// take current car position to determine angle and velocity of first previous path position
 		previous_x[1] = myCar.get_x();
@@ -79,8 +73,6 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 		// add short sequence of previous path positions starting with second previous path position
 		for (count = 0; count < min((unsigned int)previous_path_x.size(), previous_path_steps); count++) {
 			
-			cout << "count: " << count << endl;
-			
 			// take last previous path position to determine angle of next previous path position
 			previous_x[0] = previous_x[1];
 			previous_y[0] = previous_y[1];
@@ -88,9 +80,8 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 			// add path xy to trajectory
 			previous_x[1] = previous_path_x[count];
 			previous_y[1] = previous_path_y[count];
-			Trajectory::x_values.push_back(previous_x[1]);
-			Trajectory::y_values.push_back(previous_y[1]);
-			cout << "Trajectory::x_values: " << endl << createDoubleVectorString(Trajectory::x_values);
+			new_x_values.push_back(previous_x[1]);
+			new_y_values.push_back(previous_y[1]);
 			
 			// remember path end sdv
 			last_theta = atan2((previous_y[1] - previous_y[0]), (previous_x[1] - previous_x[0]));
@@ -116,10 +107,14 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 		
 		// add path xy to trajectory
 		new_xy_values = Trajectory::get_xy({last_s}, {last_d}, maps_s, maps_x, maps_y);
-		Trajectory::x_values.push_back(new_xy_values[0][0]);
-		Trajectory::y_values.push_back(new_xy_values[1][0]);
+		new_x_values = new_xy_values[0];
+		new_y_values = new_xy_values[1];
 		
 	}
+	
+	// initialize xy trajectory
+	Trajectory::x_values = new_x_values;
+	Trajectory::y_values = new_y_values;
 	
 	// initialize new trajectory segment with sdv
 	Trajectory::s_values = (vector<double>){last_s};
@@ -337,7 +332,7 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 	bool bDecelerate = false;
 	
 	// determine start of new spline trajectory segment with previous end
-	back_v = start_v; // TODO XXXXXXXX !!!!!!!!! myCar.get_v();
+	back_v = start_v;
 	back_x = start_x - (cos(Trajectory::connect_theta) * back_distance);
 	back_y = start_y - (sin(Trajectory::connect_theta) * back_distance);
 	back_sd = Trajectory::getFrenet((vector<double>){back_x}, (vector<double>){back_y}, Trajectory::connect_theta, maps_x, maps_y);
@@ -347,11 +342,17 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 	spline_x_values.push_back(back_x);
 	spline_y_values.push_back(back_y);
 	
+	// second point of new spline trajectory segment is previous end
+	spline_s_values.push_back(start_s);
+	spline_v_values.push_back(start_v);
+	spline_x_values.push_back(start_x);
+	spline_y_values.push_back(start_y);
+	
 	// determine new spline trajectory segments
 	new_xy_values = Trajectory::get_xy(Trajectory::s_values, Trajectory::d_values, maps_s, maps_x, maps_y);
 	new_x_values = new_xy_values[0];
 	new_y_values = new_xy_values[1];
-	for (count = 10; count < new_x_values.size(); count++) {
+	for (count = 1; count < new_x_values.size(); count++) {
 		
 		spline_s_values.push_back(Trajectory::s_values[count]);
 		spline_v_values.push_back(Trajectory::v_values[count]);
@@ -366,9 +367,7 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 	s_y.set_points(spline_s_values, spline_y_values);
 	
 	// define trajectory segment start
-	next_s_value = start_s;
-	
-	bool bFirst = false; // should be true but has strange behavior (speed smaller than 0 ?!?)
+	next_s_value = start_s + (start_v * sample_time);
 	
 	// determine trajectory segment points
 	while (next_s_value < Trajectory::s_values.back()) {
@@ -381,41 +380,36 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 		new_y_value = s_y(next_s_value);
 		
 		// add current trajectory segment points to final trajectory
-		if (!bFirst) {
-			Trajectory::x_values.push_back(new_x_value);
-			Trajectory::y_values.push_back(new_y_value);
-		
-			// check what to do in case of standstill
-			bAccelerate = false;
-			bDecelerate = false;
-			if (0 == 0) {
-				
-				bAccelerate = true;
-				
-			} else if (0 == 1) {
-				
-				bDecelerate = true;
-				
-			}
+		// !!!!! XXXX TODO Note sure why the first x value here can be less than the last x value of the previous path - should be more (one step more)
+		Trajectory::x_values.push_back(new_x_value);
+		Trajectory::y_values.push_back(new_y_value);
+	
+		// check what to do in case of standstill
+		bAccelerate = false;
+		bDecelerate = false;
+		if (0 == 0) {
 			
-			// determine next s value based on speed of current trajectory segment point
-			if ((new_v_value == 0) && (bAccelerate)) {
-				
-				next_s_value += (max_acceleration_s / 50); //* sample_time * sample_time);
-				
-			} else if ((new_v_value == 0) && (bDecelerate)) {
-				
-				next_s_value -= (max_acceleration_s * sample_time * sample_time);
-				
-			} else {
-				
-				next_s_value += (new_v_value * sample_time);
-				
-			}
+			bAccelerate = true;
+			
+		} else if (0 == 1) {
+			
+			bDecelerate = true;
+			
+		}
+		
+		// determine next s value based on speed of current trajectory segment point
+		if ((new_v_value == 0) && (bAccelerate)) {
+			
+			next_s_value += (max_acceleration_s / 50); //* sample_time * sample_time);
+			
+		} else if ((new_v_value == 0) && (bDecelerate)) {
+			
+			next_s_value -= (max_acceleration_s * sample_time * sample_time);
 			
 		} else {
 			
-			bFirst = false;
+			// !!!!!!!! XXXXXXXXX TODO Not sure why the velocity is > 50 m/s - is the myCar value in mph?
+			next_s_value += (new_v_value * sample_time);
 			
 		}
 		

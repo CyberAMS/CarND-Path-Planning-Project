@@ -32,9 +32,9 @@ using namespace std::placeholders;
 
 // debugging settings
 const bool bDISPLAY = true;
-const bool bDISPLAY_DRIVER_PLAN_BEHAVIOR = true;
-const bool bDISPLAY_DRIVER_CALCULATE_TRAJECTORY = true;
-const bool bDISPLAY_CAR_SET_STATE = true;
+const bool bDISPLAY_DRIVER_PLAN_BEHAVIOR = false;
+const bool bDISPLAY_DRIVER_CALCULATE_TRAJECTORY = false;
+const bool bDISPLAY_CAR_SET_STATE = false;
 const bool bDISPLAY_TRAJECTORY_INIT = true;
 const bool bDISPLAY_TRAJECTORY_ADD = true;
 const bool bDISPLAY_TRAJECTORY_ADD_FIXED = true;
@@ -45,7 +45,7 @@ const bool bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT = false;
 const bool bDISPLAY_TRAJECTORY_NEXTWAYPOINT = false;
 const bool bDISPLAY_TRAJECTORY_GETFRENET = false;
 const bool bDISPLAY_TRAJECTORY_GET_XY = false;
-const bool bDISPLAY_PATH_SET = true;
+const bool bDISPLAY_PATH_SET = false;
 const string DISPLAY_PREFIX = "    ";
 
 // calculate distance
