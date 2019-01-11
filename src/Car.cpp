@@ -47,6 +47,7 @@ void Car::set_state(double car_x, double car_y, double car_s, double car_d, doub
 	// display message if required
 	if (bDISPLAY && bDISPLAY_CAR_SET_STATE) {
 		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "--- CAR: set_state - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -104,12 +105,12 @@ string Car::createString() {
 	
 	// add information about car to string
 	text += DISPLAY_PREFIX;
-	text += "car_x=" + to_string(Car::car_x) + " ";
-	text += "car_y=" + to_string(Car::car_y) + " ";
-	text += "car_s=" + to_string(Car::car_s) + " ";
-	text += "car_d=" + to_string(Car::car_d) + " ";
-	text += "car_yaw=" + to_string(Car::car_yaw) + " ";
-	text += "car_speed=" + to_string(Car::car_speed) + "\n";
+	text += "car_x = " + to_string(Car::car_x) + " ";
+	text += "car_y = " + to_string(Car::car_y) + " ";
+	text += "car_s = " + to_string(Car::car_s) + " ";
+	text += "car_d = " + to_string(Car::car_d) + " ";
+	text += "car_yaw = " + to_string(Car::car_yaw) + " ";
+	text += "car_speed = " + to_string(Car::car_speed) + "\n";
 	
 	// return output
 	return text;

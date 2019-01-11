@@ -54,6 +54,9 @@ double distance(double x1, double y1, double x2, double y2);
 // display double vector as string
 string createDoubleVectorString(const vector<double> &double_vector);
 
+// display double vectors as string
+string createDoubleVectorsString(const vector<vector<double>> &double_vectors);
+
 // display integer vector as string
 string createUnsignedIntegerVectorString(const vector<unsigned int> &int_vector);
 

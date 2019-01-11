@@ -119,6 +119,7 @@ void Driver::plan_behavior(Car myCar, const vector<Cars> &sensor_fusion) {
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_PLAN_BEHAVIOR) {
 		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  Driver::behavior.name: " << Driver::behavior.name << endl;
 		cout << "  Driver::current_lane: " << Driver::current_lane << endl;
 		cout << "  Driver::current_speed: " << Driver::current_speed << endl;
@@ -168,11 +169,9 @@ void Driver::calculate_trajectory(Car myCar, Path myPreviousPath) {
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_CALCULATE_TRAJECTORY) {
 		
-		cout << "  Driver::trajectory.get_s(): " << endl << createDoubleVectorString(Driver::trajectory.get_s());
-		cout << "  Driver::trajectory.get_d(): " << endl << createDoubleVectorString(Driver::trajectory.get_d());
-		cout << "  Driver::trajectory.get_v(): " << endl << createDoubleVectorString(Driver::trajectory.get_v());
-		cout << "  Driver::next_x_vals: " << endl << createDoubleVectorString(Driver::next_x_vals);
-		cout << "  Driver::next_y_vals: " << endl << createDoubleVectorString(Driver::next_y_vals);
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  Driver::trajectory.get_s(), Driver::trajectory.get_d(), Driver::trajectory.get_v(): " << endl << createDoubleVectorsString(vector<vector<double>>{Driver::trajectory.get_s(), Driver::trajectory.get_d(), Driver::trajectory.get_v()});
+		cout << "  Driver::next_x_vals, Driver::next_y_vals: " << endl << createDoubleVectorsString(vector<vector<double>>{Driver::next_x_vals, Driver::next_y_vals});
 		cout << "--- DRIVER: calculate_trajectory - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

@@ -60,6 +60,42 @@ string createDoubleVectorString(const vector<double> &double_vector) {
 	
 }
 
+// display double vectors as string
+string createDoubleVectorsString(const vector<vector<double>> &double_vectors) {
+	
+	//define variables
+	unsigned int current_element = 0;
+	unsigned int current_vector = 0;
+	ostringstream streamObj;
+	string tab = "\t";
+	
+	// add information about all elements to string
+	for (current_element = 0; current_element < double_vector[0].size(); current_element++) {
+		
+		streamObj << DISPLAY_PREFIX << "Element " << current_element << ": ";
+		
+		// add information about all vectors to string
+		for (current_vector = 0; current_vector < double_vectors.size(); current_vector++) {
+			
+			if (current_vector > 0) {
+				
+				streamObj << necessary_tab;
+				
+			}
+			
+			streamObj << double_vectors[current_vector][current_element];
+			
+		}
+		
+		streamObj << endl;
+		
+	}
+	
+	// return output
+	return streamObj.str();
+	
+}
+
 // display integer vector as string
 string createUnsignedIntegerVectorString(const vector<unsigned int> &int_vector) {
 	
