@@ -85,8 +85,8 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 			last_theta = atan2((previous_y[1] - previous_y[0]), (previous_x[1] - previous_x[0]));
 			last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, last_theta, maps_x, maps_y);
 			last_v = (last_sd[0][0] - last_s) / sample_time;
-			cout << "previous_x[1]: " << previous_x[1] << end;
-			cout << "last_s: " << last_s << end;
+			cout << "previous_x[1]: " << previous_x[1] << endl;
+			cout << "last_s: " << last_s << endl;
 			last_s = last_sd[0][0];
 			last_d = last_sd[1][0];
 			
@@ -298,8 +298,8 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 	// define variables
 	double start_s = Trajectory::s_values[0];
 	double start_v = Trajectory::v_values[0];
-	double start_x = Trajectory::x_values[0];
-	double start_y = Trajectory::y_values[0];
+	double start_x = Trajectory::x_values.back(); // !!!! XXX TODO maybe one point earlier or later?
+	double start_y = Trajectory::y_values.back(); // !!!! XXX TODO maybe one point earlier or later?
 	vector<vector<double>> back_sd;
 	double back_s = 0;
 	double back_v = 0;
@@ -371,6 +371,8 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 		new_x_value = s_x(next_s_value);
 		new_y_value = s_y(next_s_value);
 		
+		cout << "next_s_value, new_v_value, new_x_value, new_y_value: " << next_s_value << "\t" << new_v_value << "\t" << new_x_value << "\t" << new_y_value << endl;
+		
 		// add current trajectory segment points to final trajectory
 		// !!!!! XXXX TODO Note sure why the first x value here can be less than the last x value of the previous path - should be more (one step more)
 		Trajectory::x_values.push_back(new_x_value);
@@ -411,8 +413,8 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CALCULATE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  spline_s_values, spline_v_values, spline_x_values, spline_y_values: " << endl << createDoubleVectorsString(vector<vector<double>>{spline_s_values, spline_v_values, spline_x_values spline_y_values});
-		cout << "  Trajectory::x_values, Trajectory::y_values: " << endl << createDoubleVectorString(vector<vector<double>>{Trajectory::x_values, Trajectory::y_values});
+		cout << "  spline_s_values, spline_v_values, spline_x_values, spline_y_values: " << endl << createDoubleVectorsString(vector<vector<double>>{spline_s_values, spline_v_values, spline_x_values, spline_y_values});
+		cout << "  Trajectory::x_values, Trajectory::y_values: " << endl << createDoubleVectorsString(vector<vector<double>>{Trajectory::x_values, Trajectory::y_values});
 		cout << "--- TRAJECTORY: calculate - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

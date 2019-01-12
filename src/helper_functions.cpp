@@ -70,7 +70,7 @@ string createDoubleVectorsString(const vector<vector<double>> &double_vectors) {
 	string tab = "\t";
 	
 	// add information about all elements to string
-	for (current_element = 0; current_element < double_vector[0].size(); current_element++) {
+	for (current_element = 0; current_element < double_vectors[0].size(); current_element++) {
 		
 		streamObj << DISPLAY_PREFIX << "Element " << current_element << ": ";
 		
@@ -79,7 +79,7 @@ string createDoubleVectorsString(const vector<vector<double>> &double_vectors) {
 			
 			if (current_vector > 0) {
 				
-				streamObj << necessary_tab;
+				streamObj << tab;
 				
 			}
 			
