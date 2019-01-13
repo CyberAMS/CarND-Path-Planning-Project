@@ -20,6 +20,12 @@ using std::string;
 
 // define constants
 const unsigned int EGO_CAR_ID = 0;
+const double EGO_CAR_SV_INIT = 0.0;
+const double EGO_CAR_SA_INIT = 0.0;
+const double EGO_CAR_SJ_INIT = 0.0;
+const double EGO_CAR_DV_INIT = 0.0;
+const double EGO_CAR_DA_INIT = 0.0;
+const double EGO_CAR_DJ_INIT = 0.0;
 
 class Vehicle {
 

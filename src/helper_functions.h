@@ -92,6 +92,12 @@ string CreateUnsignedIntegerVectorString(const vector<unsigned int> &int_vector)
 // display vector of Vehicle objects as string
 string CreateVehiclesVectorString(vector<Vehicle> vehicles_vector);
 
+// display behavior_state structure as string
+string CreateBehaviorString(const behavior_state &behavior);
+
+// display vector of Vehicle objects as string
+string CreateBehaviorVectorString(vector<behavior_state> behaviors_vector);
+
 // sort vector of doubles and return index list
 vector<unsigned int> SortDoubleVector(const vector<double> &double_vector);
 

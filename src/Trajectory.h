@@ -35,62 +35,68 @@ public:
 	// destructor
 	~Trajectory() {}
 	
-	// init trajectory
-	void init(Car myCar, Path myPreviousPath, const double &target_speed, const unsigned int &previous_path_steps, const double &sample_time, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y);
+	// initialize trajectory
+	void Init();
 	
-	// add new trajectory segment
-	void add(const unsigned int &current_lane, const double &current_speed, const unsigned int &target_lane, const double &target_speed, const double &lane_width, const double &max_acceleration_s, const double &max_acceleration_d, const double &max_waypoint_distance, const double &back_distance, const vector<double> &maps_x, const vector<double> &maps_y);
-	
-	// add new trajectory segment with fixed spacing
-	void add_fixed(const unsigned int &target_lane, const double &target_speed, const double &lane_width, const vector<double> &fixed_s_distances);
-	
-	// calculate full trajectory
-	void calculate(Car myCar, const double &back_distance, const double &sample_time, const double &max_acceleration_s, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y);
+	// add segment to trajectory
+	void Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
 	
 	// get trajectory x values
-	vector<double> get_x();
+	vector<double> Get_x();
 	
 	// get trajectory y values
-	vector<double> get_y();
+	vector<double> Get_y();
 	
-	// get segment s values
-	vector<double> get_s();
+	// get trajectory s values
+	vector<double> Get_s();
 	
-	// get segment d values
-	vector<double> get_d();
+	// get trajectory s velocity values
+	vector<double> Get_sv();
 	
-	// get segment v values
-	vector<double> get_v();
+	// get trajectory s acceleration values
+	vector<double> Get_sa();
 	
-	// get distance from center lane for lane
-	vector<double> calculate_d_from_lane(const vector<unsigned int> &lane_values, const double &lane_width);
+	// get trajectory s jerk values
+	vector<double> Get_sj();
 	
-	// estimate lane number for lane based on distance from center lane
-	vector<unsigned int> estimate_lanes(const vector<double> &d_values, const vector<unsigned int> &lanes, const double &lane_width);
+	// get trajectory d values
+	vector<double> Get_d();
 	
-	// determine closest waypoint
-	vector<unsigned int> ClosestWaypoint(const double &x, const double &y, const vector<double> &maps_x, const vector<double> &maps_y);
+	// get trajectory d velocity values
+	vector<double> Get_dv();
 	
-	// determine next waypoint
-	vector<unsigned int> NextWaypoint(const double &x, const double &y, const double &theta, const vector<double> &maps_x, const vector<double> &maps_y);
+	// get trajectory d accerleration values
+	vector<double> Get_da();
 	
-	// transform from Cartesian x,y coordinates to Frenet s,d coordinates
-	vector<vector<double>> getFrenet(const vector<double> &x_values, const vector<double> &y_values, const double &theta, const vector<double> &maps_x, const vector<double> &maps_y);
+	// get trajectory d jerk values
+	vector<double> Get_dj();
 	
-	// transform from Frenet s,d coordinates to Cartesian x,y
-	vector<vector<double>> get_xy(const vector<double> &s_values, const vector<double> &d_values, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y);
+	// get trajectory orientation angles
+	vector<double> Get_theta();
 
 private:
 	
-	// trajectory values
+	// trajectory values in xy
 	vector<double> x_values;
 	vector<double> y_values;
 	
-	// new segment values
+	// frenet s distances for trajectory and time derivatives
 	vector<double> s_values;
+	vector<double> sv_values;
+	vector<double> sa_values;
+	vector<double> sj_values;
+	
+	// frenet d distances for trajectory and time derivatives
 	vector<double> d_values;
-	vector<double> v_values;
-	double connect_theta;
+	vector<double> dv_values;
+	vector<double> da_values;
+	vector<double> dj_values;
+	
+	// trajectory orientation angles
+	vector<double> theta_values;
+	
+	// remember whether trajectory has been initialized before
+	bool is_initialized = false;
 
 };
 

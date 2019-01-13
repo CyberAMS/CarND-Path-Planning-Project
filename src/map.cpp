@@ -15,6 +15,7 @@
 #include "Map.h"
 #include "helper_functions.h"
 #include "spline.h"
+#include "spline.cpp"
 
 using std::vector;
 using std::string;
@@ -23,7 +24,6 @@ using std::endl;
 using std::fabs;
 using std::min;
 using std::fmod;
-using tk::spline;
 
 // initialize map
 void Map::Init(vector<double> map_waypoints_x, vector<double> map_waypoints_y, vector<double> map_waypoints_s, vector<double> map_waypoints_dx, vector<double> map_waypoints_dy) {

@@ -14,7 +14,7 @@
 #include <cmath>
 #include "helper_functions.h"
 #include "Trajectory.h"
-#include "Car.h"
+#include "Vehicle.h"
 #include "Path.h"
 #include "spline.h"
 //#include "Eigen-3.3/Eigen/Core"
@@ -31,100 +31,34 @@ using std::sqrt;
 using std::fabs;
 
 // init trajectory
-void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed, const unsigned int &previous_path_steps, const double &sample_time, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y) {
+void Trajectory::Init(Vehicle ego) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_INIT) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "TRAJECTORY: init - Start" << endl;
-		cout << "  myCar: " << endl << myCar.createString();
-		cout << "  myPreviousPath: " << endl << myPreviousPath.createString();
-		cout << "  target_speed: " << target_speed << endl;
-		cout << "  previous_path_steps: " << previous_path_steps << endl;
-		cout << "  sample_time: " << sample_time << endl;
-		//cout << "  maps_s, maps_x, maps_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{maps_s, maps_x, maps_y});
+		cout << "TRAJECTORY: Init - Start" << endl;
+		cout << "  ego: " << endl << ego->CreateString();
+		
 	}
 	
-	// define variables
-	vector<double> previous_x (2, 0);
-	vector<double> previous_y (2, 0);
-	double last_v = 0;
-	double last_s = 0;
-	double last_d = 0;
-	vector<double> previous_path_x = myPreviousPath.get_x();
-	vector<double> previous_path_y = myPreviousPath.get_y();
-	unsigned int count = 0;
-	vector<double> new_x_values;
-	vector<double> new_y_values;
-	double last_theta = 0;
-	vector<vector<double>> last_sd;
-	vector<vector<double>> new_xy_values;
-	
-	// determine initialization values
-	if (previous_path_x.size() >= max((unsigned int)1, previous_path_steps)) {
-		// enough previous path segments available
+	// check whether this trajectory has been initialized
+	if (!this->is_initialized) {
 		
-		// take current car position to determine angle and velocity of first previous path position
-		previous_x[1] = myCar.get_x();
-		previous_y[1] = myCar.get_y();
-		last_s = myCar.get_s();
+		// add own vehicle position to trajectory
+		this->Add(ego->Get_x(), ego->Get_y(), ego->Get_s(), EGO_CAR_SV_INIT, EGO_CAR_SA_INIT, EGO_CAR_SJ_INIT, ego->Get_d(), EGO_CAR_DV_INIT, EGO_CAR_DA_INIT, EGO_CAR_DJ_INIT, ego->Get_theta());
 		
-		// add short sequence of previous path positions starting with second previous path position
-		for (count = 0; count < min((unsigned int)previous_path_x.size(), previous_path_steps); count++) {
-			
-			// take last previous path position to determine angle of next previous path position
-			previous_x[0] = previous_x[1];
-			previous_y[0] = previous_y[1];
-			
-			// add path xy to trajectory
-			previous_x[1] = previous_path_x[count];
-			previous_y[1] = previous_path_y[count];
-			new_x_values.push_back(previous_x[1]);
-			new_y_values.push_back(previous_y[1]);
-			
-			// remember path end sdv
-			last_theta = atan2((previous_y[1] - previous_y[0]), (previous_x[1] - previous_x[0]));
-			last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, last_theta, maps_x, maps_y);
-			last_v = Distance(previous_x[0], previous_y[0], previous_x[1], previous_y[1]) / sample_time;
-			if (last_v > 25) {
-				cout << "********** CHECK **********" << endl;
-			}
-			cout << "previous_x[0], previous_y[0], previous_x[1], previous_y[1], last_theta, last_s, last_sd[0][0], last_v: " << previous_x[0] << "\t" << previous_y[0] << "\t" << previous_x[1] << "\t" << previous_y[1] << "\t" << last_theta << "\t" << last_s << "\t" << last_sd[0][0] << "\t" << last_v << endl;
-			last_s = last_sd[0][0];
-			last_d = last_sd[1][0];
-			
-		}
+		// initialization done
+		this->is_initialized = true;
 		
 	} else {
 		
-		// predict car position in next step
-		last_theta = myCar.get_theta();
-		last_v = myCar.get_v();
-		if (last_v == 0) {
-			
-			last_v = target_speed;
-			
-		}
-		last_s = myCar.get_s() + (last_v * sample_time);
-		last_d = myCar.get_d();
 		
-		// add path xy to trajectory
-		new_xy_values = Trajectory::get_xy({last_s}, {last_d}, maps_s, maps_x, maps_y);
-		new_x_values = new_xy_values[0];
-		new_y_values = new_xy_values[1];
 		
 	}
 	
-	// initialize xy trajectory
-	Trajectory::x_values = new_x_values;
-	Trajectory::y_values = new_y_values;
 	
-	// initialize new trajectory segment with sdv
-	Trajectory::s_values = (vector<double>){last_s};
-	Trajectory::d_values = (vector<double>){last_d};
-	Trajectory::v_values = (vector<double>){last_v};
-	Trajectory::connect_theta = last_theta;
+
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_INIT) {
@@ -140,101 +74,47 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 	
 }
 
-// add new trajectory segment
-void Trajectory::add(const unsigned int &current_lane, const double &current_speed, const unsigned int &target_lane, const double &target_speed, const double &lane_width, const double &max_acceleration_s, const double &max_acceleration_d, const double &max_waypoint_distance, const double &back_distance, const vector<double> &maps_x, const vector<double> &maps_y) {
+// add segment to trajectory
+void Trajectory::Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "TRAJECTORY: add - Start" << endl;
-		cout << "  current_lane: " << current_lane << endl;
-		cout << "  current_speed: " << current_speed << endl;
-		cout << "  target_lane: " << target_lane << endl;
-		cout << "  target_speed: " << target_speed << endl;
-		cout << "  lane_width: " << lane_width << endl;
-		cout << "  max_acceleration_s: " << max_acceleration_s << endl;
-		cout << "  max_acceleration_d: " << max_acceleration_d << endl;
-		cout << "  max_waypoint_distance: " << max_waypoint_distance << endl;
-		cout << "  back_distance: " << back_distance << endl;
-		//cout << "  maps_x, maps_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{maps_x, maps_y});
+		cout << "TRAJECTORY: Add - Start" << endl;
+		cout << "  x: " << x << endl;
+		cout << "  y: " << x << endl;
+		cout << "  s: " << s << endl;
+		cout << "  sv: " << sv << endl;
+		cout << "  sa " << sa << endl;
+		cout << "  sj: " << sj << endl;
+		cout << "  d: " << d << endl;
+		cout << "  dv: " << dv << endl;
+		cout << "  da: " << da << endl;
+		cout << "  dj: " << dj << endl;
+		cout << "  theta: " << theta << endl;
 		
 	}
 	
-	// define variables
-	double min_waypoint_distance_s = 0;
-	vector<double> lane_distances;
-	double lateral_change = 0;
-	double min_lateral_change_time = 0;
-	double min_waypoint_distance_d = 0;
-	double min_waypoint_distance_calc = 0;
-	unsigned int num_found = 0;
-	vector<double> waypoints_x;
-	vector<double> waypoints_y;
-	vector<unsigned int> next_waypoints;
-	unsigned int count1 = 0;
-	vector<vector<double>> next_sd;
-	unsigned int count2 = 0;
-	
-	// determine required distance to first waypoint
-	min_waypoint_distance_s = pow((target_speed - current_speed), 2) / max_acceleration_s; // distance traveled in s to reach target speed
-	lane_distances = Trajectory::calculate_d_from_lane((vector<unsigned int>){current_lane, target_lane}, lane_width);
-	lateral_change = fabs(lane_distances[1] - lane_distances[0]); // distance from target lane to current lane
-	min_lateral_change_time = sqrt(2 * lateral_change / max_acceleration_d); // time needed to change lanes
-	min_waypoint_distance_d = current_speed * min_lateral_change_time; // distance traveled in s when changing lanes
-	min_waypoint_distance_calc = max(min_waypoint_distance_s, min_waypoint_distance_d);
-	
-	// get next waypoint
-	next_waypoints = Trajectory::NextWaypoint(Trajectory::x_values.back(), Trajectory::y_values.back(), Trajectory::connect_theta, maps_x, maps_y);
-	
-	// determine first waypoint
-	for (count1 = 0; count1 < next_waypoints.size(); count1++) {
-		
-		if (Distance(Trajectory::x_values.back(), Trajectory::y_values.back(), maps_x[next_waypoints[count1]], maps_y[next_waypoints[count1]]) < min(min_waypoint_distance_calc, max_waypoint_distance)) {
-			
-			break; // for loop
-			
-		}
-		
-	}
-	waypoints_x.push_back(maps_x[next_waypoints[count1]]);
-	waypoints_y.push_back(maps_y[next_waypoints[count1]]);
-	next_sd = Trajectory::getFrenet((vector<double>){waypoints_x.back()}, (vector<double>){waypoints_y.back()}, Trajectory::connect_theta, maps_x, maps_y);
-	Trajectory::s_values.push_back(next_sd[0][0]);
-	Trajectory::d_values.push_back(lane_distances[1]);
-	Trajectory::v_values.push_back(target_speed);
-	
-	// determine second waypoint (don't reset count for quicker search)
-	for (count2 = count1; count2 < next_waypoints.size(); count2++) {
-		
-		if (Distance(waypoints_x.back(), waypoints_y.back(), maps_x[next_waypoints[count2]], maps_y[next_waypoints[count2]]) < min(back_distance, max_waypoint_distance)) {
-			
-			break; // for loop
-			
-		}
-		
-	}
-	waypoints_x.push_back(maps_x[next_waypoints[count2]]);
-	waypoints_y.push_back(maps_y[next_waypoints[count2]]);
-	next_sd = Trajectory::getFrenet((vector<double>){waypoints_x.back()}, (vector<double>){waypoints_y.back()}, Trajectory::connect_theta, maps_x, maps_y);
-	Trajectory::s_values.push_back(next_sd[0][0]);
-	Trajectory::d_values.push_back(lane_distances[1]);
-	Trajectory::v_values.push_back(target_speed);
+	// add trajectory segment
+	this->x_values.push_back(x);
+	this->y_values.push_back(y);
+	this->s_values.push_back(s);
+	this->sv_values.push_back(sv);
+	this->sa_values.push_back(sa);
+	this->sj_values.push_back(sj);
+	this->d_values.push_back(d);
+	this->dv_values.push_back(dv);
+	this->da_values.push_back(da);
+	this->dj_values.push_back(dj);
+	this->theta_values.push_back(theta);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  min_waypoint_distance_s: " << min_waypoint_distance_s << endl;
-		cout << "  lane_distances: " << endl << CreateDoubleVectorString(lane_distances);
-		cout << "  lateral_change: " << lateral_change << endl;
-		cout << "  min_lateral_change_time: " << min_lateral_change_time << endl;
-		cout << "  min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
-		cout << "  min_waypoint_distance_calc: " << min_waypoint_distance_calc << endl;
-		//cout << "  next_waypoints: " << endl << CreateUnsignedIntegerVectorString(next_waypoints);
-		cout << "  waypoints_x, waypoints_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{waypoints_x, waypoints_y});
-		cout << "  Trajectory::s_values, Trajectory::d_values, Trajectory::v_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{Trajectory::s_values, Trajectory::d_values, Trajectory::v_values});
-		cout << "--- TRAJECTORY: add - End" << endl;
+		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((<vector<vector<double>>){this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values});
+		cout << "--- TRAJECTORY: Add - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}

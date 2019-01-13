@@ -18,7 +18,6 @@
 
 using std::vector;
 using std::string;
-using tk::spline;
 
 // map parameters
 const unsigned int MAX_TRACK_S = 6945.554;

@@ -15,9 +15,8 @@
 #include "Map.h"
 #include "Vehicle.h"
 #include "Path.h"
+#include "Trajectory.h"
 #include "helper_functions.h"
-
-//#include "Trajectory.h"
 
 using std::vector;
 using std::string;
@@ -35,6 +34,15 @@ void Driver::PlanBehavior() {
 		
 	}
 	
+	// initialize all objects for next step
+	this->trajectory.Init(this->ego, this->previous_path);
+	this->state.Init(this->trajectory);
+	
+	        // This is the initialisation step
+        int start_lane = calculateLane(this->trajectory.ds[0], DEFAULT_LANE_SPACING, DEFAULT_LANE_INSIDE_OFFSET);
+        int finish_lane = calculateLane(this->trajectory.ds[this->trajectory.size() - 1], DEFAULT_LANE_SPACING, DEFAULT_LANE_INSIDE_OFFSET);
+        State initial_state = State(LongitudinalState::ACCELERATE, LateralState::STAY_IN_LANE, start_lane, finish_lane);
+        this->state_machine = StateMachine(initial_state);
 	
 	
 	
