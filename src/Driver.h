@@ -62,12 +62,13 @@ const vector<behavior_state> BEHAVIORS
 	 {.name = "LCR", .next_states = {"KL"}}};
 
 // speed definitions
-const double SAFETY_DELTA_V = 0.89408; // travel 2 mph below maximum speed
-const double MAX_V = 22.352 - SAFETY_DELTA_V; // 50 mph minus safety delta in m/s
+const double MPH_TO_MS = 0.44704; // miles per hour to meters per second
+const double SAFETY_DELTA_V = 2 * MPH_TO_MS; // travel 2 mph below maximum speed
+const double MAX_V = (50 * MPH_TO_MS) - SAFETY_DELTA_V; // 50 mph minus safety delta in m/s
 
 // longitudinal distance definitions
 const double MAX_ACCELERATION_S = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
-const double MAX_WAYPOINT_DISTANCE = 30.0 * MAX_V; // don't look ahead more than 30 seconds at max speed
+const double MAX_WAYPOINT_DISTANCE = 10.0 * MAX_V; // don't look ahead more than 30 seconds at max speed
 
 // lateral distance definitions
 const double LANE_WIDTH = 4.0;
@@ -77,10 +78,10 @@ const unsigned int LANE_3 = 3;
 const vector<unsigned int> LANES = {LANE_1, LANE_2, LANE_3};
 const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
 const bool USE_FIXED_DISTANCES = true;
-const vector<double> FIXED_S_DISTANCES = {1.5 * MAX_V, 3.0 * MAX_V}; // determine positions in 1.5 s and 3.0 s ahead at maximum speed
+const vector<double> FIXED_S_DISTANCES = {0.5 * MAX_V, 1.0 * MAX_V}; // determine positions in 0.5 s and 1.0 s ahead at maximum speed
 
 // path and trajectory parameters
-const unsigned int PREVIOUS_PATH_STEPS = 30; // !!! XXX TODO Should be 3 not 30 // maximum steps considered from old trajectory
+const unsigned int PREVIOUS_PATH_STEPS = 10; // !!! XXX TODO Should be 3 not 30 // maximum steps considered from old trajectory
 const double BACK_DISTANCE = MAX_V * SAMPLE_TIME; // spline parameter for keeping theta at segment transition (taking a large time step)
 
 class Driver {
@@ -120,20 +121,34 @@ public:
 
 private:
 	
-	// map
-	vector<double> maps_s;
-	vector<double> maps_x;
-	vector<double> maps_y;
+	// global map
+	Map map;
 	
-	// plan
-	behavior_state behavior;
+	// own car
+	Vehicle ego;
+	
+	// other vehicles
+	vector<Vehicle> vehicles;
+	
+	// behavior state
+	State state;
+	
+	// main trajectory
+	Trajectory trajectory;
+	
+	// time step
+	unsigned long time_step;
+	
+	
+	
+	
+	
+	
+	
 	unsigned int current_lane;
 	double current_speed;
 	unsigned int target_lane;
 	double target_speed;
-	
-	// trajectory
-	Trajectory trajectory;
 	
 	// path values
 	vector<double> next_x_vals;

@@ -94,11 +94,15 @@ int main() {
 	}
 	
 	// define objects
-	Driver myDriver(map_waypoints_s, map_waypoints_x, map_waypoints_y);
+	Driver driver();
+	
+	// initialize driver's map
+	driver.map.init(map_waypoints_x, map_waypoints_y, map_waypoints_s, map_waypoints_dx, map_waypoints_dy);
+	
 	Car myCar;
 	Path myPreviousPath;
 	
-	h.onMessage([&myDriver,&myCar,&myPreviousPath,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+	h.onMessage([&driver,&myCar,&myPreviousPath,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
 		// "42" at the start of the message means there's a websocket message event.
 		// The 4 signifies a websocket message
 		// The 2 signifies a websocket event
@@ -159,7 +163,7 @@ int main() {
 					// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
 					
 					// update objects with data from simulator
-					myCar.set_state(car_x, car_y, car_s, car_d, car_yaw, car_speed);
+					myCar.set_state(car_x, car_y, car_s, car_d, (2 * M_PI / 360 * car_yaw), (car_speed * MPH_TO_MS));
 					myPreviousPath.set(previous_path_x, previous_path_y, end_path_s, end_path_d);
 					
 					// determine automatic driver reaction
@@ -178,10 +182,10 @@ int main() {
 						sensor_fusions.push_back(new_sensor_fusion);
 						
 					}
-					myDriver.plan_behavior(myCar, sensor_fusions);
-					myDriver.calculate_trajectory(myCar, myPreviousPath);
-					next_x_vals = myDriver.get_next_x();
-					next_y_vals = myDriver.get_next_y();
+					driver.plan_behavior(myCar, sensor_fusions);
+					driver.calculate_trajectory(myCar, myPreviousPath);
+					next_x_vals = driver.get_next_x();
+					next_y_vals = driver.get_next_y();
 					
 					msgJson["next_x"] = next_x_vals;
 					msgJson["next_y"] = next_y_vals;

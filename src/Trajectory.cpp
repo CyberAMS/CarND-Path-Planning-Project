@@ -84,9 +84,11 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 			// remember path end sdv
 			last_theta = atan2((previous_y[1] - previous_y[0]), (previous_x[1] - previous_x[0]));
 			last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, last_theta, maps_x, maps_y);
-			last_v = (last_sd[0][0] - last_s) / sample_time;
-			cout << "previous_x[1]: " << previous_x[1] << endl;
-			cout << "last_s: " << last_s << endl;
+			last_v = distance(previous_x[0], previous_y[0], previous_x[1], previous_y[1]) / sample_time;
+			if (last_v > 25) {
+				cout << "********** CHECK **********" << endl;
+			}
+			cout << "previous_x[0], previous_y[0], previous_x[1], previous_y[1], last_theta, last_s, last_sd[0][0], last_v: " << previous_x[0] << "\t" << previous_y[0] << "\t" << previous_x[1] << "\t" << previous_y[1] << "\t" << last_theta << "\t" << last_s << "\t" << last_sd[0][0] << "\t" << last_v << endl;
 			last_s = last_sd[0][0];
 			last_d = last_sd[1][0];
 			
@@ -367,7 +369,7 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 		// LOTS OF SIMPLIFICATIONS BELOW XXXXXXXXX !!!!!!!!!!!!!!!! TODO
 		
 		// next speed value is old speed value plus maximum delta to achieve next target value
-		new_v_value = (max(min(s_v(next_s_value), 25.0), 10.0));
+		new_v_value = 48 * MPH_TO_MS; // (max(min(s_v(next_s_value), 25.0), 10.0));
 		new_x_value = s_x(next_s_value);
 		new_y_value = s_y(next_s_value);
 		
