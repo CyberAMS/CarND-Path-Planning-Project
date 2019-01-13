@@ -15,31 +15,30 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <cmath>
-#include <numeric>
-#include <algorithm>
-#include <functional>
-#include "Driver.h"
+#include "Vehicle.h"
 
 using std::vector;
 using std::string;
-using std::to_string;
-using std::cout;
-using std::endl;
-using std::ostringstream;
 
-using namespace std::placeholders;
-
-// debugging settings
+// debug settings
+const bool bFILEOUTPUT = true;
+const string OUTPUT_FILENAME = "out.txt";
 const bool bDISPLAY = true;
-const bool bDISPLAY_DRIVER_PLAN_BEHAVIOR = false;
-const bool bDISPLAY_DRIVER_CALCULATE_TRAJECTORY = false;
+const bool bDISPLAY_DRIVER_PLANBEHAVIOR = true;
 const bool bDISPLAY_MAP_INIT = true;
-const bool bDISPLAY_MAP_CLOSEST_WAYPOINT = true;
-const bool bDISPLAY_MAP_NEXT_WAYPOINT = true;
-const bool bDISPLAY_MAP_XY_TO_FRENET = true;
-const bool bDISPLAY_MAP_FRENET_TO_XY = true;
-const bool bDISPLAY_CAR_SET_STATE = false;
+const bool bDISPLAY_MAP_XY2FRENET = true;
+const bool bDISPLAY_MAP_FRENET2XY = true;
+const bool bDISPLAY_MAP_CLOSESTWAYPOINT = true;
+const bool bDISPLAY_MAP_NEXTWAYPOINT = true;
+const bool bDISPLAY_VEHICLE_UPDATE = true;
+const bool bDISPLAY_VEHICLE_AHEAD = true;
+const bool bDISPLAY_VEHICLE_BEHIND = true;
+const bool bDISPLAY_VEHICLE_GETLANED = true;
+const bool bDISPLAY_VEHICLE_DETERMINELANE = true;
+const bool bDISPLAY_VEHICLE_CHECKINSIDELANE = true;
+const bool bDISPLAY_PATH_SET = false;
+const string DISPLAY_PREFIX = "    ";
+
 const bool bDISPLAY_TRAJECTORY_INIT = true;
 const bool bDISPLAY_TRAJECTORY_ADD = true;
 const bool bDISPLAY_TRAJECTORY_ADD_FIXED = true;
@@ -50,28 +49,50 @@ const bool bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT = true;
 const bool bDISPLAY_TRAJECTORY_NEXTWAYPOINT = true;
 const bool bDISPLAY_TRAJECTORY_GETFRENET = true;
 const bool bDISPLAY_TRAJECTORY_GET_XY = false;
-const bool bDISPLAY_PATH_SET = false;
-const string DISPLAY_PREFIX = "    ";
+
+// define constants
+const double MPH2MS = 0.44704; // factor between miles per hour and meters per second
+
+// convert degrees to radians
+double Deg2Rad(const double &x);
+
+// convert radians to degrees
+double Rad2Deg(const double &x);
+
+// convert mph to m_s
+double Mph2Ms(const double &speed);
+
+// convert m_s to mph
+double Ms2Mph(const double &speed);
 
 // calculate distance
-double distance(double x1, double y1, double x2, double y2);
+double Distance(const double &x1, const double &y1, const double &x2, const double &y2);
+
+// calculate angle of vector
+double GetAngle(const double &x, const double &y);
+
+// calculate angle of vector
+double GetMagnitude(const double &x, const double &y);
+
+// calculate angle of vector
+double GetX(const double &theta, const double &magnitude);
+
+// calculate angle of vector
+double GetY(const double &theta, const double &magnitude);
 
 // display double vector as string
-string createDoubleVectorString(const vector<double> &double_vector);
+string CreateDoubleVectorString(const vector<double> &double_vector);
 
 // display double vectors as string
-string createDoubleVectorsString(const vector<vector<double>> &double_vectors);
+string CreateDoubleVectorsString(const vector<vector<double>> &double_vectors);
 
 // display integer vector as string
-string createUnsignedIntegerVectorString(const vector<unsigned int> &int_vector);
+string CreateUnsignedIntegerVectorString(const vector<unsigned int> &int_vector);
 
-// display Cars structure as string
-string createCarsString(const Cars &cars);
-
-// display vector of Cars structures as string
-string createCarsVectorString(const vector<Cars> &cars_vector);
+// display vector of Vehicle objects as string
+string CreateVehiclesVectorString(vector<Vehicle> vehicles_vector);
 
 // sort vector of doubles and return index list
-vector<unsigned int> sortDoubleVector(const vector<double> &double_vector);
+vector<unsigned int> SortDoubleVector(const vector<double> &double_vector);
 
 #endif /* HELPER_FUNCTIONS_H_ */

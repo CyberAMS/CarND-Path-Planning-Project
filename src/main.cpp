@@ -5,24 +5,14 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-//#include "Eigen-3.3/Eigen/Core"
-//#include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
-
-#include "helper_functions.h"
 #include "Driver.h"
-#include "Car.h"
-#include "Path.h"
+#include "helper_functions.h"
 
 using namespace std;
 
 // for convenience
 using json = nlohmann::json;
-
-// for converting back and forth between radians and degrees
-constexpr double pi() {return M_PI;}
-double deg2rad(double x) {return x * pi() / 180;}
-double rad2deg(double x) {return x * 180 / pi();}
 
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
@@ -47,15 +37,30 @@ string hasData(string s) {
 	
 }
 
-// define constants
-const bool bFILEOUTPUT = true;
-
 // define file for redirecting standard output and append
-ofstream out("out.txt", fstream::app);
+ofstream out(OUTPUT_FILENAME, fstream::app);
 streambuf *coutbuf = cout.rdbuf(); // save screen object
 
 int main() {
+	
+	// redirect standard output to file if necessary
+	if (bFILEOUTPUT) {
+		
+		cout.rdbuf(out.rdbuf());
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "MAIN: main - Start" << endl;
+		
+	}
+	
+	// define objects
 	uWS::Hub h;
+	Driver driver;
 	
 	// Load up map values for waypoint's x,y,s and d normalized normal vectors
 	vector<double> map_waypoints_x;
@@ -66,11 +71,7 @@ int main() {
 	
 	// Waypoint map to read from
 	string map_file_ = "../data/highway_map.csv";
-	// The max s value before wrapping around the track back to 0
-	double max_s = 6945.554;
-	
 	ifstream in_map_(map_file_.c_str(), ifstream::in);
-	
 	string line;
 	while (getline(in_map_, line)) {
 		
@@ -93,16 +94,10 @@ int main() {
 		
 	}
 	
-	// define objects
-	Driver driver();
-	
 	// initialize driver's map
-	driver.map.init(map_waypoints_x, map_waypoints_y, map_waypoints_s, map_waypoints_dx, map_waypoints_dy);
+	driver.Get_map().Init(map_waypoints_x, map_waypoints_y, map_waypoints_s, map_waypoints_dx, map_waypoints_dy);
 	
-	Car myCar;
-	Path myPreviousPath;
-	
-	h.onMessage([&driver,&myCar,&myPreviousPath,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+	h.onMessage([&driver,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
 		// "42" at the start of the message means there's a websocket message event.
 		// The 4 signifies a websocket message
 		// The 2 signifies a websocket event
@@ -163,29 +158,21 @@ int main() {
 					// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
 					
 					// update objects with data from simulator
-					myCar.set_state(car_x, car_y, car_s, car_d, (2 * M_PI / 360 * car_yaw), (car_speed * MPH_TO_MS));
-					myPreviousPath.set(previous_path_x, previous_path_y, end_path_s, end_path_d);
-					
-					// determine automatic driver reaction
-					vector<Cars> sensor_fusions;
-					Cars new_sensor_fusion;
-					for (auto sf: sensor_fusion) {
+					driver.Get_ego().Update(car_x, car_y, car_s, car_d, Deg2Rad(car_yaw), Mph2Ms(car_speed));
+					vector<Vehicle> vehicles;
+					for (auto sf : sensor_fusion) {
 						
-						new_sensor_fusion.id = (unsigned int)sf[0];
-						new_sensor_fusion.x = (double)sf[1];
-						new_sensor_fusion.y = (double)sf[2];
-						new_sensor_fusion.vx = (double)sf[3];
-						new_sensor_fusion.vy = (double)sf[4];
-						new_sensor_fusion.s = (double)sf[5];
-						new_sensor_fusion.d = (double)sf[6];
-						
-						sensor_fusions.push_back(new_sensor_fusion);
+						Vehicle v = Vehicle((unsigned int)sf[0], (double)sf[1], (double)sf[2], (double)sf[3], (double)sf[4], (double)sf[5], (double)sf[6]);
+						vehicles.push_back(v);
 						
 					}
-					driver.plan_behavior(myCar, sensor_fusions);
-					driver.calculate_trajectory(myCar, myPreviousPath);
-					next_x_vals = driver.get_next_x();
-					next_y_vals = driver.get_next_y();
+					driver.Set_vehicles(vehicles);
+					driver.Get_previous_path().Set(previous_path_x, previous_path_y, end_path_s, end_path_d);
+					
+					// determine next xy values by planning the behavior
+					driver.PlanBehavior();
+					next_x_vals = driver.Get_next_x();
+					next_y_vals = driver.Get_next_y();
 					
 					msgJson["next_x"] = next_x_vals;
 					msgJson["next_y"] = next_y_vals;
@@ -198,6 +185,7 @@ int main() {
 					// display message if required
 					if (bDISPLAY) {
 						
+						cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 						cout << "  msg: " << endl << msg << endl;
 						cout << "--- MAIN: onMessage - End" << endl;
 						cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
@@ -257,6 +245,13 @@ int main() {
 		
 	});
 	
+	// set standard output to screen if necessary
+	if (bFILEOUTPUT) {
+		
+		cout.rdbuf(coutbuf);
+		
+	}
+	
 	int port = 4567;
 	if (h.listen(port)) {
 		
@@ -269,6 +264,29 @@ int main() {
 		
 	}
 	
+	// redirect standard output to file if necessary
+	if (bFILEOUTPUT) {
+		
+		cout.rdbuf(out.rdbuf());
+		
+	}
+	
 	h.run();
+	
+	// display message if required
+	if (bDISPLAY) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "--- MAIN: main - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	// set standard output to screen if necessary
+	if (bFILEOUTPUT) {
+		
+		cout.rdbuf(coutbuf);
+		
+	}
 	
 }

@@ -14,13 +14,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "helper_functions.h"
 
 using std::vector;
 using std::string;
-using std::to_string;
-using std::cout;
-using std::endl;
 
 class Path {
 
@@ -33,16 +29,16 @@ public:
 	~Path() {}
 	
 	// set path
-	void set(vector<double> path_x, vector<double> path_y, double end_path_s, double end_path_d);
+	void Set(vector<double> path_x, vector<double> path_y, double end_path_s, double end_path_d);
 	
 	// get path_x value
-	vector<double> get_x();
+	vector<double> Get_x();
 	
 	// get path_y value
-	vector<double> get_y();
+	vector<double> Get_y();
 	
 	// display Path object as string
-	string createString();
+	string CreateString();
 
 private:
 	

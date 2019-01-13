@@ -17,6 +17,8 @@
 #include "Car.h"
 #include "Path.h"
 #include "spline.h"
+//#include "Eigen-3.3/Eigen/Core"
+//#include "Eigen-3.3/Eigen/QR"
 
 using std::vector;
 using std::string;
@@ -41,7 +43,7 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 		cout << "  target_speed: " << target_speed << endl;
 		cout << "  previous_path_steps: " << previous_path_steps << endl;
 		cout << "  sample_time: " << sample_time << endl;
-		//cout << "  maps_s, maps_x, maps_y: " << endl << createDoubleVectorsString(vector<vector<double>>{maps_s, maps_x, maps_y});
+		//cout << "  maps_s, maps_x, maps_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{maps_s, maps_x, maps_y});
 	}
 	
 	// define variables
@@ -84,7 +86,7 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 			// remember path end sdv
 			last_theta = atan2((previous_y[1] - previous_y[0]), (previous_x[1] - previous_x[0]));
 			last_sd = Trajectory::getFrenet((vector<double>){previous_x[1]}, (vector<double>){previous_y[1]}, last_theta, maps_x, maps_y);
-			last_v = distance(previous_x[0], previous_y[0], previous_x[1], previous_y[1]) / sample_time;
+			last_v = Distance(previous_x[0], previous_y[0], previous_x[1], previous_y[1]) / sample_time;
 			if (last_v > 25) {
 				cout << "********** CHECK **********" << endl;
 			}
@@ -128,8 +130,8 @@ void Trajectory::init(Car myCar, Path myPreviousPath, const double &target_speed
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_INIT) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  Trajectory::x_values, Trajectory::Y_values: " << endl << createDoubleVectorsString(vector<vector<double>>{Trajectory::x_values, Trajectory::y_values});
-		cout << "  Trajectory::s_values, Trajectory::d_values, Trajectory::v_values: " << endl << createDoubleVectorsString(vector<vector<double>>{Trajectory::s_values, Trajectory::d_values, Trajectory::v_values});
+		cout << "  Trajectory::x_values, Trajectory::Y_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{Trajectory::x_values, Trajectory::y_values});
+		cout << "  Trajectory::s_values, Trajectory::d_values, Trajectory::v_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{Trajectory::s_values, Trajectory::d_values, Trajectory::v_values});
 		cout << "  Trajectory::connect_theta: " << connect_theta << endl;
 		cout << "--- TRAJECTORY: init - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
@@ -155,7 +157,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 		cout << "  max_acceleration_d: " << max_acceleration_d << endl;
 		cout << "  max_waypoint_distance: " << max_waypoint_distance << endl;
 		cout << "  back_distance: " << back_distance << endl;
-		//cout << "  maps_x, maps_y: " << endl << createDoubleVectorsString(vector<vector<double>>{maps_x, maps_y});
+		//cout << "  maps_x, maps_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{maps_x, maps_y});
 		
 	}
 	
@@ -188,7 +190,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	// determine first waypoint
 	for (count1 = 0; count1 < next_waypoints.size(); count1++) {
 		
-		if (distance(Trajectory::x_values.back(), Trajectory::y_values.back(), maps_x[next_waypoints[count1]], maps_y[next_waypoints[count1]]) < min(min_waypoint_distance_calc, max_waypoint_distance)) {
+		if (Distance(Trajectory::x_values.back(), Trajectory::y_values.back(), maps_x[next_waypoints[count1]], maps_y[next_waypoints[count1]]) < min(min_waypoint_distance_calc, max_waypoint_distance)) {
 			
 			break; // for loop
 			
@@ -205,7 +207,7 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 	// determine second waypoint (don't reset count for quicker search)
 	for (count2 = count1; count2 < next_waypoints.size(); count2++) {
 		
-		if (distance(waypoints_x.back(), waypoints_y.back(), maps_x[next_waypoints[count2]], maps_y[next_waypoints[count2]]) < min(back_distance, max_waypoint_distance)) {
+		if (Distance(waypoints_x.back(), waypoints_y.back(), maps_x[next_waypoints[count2]], maps_y[next_waypoints[count2]]) < min(back_distance, max_waypoint_distance)) {
 			
 			break; // for loop
 			
@@ -224,14 +226,14 @@ void Trajectory::add(const unsigned int &current_lane, const double &current_spe
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  min_waypoint_distance_s: " << min_waypoint_distance_s << endl;
-		cout << "  lane_distances: " << endl << createDoubleVectorString(lane_distances);
+		cout << "  lane_distances: " << endl << CreateDoubleVectorString(lane_distances);
 		cout << "  lateral_change: " << lateral_change << endl;
 		cout << "  min_lateral_change_time: " << min_lateral_change_time << endl;
 		cout << "  min_waypoint_distance_d: " << min_waypoint_distance_d << endl;
 		cout << "  min_waypoint_distance_calc: " << min_waypoint_distance_calc << endl;
-		//cout << "  next_waypoints: " << endl << createUnsignedIntegerVectorString(next_waypoints);
-		cout << "  waypoints_x, waypoints_y: " << endl << createDoubleVectorsString(vector<vector<double>>{waypoints_x, waypoints_y});
-		cout << "  Trajectory::s_values, Trajectory::d_values, Trajectory::v_values: " << endl << createDoubleVectorsString(vector<vector<double>>{Trajectory::s_values, Trajectory::d_values, Trajectory::v_values});
+		//cout << "  next_waypoints: " << endl << CreateUnsignedIntegerVectorString(next_waypoints);
+		cout << "  waypoints_x, waypoints_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{waypoints_x, waypoints_y});
+		cout << "  Trajectory::s_values, Trajectory::d_values, Trajectory::v_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{Trajectory::s_values, Trajectory::d_values, Trajectory::v_values});
 		cout << "--- TRAJECTORY: add - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -250,7 +252,7 @@ void Trajectory::add_fixed(const unsigned int &target_lane, const double &target
 		cout << "  target_lane: " << target_lane << endl;
 		cout << "  target_speed: " << target_speed << endl;
 		cout << "  lane_width: " << lane_width << endl;
-		cout << "  fixed_s_distances: " << endl << createDoubleVectorString(fixed_s_distances);
+		cout << "  fixed_s_distances: " << endl << CreateDoubleVectorString(fixed_s_distances);
 		
 	}
 	
@@ -274,8 +276,8 @@ void Trajectory::add_fixed(const unsigned int &target_lane, const double &target
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD_FIXED) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  lane_distances: " << endl << createDoubleVectorString(lane_distances);
-		cout << "  Trajectory::s_values, Trajectory::d_values, Trajectory::v_values: " << endl << createDoubleVectorsString(vector<vector<double>>{Trajectory::s_values, Trajectory::d_values, Trajectory::v_values});
+		cout << "  lane_distances: " << endl << CreateDoubleVectorString(lane_distances);
+		cout << "  Trajectory::s_values, Trajectory::d_values, Trajectory::v_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{Trajectory::s_values, Trajectory::d_values, Trajectory::v_values});
 		cout << "--- TRAJECTORY: add_fixed - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -293,7 +295,7 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 		cout << "TRAJECTORY: calculate - Start" << endl;
 		cout << "  back_distance: " << back_distance << endl;
 		cout << "  sample_time: " << sample_time << endl;
-		//cout << "  maps_s, maps_x, maps_y: " << endl << createDoubleVectorsString(vector<vector<double>>{maps_s, maps_x, maps_y});
+		//cout << "  maps_s, maps_x, maps_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{maps_s, maps_x, maps_y});
 		
 	}
 	
@@ -415,8 +417,8 @@ void Trajectory::calculate(Car myCar, const double &back_distance, const double 
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CALCULATE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  spline_s_values, spline_v_values, spline_x_values, spline_y_values: " << endl << createDoubleVectorsString(vector<vector<double>>{spline_s_values, spline_v_values, spline_x_values, spline_y_values});
-		cout << "  Trajectory::x_values, Trajectory::y_values: " << endl << createDoubleVectorsString(vector<vector<double>>{Trajectory::x_values, Trajectory::y_values});
+		cout << "  spline_s_values, spline_v_values, spline_x_values, spline_y_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{spline_s_values, spline_v_values, spline_x_values, spline_y_values});
+		cout << "  Trajectory::x_values, Trajectory::y_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{Trajectory::x_values, Trajectory::y_values});
 		cout << "--- TRAJECTORY: calculate - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -467,7 +469,7 @@ vector<double> Trajectory::calculate_d_from_lane(const vector<unsigned int> &lan
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: calculate_d_from_lane - Start" << endl;
-		cout << "  lane_values: " << endl << createUnsignedIntegerVectorString(lane_values);
+		cout << "  lane_values: " << endl << CreateUnsignedIntegerVectorString(lane_values);
 		cout << "  lane_width: " << lane_width << endl;
 		
 	}
@@ -490,7 +492,7 @@ vector<double> Trajectory::calculate_d_from_lane(const vector<unsigned int> &lan
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CALCULATE_D_FROM_LANE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  d_values: " << endl << createDoubleVectorString(d_values);
+		cout << "  d_values: " << endl << CreateDoubleVectorString(d_values);
 		cout << "--- TRAJECTORY: calculate_d_from_lane - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -508,8 +510,8 @@ vector<unsigned int> Trajectory::estimate_lanes(const vector<double> &d_values, 
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: estimate_lanes - Start" << endl;
-		cout << "  d_values: " << endl << createDoubleVectorString(d_values);
-		cout << "  lanes: " << endl << createUnsignedIntegerVectorString(lanes);
+		cout << "  d_values: " << endl << CreateDoubleVectorString(d_values);
+		cout << "  lanes: " << endl << CreateUnsignedIntegerVectorString(lanes);
 		cout << "  lane_width: " << lane_width << endl;
 		
 	}
@@ -556,7 +558,7 @@ vector<unsigned int> Trajectory::estimate_lanes(const vector<double> &d_values, 
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CALCULATE_D_FROM_LANE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  estimated_lanes: " << endl << createUnsignedIntegerVectorString(estimated_lanes);
+		cout << "  estimated_lanes: " << endl << CreateUnsignedIntegerVectorString(estimated_lanes);
 		cout << "--- TRAJECTORY: estimate_lanes - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -576,7 +578,7 @@ vector<unsigned int> Trajectory::ClosestWaypoint(const double &x, const double &
 		cout << "TRAJECTORY: ClosestWaypoint - Start" << endl;
 		cout << "  x: " << x << endl;
 		cout << "  y: " << y << endl;
-		//cout << "  maps_x, maps_y: " << endl << createDoubleVectorsString(vector<vector<double>>{maps_x, maps_y});
+		//cout << "  maps_x, maps_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{maps_x, maps_y});
 		
 	}
 	
@@ -588,7 +590,7 @@ vector<unsigned int> Trajectory::ClosestWaypoint(const double &x, const double &
 	
 	for(count = 0; count < maps_x.size(); count++) {
 		
-		dist = distance(x, y, maps_x[count], maps_y[count]);
+		dist = Distance(x, y, maps_x[count], maps_y[count]);
 		distances.push_back(dist);
 		
 	}
@@ -599,8 +601,8 @@ vector<unsigned int> Trajectory::ClosestWaypoint(const double &x, const double &
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  distances: " << endl << createDoubleVectorString(distances);
-		cout << "  closestWaypoint: " << endl << createUnsignedIntegerVectorString(closestWaypoint);
+		cout << "  distances: " << endl << CreateDoubleVectorString(distances);
+		cout << "  closestWaypoint: " << endl << CreateUnsignedIntegerVectorString(closestWaypoint);
 		cout << "--- TRAJECTORY: ClosestWaypoint - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -620,7 +622,7 @@ vector <unsigned int> Trajectory::NextWaypoint(const double &x, const double &y,
 		cout << "  x: " << x << endl;
 		cout << "  y: " << y << endl;
 		cout << "  theta: " << theta << endl;
-		//cout << "  maps_x, maps_y: " << endl << createDoubleVectorsString(vector<vector<double>>{maps_x, maps_y});
+		//cout << "  maps_x, maps_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{maps_x, maps_y});
 		
 	}
 	
@@ -654,8 +656,8 @@ vector <unsigned int> Trajectory::NextWaypoint(const double &x, const double &y,
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_NEXTWAYPOINT) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  closestWaypoint: " << endl << createUnsignedIntegerVectorString(closestWaypoint);
-		cout << "  nextWaypoint: " << endl << createUnsignedIntegerVectorString(nextWaypoint);
+		cout << "  closestWaypoint: " << endl << CreateUnsignedIntegerVectorString(closestWaypoint);
+		cout << "  nextWaypoint: " << endl << CreateUnsignedIntegerVectorString(nextWaypoint);
 		cout << "--- TRAJECTORY: NextWaypoint - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -672,9 +674,9 @@ vector<vector<double>> Trajectory::getFrenet(const vector<double> &x_values, con
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: getFrenet - Start" << endl;
-		cout << "  x_values, y_values: " << endl << createDoubleVectorsString(vector<vector<double>>{x_values, y_values});
+		cout << "  x_values, y_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{x_values, y_values});
 		cout << "  theta: " << theta << endl;
-		//cout << "  maps_x, maps_y: " << endl << createDoubleVectorsString(vector<vector<double>>{maps_x, maps_y});
+		//cout << "  maps_x, maps_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{maps_x, maps_y});
 		
 	}
 	
@@ -716,14 +718,14 @@ vector<vector<double>> Trajectory::getFrenet(const vector<double> &x_values, con
 		double proj_x = proj_norm * n_x;
 		double proj_y = proj_norm * n_y;
 		
-		double frenet_d = distance(x_x, x_y, proj_x, proj_y);
+		double frenet_d = Distance(x_x, x_y, proj_x, proj_y);
 		
 		//see if d value is positive or negative by comparing it to a center point
 		
 		double center_x = 1000 - maps_x[prev_wp];
 		double center_y = 2000 - maps_y[prev_wp];
-		double centerToPos = distance(center_x, center_y, x_x, x_y);
-		double centerToRef = distance(center_x, center_y, proj_x, proj_y);
+		double centerToPos = Distance(center_x, center_y, x_x, x_y);
+		double centerToRef = Distance(center_x, center_y, proj_x, proj_y);
 		
 		if(centerToPos <= centerToRef) {
 			
@@ -735,11 +737,11 @@ vector<vector<double>> Trajectory::getFrenet(const vector<double> &x_values, con
 		double frenet_s = 0;
 		for(int i = 0; i < prev_wp; i++) {
 			
-			frenet_s += distance(maps_x[i], maps_y[i], maps_x[i + 1], maps_y[i + 1]);
+			frenet_s += Distance(maps_x[i], maps_y[i], maps_x[i + 1], maps_y[i + 1]);
 			
 		}
 		
-		frenet_s += distance(0, 0, proj_x, proj_y);
+		frenet_s += Distance(0, 0, proj_x, proj_y);
 		
 		// save current point
 		s_values.push_back(frenet_s);
@@ -751,7 +753,7 @@ vector<vector<double>> Trajectory::getFrenet(const vector<double> &x_values, con
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_GETFRENET) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  s_values, d_values: " << endl << createDoubleVectorsString(vector<vector<double>>{s_values, d_values});
+		cout << "  s_values, d_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{s_values, d_values});
 		cout << "--- TRAJECTORY: getFrenet - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -769,8 +771,8 @@ vector<vector<double>> Trajectory::get_xy(const vector<double> &s_values, const 
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: get_xy - Start" << endl;
-		cout << "  s_values, d_values: " << endl << createDoubleVectorsString(vector<vector<double>>{s_values, d_values});
-		//cout << "  maps_s, maps_x, maps_y: " << endl << createDoubleVectorsString(vector<vector<double>>{maps_s, maps_x, maps_y});
+		cout << "  s_values, d_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{s_values, d_values});
+		//cout << "  maps_s, maps_x, maps_y: " << endl << CreateDoubleVectorsString(vector<vector<double>>{maps_s, maps_x, maps_y});
 		
 	}
 	
@@ -822,7 +824,7 @@ vector<vector<double>> Trajectory::get_xy(const vector<double> &s_values, const 
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_GET_XY) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  x_values, y_values: " << endl << createDoubleVectorsString(vector<vector<double>>{x_values, y_values});
+		cout << "  x_values, y_values: " << endl << CreateDoubleVectorsString(vector<vector<double>>{x_values, y_values});
 		cout << "--- TRAJECTORY: get_xy - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

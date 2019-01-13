@@ -11,11 +11,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "helper_functions.h"
 #include "Driver.h"
-#include "Car.h"
-#include "Trajectory.h"
+#include "Map.h"
+#include "Vehicle.h"
 #include "Path.h"
+#include "helper_functions.h"
+
+//#include "Trajectory.h"
 
 using std::vector;
 using std::string;
@@ -23,25 +25,37 @@ using std::cout;
 using std::endl;
 
 // determine next action
-void Driver::plan_behavior(Car myCar, const vector<Cars> &sensor_fusion) {
+void Driver::PlanBehavior() {
 	
 	// display message if required
-	if (bDISPLAY && bDISPLAY_DRIVER_PLAN_BEHAVIOR) {
+	if (bDISPLAY && bDISPLAY_DRIVER_PLANBEHAVIOR) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "DRIVER: plan_behavior - Start" << endl;
-		cout << "  myCar: " << endl << myCar.createString();
-		cout << "  sensor_fusion: " << endl << createCarsVectorString(sensor_fusion);
+		cout << "DRIVER: PlanBehavior - Start" << endl;
 		
 	}
 	
+	
+	
+	
+	
+	
+	//this->
+	
+	
+	
+	
+	
+	
+	
+	
 	// define variables
-	vector<unsigned int> estimated_lanes;
+	//vector<unsigned int> estimated_lanes;
 	
 	// determine vehicles around own vehicles
-	Driver::current_speed = myCar.get_v();
-	estimated_lanes = Driver::trajectory.estimate_lanes((vector<double>){myCar.get_d()}, LANES, LANE_WIDTH);
-	Driver::current_lane = estimated_lanes[0];
+	//Driver::current_speed = myCar.get_v();
+	//estimated_lanes = Driver::trajectory.estimate_lanes((vector<double>){myCar.get_d()}, LANES, LANE_WIDTH);
+	//Driver::current_lane = estimated_lanes[0];
 	// sd coordinates from xy sensors
 	// predict vehicle positions in next seconds and use in the following
 	// vehicle in front of own vehicle in "radar" distance (if any)
@@ -59,10 +73,10 @@ void Driver::plan_behavior(Car myCar, const vector<Cars> &sensor_fusion) {
 		// follow lane at maximum speed
 		
 		// determine target speed
-		Driver::target_speed = MAX_V;
+		//Driver::target_speed = MAX_V;
 		
 		// determine target lane
-		Driver::target_lane = Driver::current_lane;
+		//Driver::target_lane = Driver::current_lane;
 		
 	} else if (Driver::behavior.name == BEHAVIORS[1].name) {
 		// keep lane and follow vehicle in front
@@ -117,21 +131,22 @@ void Driver::plan_behavior(Car myCar, const vector<Cars> &sensor_fusion) {
 	}
 	
 	// display message if required
-	if (bDISPLAY && bDISPLAY_DRIVER_PLAN_BEHAVIOR) {
+	if (bDISPLAY && bDISPLAY_DRIVER_PLANBEHAVIOR) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  Driver::behavior.name: " << Driver::behavior.name << endl;
-		cout << "  Driver::current_lane: " << Driver::current_lane << endl;
-		cout << "  Driver::current_speed: " << Driver::current_speed << endl;
-		cout << "  Driver::target_lane: " << Driver::target_lane << endl;
-		cout << "  Driver::target_speed: " << Driver::target_speed << endl;
-		cout << "--- DRIVER: plan_behavior - End" << endl;
+		//cout << "  Driver::behavior.name: " << Driver::behavior.name << endl;
+		//cout << "  Driver::current_lane: " << Driver::current_lane << endl;
+		//cout << "  Driver::current_speed: " << Driver::current_speed << endl;
+		//cout << "  Driver::target_lane: " << Driver::target_lane << endl;
+		//cout << "  Driver::target_speed: " << Driver::target_speed << endl;
+		cout << "--- DRIVER: PlanBehavior - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
 	
 }
 
+/*
 // calculate next trajectory
 void Driver::calculate_trajectory(Car myCar, Path myPreviousPath) {
 	
@@ -170,25 +185,53 @@ void Driver::calculate_trajectory(Car myCar, Path myPreviousPath) {
 	if (bDISPLAY && bDISPLAY_DRIVER_CALCULATE_TRAJECTORY) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  Driver::trajectory.get_s(), Driver::trajectory.get_d(), Driver::trajectory.get_v(): " << endl << createDoubleVectorsString(vector<vector<double>>{Driver::trajectory.get_s(), Driver::trajectory.get_d(), Driver::trajectory.get_v()});
-		cout << "  Driver::next_x_vals, Driver::next_y_vals: " << endl << createDoubleVectorsString(vector<vector<double>>{Driver::next_x_vals, Driver::next_y_vals});
+		cout << "  Driver::trajectory.get_s(), Driver::trajectory.get_d(), Driver::trajectory.get_v(): " << endl << CreateDoubleVectorsString(vector<vector<double>>{Driver::trajectory.get_s(), Driver::trajectory.get_d(), Driver::trajectory.get_v()});
+		cout << "  Driver::next_x_vals, Driver::next_y_vals: " << endl << CreateDoubleVectorsString(vector<vector<double>>{Driver::next_x_vals, Driver::next_y_vals});
 		cout << "--- DRIVER: calculate_trajectory - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
 	
+}*/
+
+// get map object
+Map Driver::Get_map() {
+	
+	return this->map;
+	
 }
 
-// access x values of trajectory
-vector<double> Driver::get_next_x() {
+// get ego object
+Vehicle Driver::Get_ego() {
 	
-	return Driver::next_x_vals;
+	return this->ego;
 	
 }
 
-// access y values of trajectory
-vector<double> Driver::get_next_y() {
+// set vehicles object vector
+void Driver::Set_vehicles(vector<Vehicle> vehicles) {
 	
-	return Driver::next_y_vals;
+	this->vehicles = vehicles;
+	
+}
+
+// get x values of path
+vector<double> Driver::Get_next_x() {
+	
+	return this->next_x_vals;
+	
+}
+
+// get y values of path
+vector<double> Driver::Get_next_y() {
+	
+	return this->next_y_vals;
+	
+}
+
+// get previous_path object
+Path Driver::Get_previous_path() {
+	
+	this->previous_path;
 	
 }

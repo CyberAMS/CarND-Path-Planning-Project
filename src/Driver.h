@@ -14,27 +14,17 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "helper_functions.h"
-#include "Car.h"
-#include "Trajectory.h"
+#include "Map.h"
+#include "Vehicle.h"
 #include "Path.h"
+#include "helper_functions.h"
+
+//#include "Trajectory.h"
 
 using std::vector;
 using std::string;
 using std::cout;
 using std::endl;
-
-struct Cars {
-	
-	unsigned int id;
-	double x;
-	double y;
-	double vx;
-	double vy;
-	double s;
-	double d;
-	
-};
 
 struct behavior_state {
 	
@@ -62,20 +52,14 @@ const vector<behavior_state> BEHAVIORS
 	 {.name = "LCR", .next_states = {"KL"}}};
 
 // speed definitions
-const double MPH_TO_MS = 0.44704; // miles per hour to meters per second
-const double SAFETY_DELTA_V = 2 * MPH_TO_MS; // travel 2 mph below maximum speed
-const double MAX_V = (50 * MPH_TO_MS) - SAFETY_DELTA_V; // 50 mph minus safety delta in m/s
+const double SAFETY_DELTA_V = 2 * MPH2MS; // travel 2 mph below maximum speed
+const double MAX_V = (50 * MPH2MS) - SAFETY_DELTA_V; // 50 mph minus safety delta in m/s
 
 // longitudinal distance definitions
 const double MAX_ACCELERATION_S = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
 const double MAX_WAYPOINT_DISTANCE = 10.0 * MAX_V; // don't look ahead more than 30 seconds at max speed
 
 // lateral distance definitions
-const double LANE_WIDTH = 4.0;
-const unsigned int LANE_1 = 1;
-const unsigned int LANE_2 = 2;
-const unsigned int LANE_3 = 3;
-const vector<unsigned int> LANES = {LANE_1, LANE_2, LANE_3};
 const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
 const bool USE_FIXED_DISTANCES = true;
 const vector<double> FIXED_S_DISTANCES = {0.5 * MAX_V, 1.0 * MAX_V}; // determine positions in 0.5 s and 1.0 s ahead at maximum speed
@@ -91,68 +75,60 @@ public:
 	// constructor
 	Driver() {}
 	
-	// constructor
-	Driver(vector<double> maps_s, vector<double> maps_x, vector<double> maps_y) {
-		
-		// initialize map information
-		Driver::maps_s = maps_s;
-		Driver::maps_x = maps_x;
-		Driver::maps_y = maps_y;
-		
-		// start with following the lane
-		Driver::behavior = BEHAVIORS[0];
-		
-	}
-	
 	// destructor
 	~Driver() {}
 	
 	// determine next action
-	void plan_behavior(Car myCar, const vector<Cars> &sensor_fusion);
+	void PlanBehavior();
 	
-	// calculate next trajectory
-	void calculate_trajectory(Car myCar, Path myPreviousPath);
+	// get map object
+	Map Get_map();
 	
-	// access x values of path
-	vector<double> get_next_x();
+	// get ego object
+	Vehicle Get_ego();
 	
-	// access y values of path
-	vector<double> get_next_y();
+	// set vehicles object vector
+	void Set_vehicles(vector<Vehicle> vehicles);
+	
+	// get x values of path
+	vector<double> Get_next_x();
+	
+	// get y values of path
+	vector<double> Get_next_y();
+	
+	// get previous_path object
+	Path Get_previous_path();
 
 private:
 	
 	// global map
 	Map map;
 	
-	// own car
-	Vehicle ego;
-	
-	// other vehicles
-	vector<Vehicle> vehicles;
+	// vehicles
+	Vehicle ego; // own vehicle
+	vector<Vehicle> vehicles; // other vehicles
 	
 	// behavior state
-	State state;
+	//State state;
+	behavior_state behavior;
 	
 	// main trajectory
-	Trajectory trajectory;
-	
-	// time step
-	unsigned long time_step;
-	
-	
-	
-	
-	
-	
-	
-	unsigned int current_lane;
-	double current_speed;
-	unsigned int target_lane;
-	double target_speed;
-	
-	// path values
+	//Trajectory trajectory;
 	vector<double> next_x_vals;
 	vector<double> next_y_vals;
+	
+	// status values
+	unsigned long time_step;
+	Path previous_path;
+	
+	
+	
+	
+	
+	//unsigned int current_lane;
+	//double current_speed;
+	//unsigned int target_lane;
+	//double target_speed;
 
 };
 

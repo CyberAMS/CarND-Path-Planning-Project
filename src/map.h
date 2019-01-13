@@ -11,14 +11,25 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <iostream>
+#include <string>
 #include <vector>
 #include "spline.h"
 
 using std::vector;
+using std::string;
 using tk::spline;
 
 // map parameters
 const unsigned int MAX_TRACK_S = 6945.554;
+
+// lane parameters
+const double LANE_WIDTH = 4.0;
+const double LANE_CENTER_WIDTH = 3.0;
+const unsigned int LANE_1 = 1;
+const unsigned int LANE_2 = 2;
+const unsigned int LANE_3 = 3;
+const vector<unsigned int> LANES = {LANE_1, LANE_2, LANE_3};
 
 class Map {
 
@@ -31,21 +42,24 @@ public:
 	~Map() {}
 	
 	// initialize map
-	void init(vector<double> map_waypoints_x, vector<double> map_waypoints_y, vector<double> map_waypoints_s, vector<double> map_waypoints_dx, vector<double> map_waypoints_dy);
+	void Init(vector<double> map_waypoints_x, vector<double> map_waypoints_y, vector<double> map_waypoints_s, vector<double> map_waypoints_dx, vector<double> map_waypoints_dy);
 	
 	// convert xy to Frenet coordinates
-	vector<double> xy_to_frenet(const double &x, const double &y, const double &theta);
+	vector<double> Xy2Frenet(const double &x, const double &y, const double &theta);
 	
 	// convert Frenet to xy coordinates
-	vector<double> frenet_to_xy(const double &s, const double &d);
+	vector<double> Frenet2Xy(const double &s, const double &d);
+	
+	// display Map object as string
+	string CreateString();
 
 private:
 	
 	// determine closest waypoint
-	vector<unsigned int> closest_waypoint(const double &x, const double &y);
+	vector<unsigned int> ClosestWaypoint(const double &x, const double &y);
 	
 	// determine next waypoint
-	vector <unsigned int> next_waypoint(const double &x, const double &y, const double &theta);
+	vector <unsigned int> NextWaypoint(const double &x, const double &y, const double &theta);
 	
 	// waypoint coordinates
 	vector<double> map_waypoints_x;

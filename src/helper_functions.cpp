@@ -16,8 +16,8 @@
 #include <numeric>
 #include <algorithm>
 #include <functional>
+#include "Vehicle.h"
 #include "helper_functions.h"
-#include "Driver.h"
 
 using std::vector;
 using std::string;
@@ -32,17 +32,71 @@ using std::begin;
 using std::end;
 using std::copy;
 
-using namespace std::placeholders;
+// convert degrees to radians
+double Deg2Rad(const double &x) {
+	
+	return (x * M_PI / 180);
+	
+}
+
+// convert radians to degrees
+double Rad2Deg(const double &x) {
+	
+	return (x * 180 / M_PI);
+	
+}
+
+// convert mph to m_s
+double Mph2Ms(const double &speed) {
+	
+	return (speed * MPH2MS);
+	
+}
+
+// convert m_s to mph
+double Ms2Mph(const double &speed) {
+	
+	return (speed / MPH2MS);
+	
+}
 
 // calculate distance
-double distance(double x1, double y1, double x2, double y2) {
+double Distance(const double &x1, const double &y1, const double &x2, const double &y2) {
 	
-	return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+	return sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
+	
+}
+
+// calculate angle of vector
+double GetAngle(const double &x, const double &y) {
+	
+	return atan2(y, x);
+	
+}
+
+// calculate magnitude of vector
+double GetMagnitude(const double &x, const double &y) {
+	
+	return sqrt((x * x) + (y * y));
+	
+}
+
+// calculate x component of vector
+double GetX(const double &theta, const double &magnitude) {
+	
+	return (magnitude * cos(theta));
+	
+}
+
+// calculate y component of vector
+double GetY(const double &theta, const double &magnitude) {
+	
+	return (magnitude * sin(theta));
 	
 }
 
 // display double vector as string
-string createDoubleVectorString(const vector<double> &double_vector) {
+string CreateDoubleVectorString(const vector<double> &double_vector) {
 	
 	//define variables
 	unsigned int current_element = 0;
@@ -61,7 +115,7 @@ string createDoubleVectorString(const vector<double> &double_vector) {
 }
 
 // display double vectors as string
-string createDoubleVectorsString(const vector<vector<double>> &double_vectors) {
+string CreateDoubleVectorsString(const vector<vector<double>> &double_vectors) {
 	
 	//define variables
 	unsigned int current_element = 0;
@@ -97,7 +151,7 @@ string createDoubleVectorsString(const vector<vector<double>> &double_vectors) {
 }
 
 // display integer vector as string
-string createUnsignedIntegerVectorString(const vector<unsigned int> &int_vector) {
+string CreateUnsignedIntegerVectorString(const vector<unsigned int> &int_vector) {
 	
 	//define variables
 	unsigned int current_element = 0;
@@ -115,38 +169,17 @@ string createUnsignedIntegerVectorString(const vector<unsigned int> &int_vector)
 	
 }
 
-// display Cars structure as string
-string createCarsString(const Cars &cars) {
-	
-	//define variables
-	string text = "";
-	
-	// add information about cars to string
-	text += DISPLAY_PREFIX;
-	text += "id=" + to_string(cars.id) + " ";
-	text += "x=" + to_string(cars.x) + " ";
-	text += "y=" + to_string(cars.y) + " ";
-	text += "vx=" + to_string(cars.vx) + " ";
-	text += "vy=" + to_string(cars.vy) + " ";
-	text += "s=" + to_string(cars.s) + " ";
-	text += "d=" + to_string(cars.d) + "\n";
-	
-	// return output
-	return text;
-	
-}
-
-// display vector of Cars structures as string
-string createCarsVectorString(const vector<Cars> &cars_vector) {
+// display vector of Vehicle objects as string
+string CreateVehiclesVectorString(vector<Vehicle> vehicles_vector) {
 	
 	//define variables
 	unsigned int current_element = 0;
 	string text = "";
 	
 	// add information about all cars to string
-	for (current_element = 0; current_element < cars_vector.size(); current_element++) {
+	for (current_element = 0; current_element < vehicles_vector.size(); current_element++) {
 		
-		text += DISPLAY_PREFIX + "Element " + to_string(current_element) + ": " + createCarsString(cars_vector[current_element]);
+		text += DISPLAY_PREFIX + "Element " + to_string(current_element) + ": " + vehicles_vector[current_element].CreateString();
 		
 	}
 	
@@ -156,7 +189,7 @@ string createCarsVectorString(const vector<Cars> &cars_vector) {
 }
 
 // sort vector of doubles and return index list
-vector<unsigned int> sortDoubleVector(const vector<double> &double_vector) {
+vector<unsigned int> SortDoubleVector(const vector<double> &double_vector) {
 	
 	// define variables
 	double data[double_vector.size()];
