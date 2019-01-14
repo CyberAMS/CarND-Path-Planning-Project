@@ -12,12 +12,16 @@
 #define STATE_H_
 
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
-#include "collision_detector.h"
+#include "Vehicle.h"
+#include "Trajectory.h"
 
 using std::vector;
+using std::string;
 
-// define variables
+// define types
 enum LONGITUDINALSTATE {ACCELERATE, KEEP_SPEED, DECELERATE};
 enum LATERALSTATE {KEEP_LANE, PREPARE_LANE_CHANGE_LEFT, PREPARE_LANE_CHANGE_RIGHT, CHANGE_LANE_LEFT, CHANGE_LANE_RIGHT};
 struct behavior_state {
@@ -28,11 +32,15 @@ struct behavior_state {
 };
 struct transition {
 	
-	LATERALSTATE name
-	vector<behavior_state> next
+	LATERALSTATE name;
+	vector<behavior_state> next;
 	
 };
-vector<transition> TRANSITIONS
+
+// define constants
+const unsigned long INITIAL_STEP = 0;
+const behavior_state INITIAL_STATE {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE};
+const vector<transition> TRANSITIONS
 	{{.name = KEEP_LANE,
 	  .next = {{.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
@@ -59,14 +67,16 @@ class State {
 public:
 	
 	// constructor
-	State();
-	State(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned int init_time);
+	State() {}
 	
 	// destructor
 	~State() {}
 	
+	// initialize state
+	void Init(Vehicle ego, Trajectory trajectory, unsigned long add_step);
+	
 	// set state
-	void SetBehavior(behavior_state behavior, unsigned int no_change_before_time);
+	void SetBehavior(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned long add_step, unsigned long no_change_before_step);
 	
 	// get next possible states
 	vector<behavior_state> GetNextPossibleBehaviors();
@@ -76,19 +86,28 @@ public:
 	
 	// display State object as string
 	string CreateString();
+	
+	// display behavior_state structure as string
+	string CreateBehaviorString(const behavior_state &behavior);
+	
+	// display vector of Vehicle objects as string
+	string CreateBehaviorVectorString(vector<behavior_state> behaviors_vector);
 
 private:
 	
 	// define state variable
-	behavior_state behavior;
+	behavior_state behavior = INITIAL_STATE;
 	
 	// define lane variables
-	unsigned int current_lane;
-	unsigned int target_lane;
+	unsigned int current_lane = 0;
+	unsigned int target_lane = 0;
 	
 	// define time variables
-	unsigned int current_time;
-	unsigned int no_change_before_time;
+	unsigned long current_step = 0;
+	unsigned long no_change_before_step = 0;
+	
+	// remember whether state has been initialized before
+	bool is_initialized = false;
 
 };
 

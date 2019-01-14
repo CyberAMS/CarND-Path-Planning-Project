@@ -9,39 +9,63 @@
  */
 
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
 #include "State.h"
+#include "Map.h"
+#include "Vehicle.h"
+#include "Trajectory.h"
 
 using std::vector;
+using std::string;
+using std::to_string;
+using std::cout;
+using std::endl;
+using std::ostringstream;
 
-// constructor
-State::State() {}
-State::State(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned int init_time) {
+// initialize state
+void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
 	
 	// display message if required
-	if (bDISPLAY && bDISPLAY_STATE_CONSTRUCTOR) {
+	if (bDISPLAY && bDISPLAY_STATE_INIT) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "STATE: Constructor - Start" << endl;
-		cout << "  behavior_state: " << endl << CreateBehaviorString(behavior_state);
-		cout << "  current_lane: " << current_lane << endl;
-		cout << "  target_lane: " << target_lane << endl;
-		cout << "  init_time: " << init_time << endl;
+		cout << "STATE: Init - Start" << endl;
+		cout << "  ego: " << endl << ego.CreateString();
+		cout << "  trajectory: " << endl << trajectory.CreateString();
 		
 	}
 	
-	this->behavior = behavior;
-	this->current_lane = current_lane;
-	this->target_lane = target_lane;
-	this->current_time = init_time;
-	this->no_change_before_time = init_time;
+	// define variables
+	unsigned int current_lane = 0;
+	unsigned int target_lane = 0;
+	
+	if (!this->is_initialized) {
+		
+		// determine current and target lane
+		current_lane = ego.DetermineLane(trajectory.Get_d()[0]);
+		target_lane = ego.DetermineLane(trajectory.Get_d()[trajectory.Get_d().size() - 1]);
+		
+		// set initial state
+		this->SetBehavior(INITIAL_STATE, current_lane, target_lane, add_step, INITIAL_STEP);
+		
+		// initialization done
+		this->is_initialized = true;
+		
+	} else {
+		
+		// set state (update executed steps and increase step by one)
+		this->SetBehavior(this->behavior, this->current_lane, this->target_lane, add_step, this->current_step);
+		
+	}
 	
 	// display message if required
-	if (bDISPLAY && bDISPLAY_STATE_CONSTRUCTOR) {
+	if (bDISPLAY && bDISPLAY_STATE_INIT) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  this: " << endl << this->CreateString();
-		cout << "--- STATE: Constructor - End" << endl;
+		cout << "--- STATE: Init - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
@@ -49,25 +73,26 @@ State::State(behavior_state behavior, unsigned int current_lane, unsigned int ta
 }
 
 // set state
-void State::SetBehavior(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned int no_change_before_time) {
+void State::SetBehavior(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned long add_step, unsigned long no_change_before_step) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_SETBEHAVIOR) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "STATE: SetBehavior - Start" << endl;
-		cout << "  behavior_state: " << endl << CreateBehaviorString(behavior_state);
+		cout << "  behavior_state: " << endl << this->CreateBehaviorString(behavior);
 		cout << "  current_lane: " << current_lane << endl;
 		cout << "  target_lane: " << target_lane << endl;
-		cout << "  no_change_before_time: " << no_change_before_time << endl;
+		cout << "  add_step: " << add_step << endl;
+		cout << "  no_change_before_step: " << no_change_before_step << endl;
 		
 	}
 	
 	this->behavior = behavior;
 	this->current_lane = current_lane;
 	this->target_lane = target_lane;
-	++this->current_time;
-	this->no_change_before_time = no_change_before_time;
+	this->current_step += (add_step + 1); // TODO: check whether this really needs to be increased by 1 or wait for previous_path to increment this
+	this->no_change_before_step = no_change_before_step;
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_SETBEHAVIOR) {
@@ -119,7 +144,7 @@ vector<behavior_state> State::GetNextPossibleBehaviors() {
 	for (count_t = 0; count_t < TRANSITIONS.size(); count_t++) {
 		
 		// check whether current transition defines next states for current behavior state
-		if (this->behavior.name == TRANSITIONS[count_t].name) {
+		if (this->behavior.lateral_state == TRANSITIONS[count_t].name) {
 			
 			// get list of possible next behaviors
 			next_potential_behaviors = TRANSITIONS[count_t].next;
@@ -151,7 +176,7 @@ vector<behavior_state> State::GetNextPossibleBehaviors() {
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  can_move_left: " << can_move_left << endl;
 		cout << "  can_move_right: " << can_move_right << endl;
-		cout << "  next_behaviors: " << endl << CreateBehaviorVectorString(next_behaviors);
+		cout << "  next_behaviors: " << endl << this->CreateBehaviorVectorString(next_behaviors);
 		cout << "--- STATE: GetNextPossibleBehaviors - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -173,12 +198,48 @@ string State::CreateString() {
 	string text = "";
 	
 	// add information about car to string
-	text += DISPLAY_PREFIX + "behavior =\n" + CreateBehaviorString(this->behavior);
+	text += DISPLAY_PREFIX + "behavior =\n" + this->CreateBehaviorString(this->behavior);
 	text += DISPLAY_PREFIX;
 	text += "current_lane = " + to_string(this->current_lane) + " ";
 	text += "target_lane = " + to_string(this->target_lane) + " ";
-	text += "current_time = " + to_string(this->current_time) + " ";
-	text += "no_change_before_time = " + to_string(this->no_change_before_time) + "\n";
+	text += "current_step = " + to_string(this->current_step) + " ";
+	text += "no_change_before_step = " + to_string(this->no_change_before_step) + " ";
+	text += "is_initialized = " + to_string(this->is_initialized) + "\n";
+	
+	// return output
+	return text;
+	
+}
+
+// display behavior_state structure as string
+string State::CreateBehaviorString(const behavior_state &behavior) {
+	
+	//define variables
+	string text = "";
+	
+	// add information about cars to string
+	text += DISPLAY_PREFIX;
+	text += "longitudinal_state = " + to_string(behavior.longitudinal_state) + " ";
+	text += "lateral_state = " + to_string(behavior.lateral_state) + "\n";
+	
+	// return output
+	return text;
+	
+}
+
+// display vector of Vehicle objects as string
+string State::CreateBehaviorVectorString(vector<behavior_state> behaviors_vector) {
+	
+	//define variables
+	unsigned int current_element = 0;
+	string text = "";
+	
+	// add information about all behaviors to string
+	for (current_element = 0; current_element < behaviors_vector.size(); current_element++) {
+		
+		text += DISPLAY_PREFIX + "Element " + to_string(current_element) + ": " + this->CreateBehaviorString(behaviors_vector[current_element]);
+		
+	}
 	
 	// return output
 	return text;

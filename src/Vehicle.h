@@ -12,6 +12,7 @@
 #define VEHICLE_H_
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -43,6 +44,10 @@ public:
 	void Update(unsigned int id, double x, double y, double vx, double vy, double s, double d);
 	void Update(double x, double y, double s, double d, double theta, double v);
 	void Update();
+	
+	// determine lane
+	unsigned int DetermineLane();
+	unsigned int DetermineLane(const double &d);
 	
 	// get vehicles ahead of own vehicle
 	vector<Vehicle> Ahead(const vector<Vehicle> &vehicles, unsigned int lane);
@@ -82,32 +87,32 @@ public:
 	
 	// display Vehicle object as string
 	string CreateString();
+	
+	// display vector of Vehicle objects as string
+	string CreateVehiclesVectorString(vector<Vehicle> vehicles_vector);
 
 private:
 	
 	// get d values for lanes
 	vector<double> GetLaneD(const vector<unsigned int> &lanes);
 	
-	// determine lane
-	unsigned int DetermineLane();
-	
 	// check whether vehicle is inside the determined lane
 	bool CheckInsideLane();
 	
 	// state values
-	double id;
-	double x;
-	double y;
-	double vx;
-	double vy;
-	double s;
-	double d;
-	double theta;
-	double v;
+	double id = 0;
+	double x = 0;
+	double y = 0;
+	double vx = 0;
+	double vy = 0;
+	double s = 0;
+	double d = 0;
+	double theta = 0;
+	double v = 0;
 	
 	// determined values
-	unsigned int lane;
-	bool is_inside_lane;
+	unsigned int lane = 0;
+	bool is_inside_lane = false;
 
 };
 

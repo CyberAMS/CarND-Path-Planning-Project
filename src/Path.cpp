@@ -11,8 +11,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "helper_functions.h"
 #include "Path.h"
+#include "helper_functions.h"
 
 using std::vector;
 using std::string;
@@ -43,6 +43,7 @@ void Path::Set(vector<double> path_x, vector<double> path_y, double end_path_s, 
 	if (bDISPLAY && bDISPLAY_PATH_SET) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  this: " << endl << this->CreateString();
 		cout << "--- PATH: Set - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -71,10 +72,10 @@ string Path::CreateString() {
 	string text = "";
 	
 	// add information about path to string
-	text += DISPLAY_PREFIX + "path_x, path_y =\n" + CreateDoubleVectorsString(vector<vector<double>>{Path::path_x, Path::path_y});
+	text += DISPLAY_PREFIX + "path_x, path_y =\n" + CreateDoubleVectorsString(vector<vector<double>>{this->path_x, this->path_y});
 	text += DISPLAY_PREFIX;
-	text += "end_path_s = " + to_string(Path::end_path_s) + " ";
-	text += "end_path_d = " + to_string(Path::end_path_d) + "\n";
+	text += "end_path_s = " + to_string(this->end_path_s) + " ";
+	text += "end_path_d = " + to_string(this->end_path_d) + "\n";
 	
 	// return output
 	return text;

@@ -15,7 +15,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "Vehicle.h"
 
 using std::vector;
 using std::string;
@@ -37,18 +36,13 @@ const bool bDISPLAY_VEHICLE_GETLANED = true;
 const bool bDISPLAY_VEHICLE_DETERMINELANE = true;
 const bool bDISPLAY_VEHICLE_CHECKINSIDELANE = true;
 const bool bDISPLAY_PATH_SET = false;
-const string DISPLAY_PREFIX = "    ";
-
 const bool bDISPLAY_TRAJECTORY_INIT = true;
 const bool bDISPLAY_TRAJECTORY_ADD = true;
-const bool bDISPLAY_TRAJECTORY_ADD_FIXED = true;
-const bool bDISPLAY_TRAJECTORY_CALCULATE = true;
-const bool bDISPLAY_TRAJECTORY_CALCULATE_D_FROM_LANE = false;
-const bool bDISPLAY_TRAJECTORY_ESTIMATE_LANES = false;
-const bool bDISPLAY_TRAJECTORY_CLOSESTWAYPOINT = true;
-const bool bDISPLAY_TRAJECTORY_NEXTWAYPOINT = true;
-const bool bDISPLAY_TRAJECTORY_GETFRENET = true;
-const bool bDISPLAY_TRAJECTORY_GET_XY = false;
+const bool bDISPLAY_TRAJECTORY_REMOVEFIRSTSTEPS = true;
+const bool bDISPLAY_STATE_INIT = true;
+const bool bDISPLAY_STATE_SETBEHAVIOR = true;
+const bool bDISPLAY_STATE_GETNEXTPOSSIBLEBEHAVIORS = true;
+const string DISPLAY_PREFIX = "    ";
 
 // define constants
 const double MPH2MS = 0.44704; // factor between miles per hour and meters per second
@@ -88,15 +82,6 @@ string CreateDoubleVectorsString(const vector<vector<double>> &double_vectors);
 
 // display integer vector as string
 string CreateUnsignedIntegerVectorString(const vector<unsigned int> &int_vector);
-
-// display vector of Vehicle objects as string
-string CreateVehiclesVectorString(vector<Vehicle> vehicles_vector);
-
-// display behavior_state structure as string
-string CreateBehaviorString(const behavior_state &behavior);
-
-// display vector of Vehicle objects as string
-string CreateBehaviorVectorString(vector<behavior_state> behaviors_vector);
 
 // sort vector of doubles and return index list
 vector<unsigned int> SortDoubleVector(const vector<double> &double_vector);

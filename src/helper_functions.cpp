@@ -16,8 +16,6 @@
 #include <numeric>
 #include <algorithm>
 #include <functional>
-#include "Vehicle.h"
-#include "State.h"
 #include "helper_functions.h"
 
 using std::vector;
@@ -162,60 +160,6 @@ string CreateUnsignedIntegerVectorString(const vector<unsigned int> &int_vector)
 	for (current_element = 0; current_element < int_vector.size(); current_element++) {
 		
 		text += DISPLAY_PREFIX + "Element " + to_string(current_element) + ": " + to_string(int_vector[current_element]) + "\n";
-		
-	}
-	
-	// return output
-	return text;
-	
-}
-
-// display vector of Vehicle objects as string
-string CreateVehiclesVectorString(vector<Vehicle> vehicles_vector) {
-	
-	//define variables
-	unsigned int current_element = 0;
-	string text = "";
-	
-	// add information about all cars to string
-	for (current_element = 0; current_element < vehicles_vector.size(); current_element++) {
-		
-		text += DISPLAY_PREFIX + "Element " + to_string(current_element) + ": " + vehicles_vector[current_element].CreateString();
-		
-	}
-	
-	// return output
-	return text;
-	
-}
-
-// display behavior_state structure as string
-string CreateBehaviorString(const behavior_state &behavior) {
-	
-	//define variables
-	string text = "";
-	
-	// add information about cars to string
-	text += DISPLAY_PREFIX;
-	text += "longitudinal_state = " + to_string(behavior.longitudinal_state) + " ";
-	text += "lateral_state = " + to_string(behavior.lateral_state) + "\n";
-	
-	// return output
-	return text;
-	
-}
-
-// display vector of Vehicle objects as string
-string CreateBehaviorVectorString(vector<behavior_state> behaviors_vector) {
-	
-	//define variables
-	unsigned int current_element = 0;
-	string text = "";
-	
-	// add information about all behaviors to string
-	for (current_element = 0; current_element < behaviors_vector.size(); current_element++) {
-		
-		text += DISPLAY_PREFIX + "Element " + to_string(current_element) + ": " + CreateBehaviorString(behaviors_vector[current_element]);
 		
 	}
 	

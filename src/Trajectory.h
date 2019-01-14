@@ -14,11 +14,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <cmath>
-#include "helper_functions.h"
-#include "Car.h"
+#include "Vehicle.h"
 #include "Path.h"
-#include "spline.h"
+#include "helper_functions.h"
 
 using std::vector;
 using std::string;
@@ -36,7 +34,7 @@ public:
 	~Trajectory() {}
 	
 	// initialize trajectory
-	void Init();
+	unsigned long Init(Vehicle ego, Path previous_path);
 	
 	// add segment to trajectory
 	void Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
@@ -73,8 +71,14 @@ public:
 	
 	// get trajectory orientation angles
 	vector<double> Get_theta();
+	
+	// display Trajectory object as string
+	string CreateString();
 
 private:
+	
+	// remove steps from the front
+	void RemoveFirstSteps(const unsigned long &finished_steps);
 	
 	// trajectory values in xy
 	vector<double> x_values;

@@ -45,8 +45,8 @@ private:
 	// path values
 	vector<double> path_x;
 	vector<double> path_y;
-	double end_path_s;
-	double end_path_d;
+	double end_path_s = 0;
+	double end_path_d = 0;
 
 };
 

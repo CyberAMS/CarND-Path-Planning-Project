@@ -15,7 +15,6 @@
 #include "Map.h"
 #include "helper_functions.h"
 #include "spline.h"
-#include "spline.cpp"
 
 using std::vector;
 using std::string;

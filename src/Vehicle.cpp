@@ -9,6 +9,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -21,6 +22,7 @@ using std::string;
 using std::to_string;
 using std::cout;
 using std::endl;
+using std::ostringstream;
 using std::fabs;
 
 // constructor
@@ -150,6 +152,82 @@ void Vehicle::Update() {
 	
 }
 
+// determine lane
+unsigned int Vehicle::DetermineLane() {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: DetermineLane - Start" << endl;
+		
+	}
+	
+	// initialize outputs
+	unsigned int lane = this->DetermineLane(this->d);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  lane: " << lane << endl;
+		cout << "--- VEHICLE: DetermineLane - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return lane;
+	
+}
+unsigned int Vehicle::DetermineLane(const double &d) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: DetermineLane - Start" << endl;
+		cout << "  d: " << d << endl;
+		
+	}
+	
+	// define variables
+	vector<double> lane_centers;
+	double min_distance = std::numeric_limits<double>::max();
+	unsigned int lane = 0;
+	unsigned int count = 0;
+	double lane_distance = 0;
+	
+	// get center for all lanes
+	lane_centers = this->GetLaneD(LANES);
+	
+	// check all lanes for minimum distance to current distance value
+	for (count = 0; count < lane_centers.size(); count++) {
+		
+		lane_distance = fabs(d - lane_centers[count]);
+		
+		if (lane_distance < min_distance) {
+			
+			min_distance = lane_distance;
+			lane = LANES[count];
+			
+		}
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  lane: " << lane << endl;
+		cout << "--- VEHICLE: DetermineLane - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return lane;
+	
+}
+
 // get vehicles ahead of own vehicle
 vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, unsigned int lane) {
 	
@@ -158,7 +236,7 @@ vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, unsigned int lan
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Ahead - Start" << endl;
-		cout << "  vehicles: " << endl << CreateVehiclesVectorString(vehicles);
+		cout << "  vehicles: " << endl << this->CreateVehiclesVectorString(vehicles);
 		cout << "  lane: " << lane << endl;
 		
 	}
@@ -182,7 +260,7 @@ vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, unsigned int lan
 	if (bDISPLAY && bDISPLAY_VEHICLE_AHEAD) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  vehicles_ahead: " << endl << CreateVehiclesVectorString(vehicles_ahead);
+		cout << "  vehicles_ahead: " << endl << this->CreateVehiclesVectorString(vehicles_ahead);
 		cout << "--- VEHICLE: Ahead - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -199,7 +277,7 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, unsigned int la
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Behind - Start" << endl;
-		cout << "  vehicles: " << endl << CreateVehiclesVectorString(vehicles);
+		cout << "  vehicles: " << endl << this->CreateVehiclesVectorString(vehicles);
 		cout << "  lane: " << lane << endl;
 		
 	}
@@ -223,7 +301,7 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, unsigned int la
 	if (bDISPLAY && bDISPLAY_VEHICLE_BEHIND) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  vehicles_behind: " << endl << CreateVehiclesVectorString(vehicles_behind);
+		cout << "  vehicles_behind: " << endl << this->CreateVehiclesVectorString(vehicles_behind);
 		cout << "--- VEHICLE: Behind - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -327,6 +405,25 @@ string Vehicle::CreateString() {
 	
 }
 
+// display vector of Vehicle objects as string
+string Vehicle::CreateVehiclesVectorString(vector<Vehicle> vehicles_vector) {
+	
+	//define variables
+	unsigned int current_element = 0;
+	string text = "";
+	
+	// add information about all cars to string
+	for (current_element = 0; current_element < vehicles_vector.size(); current_element++) {
+		
+		text += DISPLAY_PREFIX + "Element " + to_string(current_element) + ": " + vehicles_vector[current_element].CreateString();
+		
+	}
+	
+	// return output
+	return text;
+	
+}
+
 // get d values for lanes
 vector<double> Vehicle::GetLaneD(const vector<unsigned int> &lanes) {
 	
@@ -364,55 +461,6 @@ vector<double> Vehicle::GetLaneD(const vector<unsigned int> &lanes) {
 	}
 	
 	return d_values;
-	
-}
-
-// determine lane
-unsigned int Vehicle::DetermineLane() {
-	
-	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
-		
-		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "VEHICLE: DetermineLane - Start" << endl;
-		
-	}
-	
-	// define variables
-	vector<double> lane_centers;
-	double min_distance = std::numeric_limits<double>::max();
-	unsigned int lane = 0;
-	unsigned int count = 0;
-	double lane_distance = 0;
-	
-	// get center for all lanes
-	lane_centers = this->GetLaneD(LANES);
-	
-	// check all lanes for minimum distance to current distance value
-	for (count = 0; count < lane_centers.size(); count++) {
-		
-		lane_distance = fabs(this->d - lane_centers[count]);
-		
-		if (lane_distance < min_distance) {
-			
-			min_distance = lane_distance;
-			lane = LANES[count];
-			
-		}
-		
-	}
-	
-	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
-		
-		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  lane: " << lane << endl;
-		cout << "--- VEHICLE: DetermineLane - End" << endl;
-		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
-		
-	}
-	
-	return lane;
 	
 }
 
