@@ -213,6 +213,13 @@ int main() {
 		
 	});
 	
+	// set standard output to screen if necessary
+	if (bFILEOUTPUT) {
+		
+		cout.rdbuf(coutbuf);
+		
+	}
+	
 	// We don't need this since we're not using HTTP but if it's removed the
 	// program
 	// doesn't compile :-(
@@ -244,13 +251,6 @@ int main() {
 		std::cout << "Disconnected" << std::endl;
 		
 	});
-	
-	// set standard output to screen if necessary
-	if (bFILEOUTPUT) {
-		
-		cout.rdbuf(coutbuf);
-		
-	}
 	
 	int port = 4567;
 	if (h.listen(port)) {

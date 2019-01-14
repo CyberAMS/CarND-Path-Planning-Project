@@ -37,12 +37,38 @@ void Driver::PlanBehavior() {
 	
 	// define variables
 	unsigned long finished_steps = 0;
+	vector<behavior_state> next_possible_behaviors;
+	unsigned int count = 0;
+	Trajectory next_possible_trajectory;
+	vector<Trajectory> next_possible_trajectories;
 	
 	// initialize all objects for next step
 	finished_steps = this->trajectory.Init(this->ego, this->previous_path);
 	this->state.Init(this->ego, this->trajectory, finished_steps);
 	
-	// MORE TODO HERE !!!
+	// get next possible states
+	next_possible_behaviors = state.GetNextPossibleBehaviors();
+	
+	// generate trajectories for all states
+	for (count = 0; count < next_possible_behaviors.size(); count++) {
+		
+		next_possible_trajectory.Generate();
+		
+		if (next_possible_trajectory.Valid()) {
+			
+			next_possible_trajectories.push_back(next_possible_trajectory);
+			
+		}
+		
+	}
+	
+	// evaluate cost for all trajectories
+	
+	// select lowest cost trajectory
+	state.SetBehavior(best_behavior, current_lane, target_lane, NO_STEP_INCREASE);
+	
+	// generate path
+	
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_PLANBEHAVIOR) {

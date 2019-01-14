@@ -48,7 +48,7 @@ void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
 		target_lane = ego.DetermineLane(trajectory.Get_d()[trajectory.Get_d().size() - 1]);
 		
 		// set initial state
-		this->SetBehavior(INITIAL_STATE, current_lane, target_lane, add_step, INITIAL_STEP);
+		this->SetBehavior(INITIAL_STATE, current_lane, target_lane, add_step);
 		
 		// initialization done
 		this->is_initialized = true;
@@ -56,7 +56,7 @@ void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
 	} else {
 		
 		// set state (update executed steps and increase step by one)
-		this->SetBehavior(this->behavior, this->current_lane, this->target_lane, add_step, this->current_step);
+		this->SetBehavior(this->behavior, this->current_lane, this->target_lane, add_step);
 		
 	}
 	
@@ -73,7 +73,7 @@ void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
 }
 
 // set state
-void State::SetBehavior(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned long add_step, unsigned long no_change_before_step) {
+void State::SetBehavior(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned long add_step) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_SETBEHAVIOR) {
@@ -84,14 +84,28 @@ void State::SetBehavior(behavior_state behavior, unsigned int current_lane, unsi
 		cout << "  current_lane: " << current_lane << endl;
 		cout << "  target_lane: " << target_lane << endl;
 		cout << "  add_step: " << add_step << endl;
-		cout << "  no_change_before_step: " << no_change_before_step << endl;
 		
 	}
 	
+	// define variables
+	unsigned long current_step;
+	
+	// determine next step
+	current_step = this->current_step + add_step; // + 1; // TODO: check whether this really needs to be increased by 1 or wait for previous_path to increment this
+	
+	// check whether transitions must be locked to ensure complete state change
+	if (((this->behavior.lateral_state == PREPARE_LANE_CHANGE_LEFT) && (behavior.lateral_state == CHANGE_LANE_LEFT)) || ((this->behavior.lateral_state == PREPARE_LANE_CHANGE_RIGHT) && (behavior.lateral_state == CHANGE_LANE_RIGHT))) {
+		
+		// determine step when transition will be finished
+		no_change_before_step = current_step + LANE_CHANGE_TRANSITION_TIME;
+		
+	}
+	
+	// set behavior state
 	this->behavior = behavior;
 	this->current_lane = current_lane;
 	this->target_lane = target_lane;
-	this->current_step += (add_step + 1); // TODO: check whether this really needs to be increased by 1 or wait for previous_path to increment this
+	this->current_step = current_step;
 	this->no_change_before_step = no_change_before_step;
 	
 	// display message if required
@@ -126,41 +140,51 @@ vector<behavior_state> State::GetNextPossibleBehaviors() {
 	LATERALSTATE potential_lateral_state;
 	
 	// initialize outputs
-	vector<behavior_state> next_behaviors;
+	vector<behavior_state> next_possible_behaviors;
 	
-	// check possible lane changes
-	if (this->current_lane > LANES[0]) {
+	// check whether we still execute a transition and no behavior change is allowed
+	if (this->current_step < this->no_change_before_step) {
 		
-		can_move_left = true;
+		// only return current behavior state
+		next_possible_behaviors = (vector<behavior_state>){this->behavior};
 		
-	}
-	if (this->current_lane < LANES[LANES.size() - 1]) {
+	} else {
 		
-		can_move_right = true;
-		
-	}
-	
-	// check all possible transitions
-	for (count_t = 0; count_t < TRANSITIONS.size(); count_t++) {
-		
-		// check whether current transition defines next states for current behavior state
-		if (this->behavior.lateral_state == TRANSITIONS[count_t].name) {
+		// check possible lane changes
+		if (this->current_lane > LANES[0]) {
 			
-			// get list of possible next behaviors
-			next_potential_behaviors = TRANSITIONS[count_t].next;
+			can_move_left = true;
 			
-			// check all possible behaviors for feasible lanes changes
-			for (count_b = 0; count_b < next_potential_behaviors.size(); count_b++) {
+		}
+		if (this->current_lane < LANES[LANES.size() - 1]) {
+			
+			can_move_right = true;
+			
+		}
+		
+		// check all possible transitions
+		for (count_t = 0; count_t < TRANSITIONS.size(); count_t++) {
+			
+			// check whether current transition defines next states for current behavior state
+			if (this->behavior.lateral_state == TRANSITIONS[count_t].name) {
 				
-				// get potential lateral state
-				potential_lateral_state = next_potential_behaviors[count_b].lateral_state;
+				// get list of possible next behaviors
+				next_potential_behaviors = TRANSITIONS[count_t].next;
 				
-				// only include lateral changes if there are valid lanes for it
-				if ((((potential_lateral_state == PREPARE_LANE_CHANGE_LEFT) || (potential_lateral_state == CHANGE_LANE_LEFT)) && can_move_left) || ((potential_lateral_state == PREPARE_LANE_CHANGE_RIGHT) || (potential_lateral_state == CHANGE_LANE_RIGHT)) && can_move_right) {
+				// check all possible behaviors for feasible lanes changes
+				for (count_b = 0; count_b < next_potential_behaviors.size(); count_b++) {
 					
-					next_behaviors.push_back(next_potential_behaviors[count_b]);
+					// get potential lateral state
+					potential_lateral_state = next_potential_behaviors[count_b].lateral_state;
 					
-				};
+					// only include lateral changes if there are valid lanes for it
+					if ((((potential_lateral_state == PREPARE_LANE_CHANGE_LEFT) || (potential_lateral_state == CHANGE_LANE_LEFT)) && can_move_left) || ((potential_lateral_state == PREPARE_LANE_CHANGE_RIGHT) || (potential_lateral_state == CHANGE_LANE_RIGHT)) && can_move_right) {
+						
+						next_possible_behaviors.push_back(next_potential_behaviors[count_b]);
+						
+					};
+					
+				}
 				
 			}
 			
@@ -168,7 +192,7 @@ vector<behavior_state> State::GetNextPossibleBehaviors() {
 		
 	}
 	
-	return next_behaviors;
+	return next_possible_behaviors;
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_SETBEHAVIOR) {

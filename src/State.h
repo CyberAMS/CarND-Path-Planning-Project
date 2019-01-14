@@ -61,6 +61,8 @@ const vector<transition> TRANSITIONS
 	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE}}},
 	 {.name = CHANGE_LANE_RIGHT,
 	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE}}}};
+const long LANE_CHANGE_TRANSITION_TIME = 25;
+const long NO_STEP_INCREASE = 0;
 
 class State {
 
@@ -76,7 +78,7 @@ public:
 	void Init(Vehicle ego, Trajectory trajectory, unsigned long add_step);
 	
 	// set state
-	void SetBehavior(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned long add_step, unsigned long no_change_before_step);
+	void SetBehavior(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned long add_step);
 	
 	// get next possible states
 	vector<behavior_state> GetNextPossibleBehaviors();
@@ -103,8 +105,8 @@ private:
 	unsigned int target_lane = 0;
 	
 	// define time variables
-	unsigned long current_step = 0;
-	unsigned long no_change_before_step = 0;
+	unsigned long current_step = INITIAL_STEP;
+	unsigned long no_change_before_step = INITIAL_STEP;
 	
 	// remember whether state has been initialized before
 	bool is_initialized = false;
