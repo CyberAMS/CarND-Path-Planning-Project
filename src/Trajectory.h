@@ -39,6 +39,15 @@ public:
 	// add segment to trajectory
 	void Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
 	
+	// generate new trajectory
+	void Generate();
+	
+	// check trajectory for being valid
+	void Valid();
+	
+	// determine cost of trajectory
+	double Cost();
+	
 	// get trajectory x values
 	vector<double> Get_x();
 	

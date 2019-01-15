@@ -123,6 +123,27 @@ void Trajectory::Add(double x, double y, double s, double sv, double sa, double 
 	
 }
 
+// generate new trajectory
+void Trajectory::Generate() {
+	
+	
+	
+}
+
+// check trajectory for being valid
+void Trajectory::Valid() {
+	
+	
+	
+}
+
+// determine cost of trajectory
+double Trajectory::Cost() {
+	
+	
+	
+}
+
 // get trajectory x values
 vector<double> Trajectory::Get_x() {
 	
