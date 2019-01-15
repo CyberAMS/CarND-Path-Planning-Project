@@ -66,7 +66,7 @@ void Driver::PlanBehavior() {
 	for (count = 0; count < next_possible_behaviors.size(); count++) {
 		
 		// generate trajectory for current state
-		next_possible_trajectory.Generate(this->ego, this->trajectory, next_possible_behaviors[count], from_step);
+		next_possible_trajectory.GenerateFromBehavior(this->map, this->ego, this->trajectory, from_step, next_possible_behaviors[count]);
 		
 		// check whether trajectory is valid
 		if (next_possible_trajectory.Valid()) {

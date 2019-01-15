@@ -45,6 +45,9 @@ public:
 	void Update(double x, double y, double s, double d, double theta, double v);
 	void Update();
 	
+	// get d values for lanes
+	vector<double> GetLaneD(const vector<unsigned int> &lanes);
+	
 	// determine lane
 	unsigned int DetermineLane();
 	unsigned int DetermineLane(const double &d);
@@ -92,9 +95,6 @@ public:
 	string CreateVehiclesVectorString(vector<Vehicle> vehicles_vector);
 
 private:
-	
-	// get d values for lanes
-	vector<double> GetLaneD(const vector<unsigned int> &lanes);
 	
 	// check whether vehicle is inside the determined lane
 	bool CheckInsideLane();

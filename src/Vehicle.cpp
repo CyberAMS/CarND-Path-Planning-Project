@@ -152,6 +152,46 @@ void Vehicle::Update() {
 	
 }
 
+// get d values for lanes
+vector<double> Vehicle::GetLaneD(const vector<unsigned int> &lanes) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_GETLANED) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: GetLaneD - Start" << endl;
+		cout << "  lanes: " << endl << CreateUnsignedIntegerVectorString(lanes);
+		
+	}
+	
+	// define variables
+	unsigned int count = 0;
+	double d = 0;
+	
+	// initialize outputs
+	vector<double> d_values;
+	
+	for (count = 0; count < lanes.size(); count++) {
+		
+		d = (LANE_WIDTH / 2) + (LANE_WIDTH * ((double) lanes[count] - 1));
+		d_values.push_back(d);
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_GETLANED) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  d_values: " << endl << CreateDoubleVectorString(d_values);
+		cout << "--- VEHICLE: GetLaneD - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return d_values;
+	
+}
+
 // determine lane
 unsigned int Vehicle::DetermineLane() {
 	
@@ -421,46 +461,6 @@ string Vehicle::CreateVehiclesVectorString(vector<Vehicle> vehicles_vector) {
 	
 	// return output
 	return text;
-	
-}
-
-// get d values for lanes
-vector<double> Vehicle::GetLaneD(const vector<unsigned int> &lanes) {
-	
-	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_GETLANED) {
-		
-		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "VEHICLE: GetLaneD - Start" << endl;
-		cout << "  lanes: " << endl << CreateUnsignedIntegerVectorString(lanes);
-		
-	}
-	
-	// define variables
-	unsigned int count = 0;
-	double d = 0;
-	
-	// initialize outputs
-	vector<double> d_values;
-	
-	for (count = 0; count < lanes.size(); count++) {
-		
-		d = (LANE_WIDTH / 2) + (LANE_WIDTH * ((double) lanes[count] - 1));
-		d_values.push_back(d);
-		
-	}
-	
-	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_GETLANED) {
-		
-		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  d_values: " << endl << CreateDoubleVectorString(d_values);
-		cout << "--- VEHICLE: GetLaneD - End" << endl;
-		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
-		
-	}
-	
-	return d_values;
 	
 }
 

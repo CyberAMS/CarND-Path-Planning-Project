@@ -38,6 +38,7 @@ const bool bDISPLAY_VEHICLE_CHECKINSIDELANE = true;
 const bool bDISPLAY_PATH_SET = false;
 const bool bDISPLAY_TRAJECTORY_INIT = true;
 const bool bDISPLAY_TRAJECTORY_ADD = true;
+const bool bDISPLAY_TRAJECTORY_GENERATEFROMBEHAVIOR = true;
 const bool bDISPLAY_TRAJECTORY_GENERATE = true;
 const bool bDISPLAY_TRAJECTORY_VALID = true;
 const bool bDISPLAY_TRAJECTORY_COST = true;
@@ -76,6 +77,12 @@ double GetX(const double &theta, const double &magnitude);
 
 // calculate angle of vector
 double GetY(const double &theta, const double &magnitude);
+
+// determine coefficients for jerk minimizing trajectory
+vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector<double> end, double T);
+
+// determine states with jerk minimizing trajectory
+vector<double> JerkMinimizingTrajectoryState(poly, start, t);
 
 // display double vector as string
 string CreateDoubleVectorString(const vector<double> &double_vector);

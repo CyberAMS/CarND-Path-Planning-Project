@@ -17,15 +17,14 @@
 #include "Path.h"
 #include "State.h"
 #include "helper_functions.h"
-//#include "Eigen-3.3/Eigen/Core"
-//#include "Eigen-3.3/Eigen/QR"
-//#include "spline.h"
 
 using std::vector;
 using std::string;
 using std::to_string;
 using std::cout;
 using std::endl;
+using std::max;
+using std::pow;
 
 // init trajectory
 unsigned long Trajectory::Init(Vehicle ego, Path previous_path) {
@@ -124,28 +123,310 @@ void Trajectory::Add(double x, double y, double s, double sv, double sa, double 
 	
 }
 
+// add jerk minimizing trajectory
+void Trajectory::AddJerkMinimizingTrajectory(double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADDJERKMINIMIZINGTRAJECTORY) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "TRAJECTORY: AddJerkMinimizingTrajectory - Start" << endl;
+		cout << "  s_target: " << s_target << endl;
+		cout << "  sv_target: " << sv_target << endl;
+		cout << "  sa_target: " << sa_target << endl;
+		cout << "  d_target: " << d_target << endl;
+		cout << "  dv_target: " << dv_target << endl;
+		cout << "  da_target: " << da_target << endl;
+		
+	}
+	
+	// define variables
+	unsigned int trajectory_length = 0;
+	double x_last = 0.0;
+	double y_last = 0.0;
+	double s_last = 0.0;
+	double sv_last = 0.0;
+	double sa_last = 0.0;
+	double d_last = 0.0;
+	double dv_last = 0.0;
+	double da_last = 0.0;
+	vector<double> s_start_vector;
+	vector<double> s_end_vector;
+	vector<double> s_poly;
+	vector<double> d_start_vector;
+	vector<double> d_end_vector;
+	vector<double> d_poly;
+	unsigned long remaining_points = 0;
+	unsigned long count = 0;
+	double t = 0.0;
+	double t1 = 0.0;
+	double t2 = 0.0;
+	double t3 = 0.0;
+	double t4 = 0.0;
+	double t5 = 0.0;
+	double s = 0.0;
+	double sv = 0.0;
+	double sa = 0.0;
+	double sj = 0.0;
+	double d = 0.0;
+	double dv = 0.0;
+	double da = 0.0;
+	double dj = 0.0;
+	vector<double> xy_values;
+	double x = 0.0;
+	double y = 0.0;
+	
+	// determine length of trajectory
+	trajectory_length = this->Get_x().size();
+	
+	// use last trajectory values as starting point for new trajectory segment if available
+	if (trajectory_length > 0) {
+		
+		x_last = this->Get_x()[trajectory_length - 1];
+		y_last = this->Get_y()[trajectory_length - 1];
+		s_last = this->Get_s()[trajectory_length - 1];
+		sv_last = this->Get_sv()[trajectory_length - 1];
+		sa_last = this->Get_sa()[trajectory_length - 1];
+		d_last = this->Get_d()[trajectory_length - 1];
+		dv_last = this->Get_dv()[trajectory_length - 1];
+		da_last = this->Get_da()[trajectory_length - 1];
+		
+	}
+	
+	// determine coefficients for jerk minimizing trajectory
+	s_start_vector = (vector<double>){s_last, sv_last, sa_last};
+	s_end_vector = (vector<double>){s_target, sv_target, sa_target};
+	s_poly = JerkMinimizingTrajectoryCoefficients(s_start, s_end, STEP_TIME_INTERVAL);
+	d_start_vector = (vector<double>){d_last, dv_last, da_last};
+	d_end_vector = (vector<double>){d_target, dv_target, da_target};
+	d_poly = JerkMinimizingTrajectoryCoefficients(d_start, d_end, STEP_TIME_INTERVAL);
+	
+	// determine number of points to create
+	remaining_points = (STEP_TIME_INTERVAL / SAMPLE_TIME) - trajectory_length;
+	
+	for (count = 0; count < remaining_points; count++) {
+		
+		// determine time value
+		t = SAMPLE_TIME * (count + 1);
+		
+		// determine states
+		s_states = JerkMinimizingTrajectoryState(s_poly, s_start_vector, t);
+		s = s_states[0];
+		sv = s_states[1];
+		sa = s_states[2];
+		sj = s_states[3];
+		d_states = JerkMinimizingTrajectoryState(d_poly, d_start_vector, t);
+		d = d_states[0];
+		dv = d_states[1];
+		da = d_states[2];
+		dj = d_states[3];
+		
+		// convert Frenet coordinates to xy coordinates
+		xy_values = Frenet2Xy(s, d);
+		x = xy_values[0];
+		y = xy_values[1];
+		
+		// determine orientation angle
+		theta = atan2(y - last_y, x - last_x);
+		
+		// add new point to trajectory
+		this->Add(x, y, s, sv, sa, sj, d, dv, da, dj, theta);
+		
+		// update last values for next point (to determine orientation angle again)
+		last_x = x;
+		last_y = y;
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADDJERKMINIMIZINGTRAJECTORY) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  this: " << endl << this->CreateString;
+		cout << "--- TRAJECTORY: AddJerkMinimizingTrajectory - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+}
+
+// generate new trajectory from behavior
+void Trajectory::GenerateFromBehavior(Map map, Vehicle ego, Trajectory trajectory, unsigned long from_step, behavior_state behavior) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_GENERATEFROMBEHAVIOR) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "TRAJECTORY: GenerateFromBehavior - Start" << endl;
+		cout << "  map: " << endl << map.CreateString();
+		cout << "  ego: " << endl << ego.CreateString();
+		cout << "  trajectory: " << endl << trajectory.CreateString();
+		cout << "  from_step: " << from_step << endl;
+		cout << "  behavior: " << endl << State::CreateBehaviorString(behavior);
+		
+	}
+	
+	// define variables
+	double sv_continue = trajectory.Get_sv()[from_step];
+	double sa_continue = trajectory.Get_sa()[from_step];
+	double s_target = 0.0;
+	double sv_target = 0.0;
+	double sa_target = 0.0;
+	double d_target = 0.0;
+	double dv_target = 0.0;
+	double da_target = 0.0;
+	double speed_factor = 1.0;
+	unsigned int current_lane = ego.GetLane();
+	
+	// determine target values based on longitudinal behavior
+	switch (behavior.longitudinal_state) {
+		
+		case LONGITUDINALSTATE::ACCELERATE:
+			
+			// check for starting from zero speed
+			if (sv_continue == 0) {
+				
+				sv_target = TARGET_SPEED_FROM_ZERO;
+				
+			} else {
+				
+				// check speed range
+				if (sv_continue < LOW_SPEED_LIMIT) {
+					
+					speed_factor = LOW_SPEED_ACCELERATION_FACTOR;
+					
+				} else {
+					
+					speed_factor = HIGH_SPEED_ACCELERATION_FACTOR;
+					
+				}
+				
+				// set target speed
+				sv_target = sv_continue * speed_factor;
+				
+			}
+			break; // switch
+			
+		case LONGITUDINALSTATE::KEEP_SPEED:
+			
+			// set target speed
+			sv_target = sv_continue;
+			break; // switch
+			
+		case LongitudinalState::DECELERATE:
+			
+			// set target speed
+			sv_target = sv_continue * DECELERATION_FACTOR;
+			break; // switch
+			
+	}
+	
+	// keep speed limit
+	sv_target = max(sv_target, MAX_SPEED);
+	
+	// determine
+	s_target = (trajectory.s_values[from_step] + sv_target * STEP_TIME_INTERVAL);
+	
+	// determine target values based on lateral behavior
+	switch (behavior.lateral_state) {
+	
+		case LATERALSTATE::KEEP_LANE:
+			
+			d_target = ego.GetLaneD(current_lane);
+			break; // switch
+			
+		case LATERALSTATE::PREPARE_LANE_CHANGE_LEFT:
+			
+			d_target = ego.GetLaneD(current_lane);
+			break; // switch
+			
+		case LATERALSTATE::PREPARE_LANE_CHANGE_RIGHT:
+			
+			d_target = ego.GetLaneD(current_lane);
+			break; // switch
+			
+		case LATERALSTATE::CHANGE_LANE_LEFT:
+			
+			d_target = ego.GetLaneD(current_lane - 1);
+			break; // switch
+			
+		case LATERALSTATE::CHANGE_LANE_RIGHT:
+			
+			d_target = ego.GetLaneD(current_lane + 1);
+			break; // switch
+			
+	}
+	
+	// keep lane if trajectory is too short // TODO: !!!!!! XXXXXXX Why?
+	if (trajectory.Get_d().size() < 5) {
+		
+		d_target = trajectory.Get_d()[0];
+		
+	}
+	
+	this->Generate(map, trajectory, from_step, s_target, sv_target, sa_target, d_target, dv_target, da_target);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_GENERATEFROMBEHAVIOR) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  current_lane: " << current_lane << endl;
+		cout << "  speed_factor: " << speed_factor << endl;
+		cout << "  s_target: " << s_target << endl;
+		cout << "  sv_target: " << s_target << endl;
+		cout << "  sa_target: " << s_target << endl;
+		cout << "  d_target: " << s_target << endl;
+		cout << "  dv_target: " << s_target << endl;
+		cout << "  da_target: " << s_target << endl;
+		cout << "  this: " << endl << this->CreateString;
+		cout << "--- TRAJECTORY: GenerateFromBehavior - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return new_trajectory;
+	
+}
+
 // generate new trajectory
-void Trajectory::Generate(Vehicle ego, Trajectory trajectory, behavior_state behavior, unsigned long from_step) {
+void Trajectory::Generate(Map map, Trajectory trajectory, unsigned long from_step, double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_GENERATE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: Generate - Start" << endl;
-		cout << "  ego: " << endl << ego.CreateString();
-		cout << "  trajectory: " << endl << trajectory.CreateString();
-		cout << "  behavior: " << endl << State::CreateBehaviorString(behavior);
+		cout << "  map: " << endl << map.CreateString;
+		cout << "  trajectory: " << endl << trajectory.CreateString;
 		cout << "  from_step: " << from_step << endl;
+		cout << "  s_target: " << s_target << endl;
+		cout << "  sv_target: " << s_target << endl;
+		cout << "  sa_target: " << s_target << endl;
+		cout << "  d_target: " << s_target << endl;
+		cout << "  dv_target: " << s_target << endl;
+		cout << "  da_target: " << s_target << endl;
 		
 	}
 	
+	// define variables
+	unsigned long count = 0;
 	
+	// start with previous trajectory
+	for (count = 0; ((count < trajectory.Get_x().size()) && (count < from_size)); count++) {
+		
+		// add current segment
+		this->Add(trajectory.Get_x()[count], trajectory.Get_y()[count], trajectory.Get_s()[count], trajectory.Get_sv()[count], trajectory.Get_sa()[count], trajectory.Get_sj()[count], trajectory.Get_d()[count], trajectory.Get_dv()[count], trajectory.Get_da()[count], trajectory.Get_dj()[count], trajectory.Get_theta()[count]);
+		
+	}
+	
+	// add final segment as jerk minimizing trajectory
+	this->AddJerkMinimizingTrajectory(s_target, sv_target, sa_target, d_target, dv_target, da_target);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_GENERATE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values});
+		cout << "  this: " << endl << this->CreateString;
 		cout << "--- TRAJECTORY: Generate - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

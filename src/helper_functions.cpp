@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <functional>
 #include "helper_functions.h"
+#include "Eigen-3.3/Eigen/Core"
+#include "Eigen-3.3/Eigen/QR"
 
 using std::vector;
 using std::string;
@@ -91,6 +93,63 @@ double GetX(const double &theta, const double &magnitude) {
 double GetY(const double &theta, const double &magnitude) {
 	
 	return (magnitude * sin(theta));
+	
+}
+
+// determine coefficients for jerk minimizing trajectory
+vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector<double> end, double T) {
+	
+	// define variables
+	MatrixXd T_matrix(3, 3);
+	VectorXd sf_diff(3);
+	VectorXd coefficients_vector;
+	vector<double> coefficients;
+	
+	// determine time values
+	T2 = pow(T, 2);
+	T3 = pow(T, 3);
+	T4 = pow(T, 4);
+	T5 = pow(T, 5);
+	
+	// determine time matrix
+	T_matrix <<     T3,      T4,      T5,
+	            3 * T2,  4 * T3,  5 * T4,
+	             6 * T, 12 * T2, 20 * T3;
+	
+	// determine difference based on start and end
+	sf_diff << end[0] - (start[0] + start[1] * T + 0.5 * start[2] * pow(T, 2)),
+	                                        end[1] - (start[1] + start[2] * T),
+	                                                         end[2] - start[2];
+	
+	// calculate coefficients vector
+	coefficients_vector = T_matrix.inverse() * sf_diff;
+	
+	// determine coefficients
+	coefficients = vector<double> {start[0], start[1], (0.5 * start[2]), coeffs[0], coeffs[1], coeffs[2]};
+	
+	return coefficients;
+	
+}
+
+// determine states with jerk minimizing trajectory
+vector<double> JerkMinimizingTrajectoryState(poly, start, t) {
+	
+	//initialize outputs
+	vector<double> states;
+	
+	// determine time values
+	t2 = pow(t, 2);
+	t3 = pow(t, 3);
+	t4 = pow(t, 4);
+	t5 = pow(t, 5);
+		
+	// determine states
+	state     =      (start[0]) +       (start[1]) * t + (0.5 * start[2]) * t2 +        (poly[3]) * t3 +       (poly[4]) * t4 + (poly[5]) * t5;
+	state_d   =      (start[1]) +       (start[2]) * t +  (3.0 * poly[3]) * t2 +  (4.0 * poly[4]) * t3 + (5.0 * poly[5]) * t4;
+	state_dd  =      (start[2]) +  (6.0 * poly[3]) * t + (12.0 * poly[4]) * t2 + (20.0 * poly[5]) * t3;
+	state_ddd = (6.0 * poly[3]) + (24.0 * poly[4]) * t + (60.0 * poly[5]) * t2;
+	
+	return (vector<double>){state, state_d, state_dd, state_ddd};
 	
 }
 
