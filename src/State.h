@@ -78,10 +78,10 @@ public:
 	void Init(Vehicle ego, Trajectory trajectory, unsigned long add_step);
 	
 	// set state
-	void SetBehavior(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned long add_step);
+	void SetBehavior(behavior_state behavior, unsigned long add_step);
 	
 	// get next possible states
-	vector<behavior_state> GetNextPossibleBehaviors();
+	vector<behavior_state> GetNextPossibleBehaviors(unsigned int current_lane);
 	
 	// get behavior state
 	behavior_state Get_behavior();
@@ -99,10 +99,6 @@ private:
 	
 	// define state variable
 	behavior_state behavior = INITIAL_STATE;
-	
-	// define lane variables
-	unsigned int current_lane = 0;
-	unsigned int target_lane = 0;
 	
 	// define time variables
 	unsigned long current_step = INITIAL_STEP;

@@ -15,6 +15,7 @@
 #include "Trajectory.h"
 #include "Vehicle.h"
 #include "Path.h"
+#include "State.h"
 #include "helper_functions.h"
 //#include "Eigen-3.3/Eigen/Core"
 //#include "Eigen-3.3/Eigen/QR"
@@ -124,23 +125,81 @@ void Trajectory::Add(double x, double y, double s, double sv, double sa, double 
 }
 
 // generate new trajectory
-void Trajectory::Generate() {
+void Trajectory::Generate(Vehicle ego, Trajectory trajectory, behavior_state behavior, unsigned long from_step) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_GENERATE) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "TRAJECTORY: Generate - Start" << endl;
+		cout << "  ego: " << endl << ego.CreateString();
+		cout << "  trajectory: " << endl << trajectory.CreateString();
+		cout << "  behavior: " << endl << State::CreateBehaviorString(behavior);
+		cout << "  from_step: " << from_step << endl;
+		
+	}
 	
 	
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_GENERATE) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values});
+		cout << "--- TRAJECTORY: Generate - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
 	
 }
 
 // check trajectory for being valid
-void Trajectory::Valid() {
+bool Trajectory::Valid() {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_VALID) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "TRAJECTORY: Valid - Start" << endl;
+		
+	}
 	
 	
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_VALID) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "--- TRAJECTORY: Valid - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return false;
 	
 }
 
 // determine cost of trajectory
 double Trajectory::Cost() {
 	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_COST) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "TRAJECTORY: Cost - Start" << endl;
+		
+	}
 	
+	
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_TRAJECTORY_COST) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "--- TRAJECTORY: Cost - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
 	
 }
 

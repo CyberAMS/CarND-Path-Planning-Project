@@ -37,18 +37,10 @@ void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
 		
 	}
 	
-	// define variables
-	unsigned int current_lane = 0;
-	unsigned int target_lane = 0;
-	
 	if (!this->is_initialized) {
 		
-		// determine current and target lane
-		current_lane = ego.DetermineLane(trajectory.Get_d()[0]);
-		target_lane = ego.DetermineLane(trajectory.Get_d()[trajectory.Get_d().size() - 1]);
-		
 		// set initial state
-		this->SetBehavior(INITIAL_STATE, current_lane, target_lane, add_step);
+		this->SetBehavior(INITIAL_STATE, add_step);
 		
 		// initialization done
 		this->is_initialized = true;
@@ -56,7 +48,7 @@ void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
 	} else {
 		
 		// set state (update executed steps and increase step by one)
-		this->SetBehavior(this->behavior, this->current_lane, this->target_lane, add_step);
+		this->SetBehavior(this->behavior, add_step);
 		
 	}
 	
@@ -73,7 +65,7 @@ void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
 }
 
 // set state
-void State::SetBehavior(behavior_state behavior, unsigned int current_lane, unsigned int target_lane, unsigned long add_step) {
+void State::SetBehavior(behavior_state behavior, unsigned long add_step) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_SETBEHAVIOR) {
@@ -81,8 +73,6 @@ void State::SetBehavior(behavior_state behavior, unsigned int current_lane, unsi
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "STATE: SetBehavior - Start" << endl;
 		cout << "  behavior_state: " << endl << this->CreateBehaviorString(behavior);
-		cout << "  current_lane: " << current_lane << endl;
-		cout << "  target_lane: " << target_lane << endl;
 		cout << "  add_step: " << add_step << endl;
 		
 	}
@@ -103,8 +93,6 @@ void State::SetBehavior(behavior_state behavior, unsigned int current_lane, unsi
 	
 	// set behavior state
 	this->behavior = behavior;
-	this->current_lane = current_lane;
-	this->target_lane = target_lane;
 	this->current_step = current_step;
 	this->no_change_before_step = no_change_before_step;
 	
@@ -121,13 +109,14 @@ void State::SetBehavior(behavior_state behavior, unsigned int current_lane, unsi
 }
 
 // get next possible states
-vector<behavior_state> State::GetNextPossibleBehaviors() {
+vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_GETNEXTPOSSIBLEBEHAVIORS) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "STATE: GetNextPossibleBehaviors - Start" << endl;
+		cout << "  current_lane: " << current_lane << endl;
 		
 	}
 	
@@ -151,12 +140,12 @@ vector<behavior_state> State::GetNextPossibleBehaviors() {
 	} else {
 		
 		// check possible lane changes
-		if (this->current_lane > LANES[0]) {
+		if (current_lane > LANES[0]) {
 			
 			can_move_left = true;
 			
 		}
-		if (this->current_lane < LANES[LANES.size() - 1]) {
+		if (current_lane < LANES[LANES.size() - 1]) {
 			
 			can_move_right = true;
 			
@@ -224,8 +213,6 @@ string State::CreateString() {
 	// add information about car to string
 	text += DISPLAY_PREFIX + "behavior =\n" + this->CreateBehaviorString(this->behavior);
 	text += DISPLAY_PREFIX;
-	text += "current_lane = " + to_string(this->current_lane) + " ";
-	text += "target_lane = " + to_string(this->target_lane) + " ";
 	text += "current_step = " + to_string(this->current_step) + " ";
 	text += "no_change_before_step = " + to_string(this->no_change_before_step) + " ";
 	text += "is_initialized = " + to_string(this->is_initialized) + "\n";

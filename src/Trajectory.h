@@ -16,6 +16,7 @@
 #include <vector>
 #include "Vehicle.h"
 #include "Path.h"
+#include "State.h"
 #include "helper_functions.h"
 
 using std::vector;
@@ -40,10 +41,10 @@ public:
 	void Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
 	
 	// generate new trajectory
-	void Generate();
+	void Generate(Vehicle ego, Trajectory trajectory, behavior_state behavior, unsigned long from_step);
 	
 	// check trajectory for being valid
-	void Valid();
+	bool Valid();
 	
 	// determine cost of trajectory
 	double Cost();

@@ -36,6 +36,7 @@ void Driver::PlanBehavior() {
 	}
 	
 	// define variables
+	unsigned long from_step = 0;
 	unsigned long finished_steps = 0;
 	vector<behavior_state> next_possible_behaviors;
 	unsigned int count = 0;
@@ -46,17 +47,26 @@ void Driver::PlanBehavior() {
 	Trajectory best_trajectory;
 	
 	// initialize all objects for next step
+	if (this->trajectory.is_initialized) {
+		
+		from_step = NUM_PREVIOUS_PATH_STEPS;
+		
+	} else {
+		
+		from_step = NO_PREVIOUS_PATH_STEPS;
+		
+	}
 	finished_steps = this->trajectory.Init(this->ego, this->previous_path);
 	this->state.Init(this->ego, this->trajectory, finished_steps);
 	
 	// get next possible states
-	next_possible_behaviors = state.GetNextPossibleBehaviors(); // should this start with current lane and then determine target lane - needed inside this function - and return target lane (no need to pass anything in SetBehavior)
+	next_possible_behaviors = state.GetNextPossibleBehaviors(this->Get_ego().Get_lane());
 	
 	// generate trajectories for all states
 	for (count = 0; count < next_possible_behaviors.size(); count++) {
 		
 		// generate trajectory for current state
-		next_possible_trajectory.Generate();
+		next_possible_trajectory.Generate(this->ego, this->trajectory, next_possible_behaviors[count], from_step);
 		
 		// check whether trajectory is valid
 		if (next_possible_trajectory.Valid()) {
@@ -79,8 +89,7 @@ void Driver::PlanBehavior() {
 	}
 	
 	// select behavior for lowest cost trajectory and update trajectory accordingly
-	state.SetBehavior(best_behavior, current_lane, target_lane, NO_STEP_INCREASE);
-	// must add to update current lane based on behavior - maybe return of function above ?!?
+	state.SetBehavior(best_behavior, NO_STEP_INCREASE);
 	this->trajectory = best_trajectory;
 	
 	// display message if required
