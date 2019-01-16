@@ -274,7 +274,8 @@ unsigned int Vehicle::DetermineLane(const double &d) {
 		
 		lane_distance = fabs(d - lane_centers[count]);
 		
-		if (lane_distance < min_distance) {
+		// smallest distance and distance within lane width around lane center
+		if ((lane_distance < min_distance) && (lane_distance <= (LANE_WIDTH / 2))){
 			
 			min_distance = lane_distance;
 			lane = LANES[count];

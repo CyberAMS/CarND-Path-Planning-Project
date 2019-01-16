@@ -9,6 +9,7 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -26,7 +27,7 @@ using std::endl;
 using std::pow;
 
 // init trajectory
-unsigned long Trajectory::Init(Vehicle ego, Path previous_path) {
+unsigned long Trajectory::Init(Map map, Vehicle ego, Path previous_path) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_INIT) {
@@ -39,13 +40,33 @@ unsigned long Trajectory::Init(Vehicle ego, Path previous_path) {
 	}
 	
 	// initialize outputs
+	double s_next = 0.0;
+	double sv_next = 0.0;
+	double sa_next = 0.0;
+	double sj_next = 0.0;
+	double d_next = 0.0;
+	vector<double> xy_next;
+	double x_next = 0.0;
+	double y_next = 0.0;
 	unsigned long finished_steps = 0;
 	
 	// check whether this trajectory has been initialized
 	if (!this->is_initialized) {
 		
-		// add own vehicle position to trajectory
-		this->Add(ego.Get_x(), ego.Get_y(), ego.Get_s(), EGO_CAR_SV_INIT, EGO_CAR_SA_INIT, EGO_CAR_SJ_INIT, ego.Get_d(), EGO_CAR_DV_INIT, EGO_CAR_DA_INIT, EGO_CAR_DJ_INIT, ego.Get_theta());
+		// current position is first step
+		finished_steps = 1;
+		
+		// add own vehicle position at next step to trajectory
+		s_next = ego.Get_s() + (EGO_CAR_SV_INIT * SAMPLE_TIME);
+		sv_next = EGO_CAR_SV_INIT;
+		sa_next = (sv_next / SAMPLE_TIME);
+		sj_next = (sa_next / SAMPLE_TIME);
+		d_next = ego.Get_d();
+		xy_next = map.Frenet2Xy(s_next, d_next);
+		x_next = xy_next[0];
+		y_next = xy_next[1];
+		this->Add(x_next, y_next, s_next, sv_next, sa_next, sj_next, d_next, EGO_CAR_DV_INIT, EGO_CAR_DA_INIT, EGO_CAR_DJ_INIT, ego.Get_theta());
+		//this->Add(ego.Get_x(), ego.Get_y(), ego.Get_s(), EGO_CAR_SV_INIT, EGO_CAR_SA_INIT, EGO_CAR_SJ_INIT, ego.Get_d(), EGO_CAR_DV_INIT, EGO_CAR_DA_INIT, EGO_CAR_DJ_INIT, ego.Get_theta());
 		
 		// initialization done
 		this->is_initialized = true;
@@ -75,7 +96,7 @@ unsigned long Trajectory::Init(Vehicle ego, Path previous_path) {
 	
 }
 
-// add segment to trajectory
+// add step to trajectory
 void Trajectory::Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta) {
 	
 	// display message if required
@@ -97,7 +118,7 @@ void Trajectory::Add(double x, double y, double s, double sv, double sa, double 
 		
 	}
 	
-	// add trajectory segment
+	// add trajectory step
 	this->x_values.push_back(x);
 	this->y_values.push_back(y);
 	this->s_values.push_back(s);
@@ -156,7 +177,7 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 	vector<double> d_start_vector;
 	vector<double> d_end_vector;
 	vector<double> d_poly;
-	unsigned long remaining_points = 0;
+	unsigned long remaining_steps = 0;
 	unsigned long count = 0;
 	double t = 0.0;
 	vector<double> s_states;
@@ -192,6 +213,7 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 	} else {
 		
 		// TODO: XXXX !!!!! need else for case when we don't start
+		cout << "TRAJECTORY: AddJerkMinimizingTrajectory - error 1: Should never have empty trajectory!" << endl;
 		
 	}
 	
@@ -203,10 +225,10 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 	d_end_vector = (vector<double>){d_target, dv_target, da_target};
 	d_poly = JerkMinimizingTrajectoryCoefficients(d_start_vector, d_end_vector, STEP_TIME_INTERVAL);
 	
-	// determine number of points to create
-	remaining_points = (STEP_TIME_INTERVAL / SAMPLE_TIME) - trajectory_length;
+	// determine number of steps to create
+	remaining_steps = (STEP_TIME_INTERVAL / SAMPLE_TIME) - trajectory_length;
 	
-	for (count = 0; count < remaining_points; count++) {
+	for (count = 0; count < remaining_steps; count++) {
 		
 		// determine time value
 		t = SAMPLE_TIME * (count + 1);
@@ -231,10 +253,10 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 		// determine orientation angle
 		theta = atan2(y - y_last, x - x_last);
 		
-		// add new point to trajectory
+		// add new step to trajectory
 		this->Add(x, y, s, sv, sa, sj, d, dv, da, dj, theta);
 		
-		// update last values for next point (to determine orientation angle again)
+		// update last values for next step (to determine orientation angle again)
 		x_last = x;
 		y_last = y;
 		

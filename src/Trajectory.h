@@ -12,6 +12,7 @@
 #define TRAJECTORY_H_
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include "Map.h"
@@ -53,7 +54,7 @@ public:
 	~Trajectory() {}
 	
 	// initialize trajectory
-	unsigned long Init(Vehicle ego, Path previous_path);
+	unsigned long Init(Map map, Vehicle ego, Path previous_path);
 	
 	// add segment to trajectory
 	void Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);

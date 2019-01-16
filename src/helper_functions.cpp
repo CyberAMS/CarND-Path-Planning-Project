@@ -9,6 +9,7 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -27,6 +28,8 @@ using std::to_string;
 using std::cout;
 using std::endl;
 using std::ostringstream;
+using std::setw;
+using std::setfill;
 using std::sqrt;
 using std::iota;
 using std::sort;
@@ -208,7 +211,8 @@ string CreateDoubleVectorsString(const vector<vector<double>> &double_vectors) {
 			
 			if (current_vector > 0) {
 				
-				streamObj << tab;
+				// streamObj << tab;
+				streamObj << setw(DISPLAY_COLUMN_WIDTH) << setfill(' ');
 				
 			}
 			

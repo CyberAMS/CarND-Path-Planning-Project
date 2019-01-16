@@ -56,7 +56,7 @@ void Driver::PlanBehavior() {
 		from_step = NO_PREVIOUS_PATH_STEPS;
 		
 	}
-	finished_steps = this->trajectory.Init(this->ego, this->previous_path);
+	finished_steps = this->trajectory.Init(this->map, this->ego, this->previous_path);
 	this->state.Init(this->ego, this->trajectory, finished_steps);
 	
 	// get next possible states

@@ -40,7 +40,7 @@ const bool bDISPLAY_PATH_SET = false;
 const bool bDISPLAY_TRAJECTORY_INIT = true;
 const bool bDISPLAY_TRAJECTORY_ADD = false;
 const bool bDISPLAY_TRAJECTORY_ADDJERKMINIMIZINGTRAJECTORY = false;
-const bool bDISPLAY_TRAJECTORY_GENERATE = false;
+const bool bDISPLAY_TRAJECTORY_GENERATE = true;
 const bool bDISPLAY_TRAJECTORY_VALID = true;
 const bool bDISPLAY_TRAJECTORY_COST = true;
 const bool bDISPLAY_TRAJECTORY_REMOVEFIRSTSTEPS = false;
@@ -49,6 +49,7 @@ const bool bDISPLAY_STATE_SETBEHAVIOR = true;
 const bool bDISPLAY_STATE_GETNEXTPOSSIBLEBEHAVIORS = true;
 const bool bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR = true;
 const string DISPLAY_PREFIX = "    ";
+const unsigned int DISPLAY_COLUMN_WIDTH = 10;
 
 // define constants
 const double MPH2MS = 0.44704; // factor between miles per hour and meters per second
