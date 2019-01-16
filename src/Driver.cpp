@@ -43,7 +43,7 @@ void Driver::PlanBehavior() {
 	Trajectory next_possible_trajectory;
 	double cost;
 	double minimal_cost = std::numeric_limits<double>::max();
-	behavior_state best_behavior = this->state.behavior;
+	behavior_state best_behavior = this->state.Get_behavior();
 	Trajectory best_trajectory = this->trajectory;
 	
 	// initialize all objects for next step
