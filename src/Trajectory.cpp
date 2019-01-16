@@ -462,7 +462,7 @@ void Trajectory::RemoveFirstSteps(const unsigned long &finished_steps) {
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_REMOVEFIRSTSTEPS) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "TRAJECTORY: RemobeFirstSteps - Start" << endl;
+		cout << "TRAJECTORY: RemoveFirstSteps - Start" << endl;
 		cout << "  finished_steps: " << finished_steps << endl;
 		
 	}
