@@ -40,10 +40,10 @@ public:
 	void PlanBehavior();
 	
 	// get map object
-	Map Get_map();
+	Map* Get_map();
 	
 	// get ego object
-	Vehicle Get_ego();
+	Vehicle* Get_ego();
 	
 	// set vehicles object vector
 	void Set_vehicles(vector<Vehicle> vehicles);
@@ -55,7 +55,7 @@ public:
 	vector<double> Get_next_y();
 	
 	// get previous_path object
-	Path Get_previous_path();
+	Path* Get_previous_path();
 
 private:
 	

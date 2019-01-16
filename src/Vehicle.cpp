@@ -92,8 +92,8 @@ void Vehicle::Update(double x, double y, double s, double d, double theta, doubl
 		cout << "VEHICLE: Update - Start" << endl;
 		cout << "  x: " << x << endl;
 		cout << "  y: " << y << endl;
-		cout << "  vx: " << vx << endl;
-		cout << "  vy: " << vy << endl;
+		cout << "  s: " << s << endl;
+		cout << "  d: " << d << endl;
 		cout << "  theta: " << theta << endl;
 		cout << "  v: " << v << endl;
 		
@@ -137,8 +137,8 @@ void Vehicle::Update() {
 	}
 	
 	// determine values
-	this->is_inside_lane = this->CheckInsideLane();
 	this->lane = this->DetermineLane();
+	this->is_inside_lane = this->CheckInsideLane();
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
@@ -505,15 +505,13 @@ bool Vehicle::CheckInsideLane() {
 	}
 	
 	// define variables
-	vector<double> d_values;
 	double lane_center;
 	
 	// initialize outputs
 	bool is_inside_lane = false;
 	
 	// get lane center d value of vehicle's lane
-	d_values = GetLaneD((vector<unsigned int>){this->lane});
-	lane_center = d_values[0];
+	lane_center = GetLaneD(this->lane);
 	
 	// check whether vehicle is within lane center range
 	if (fabs(this->d - lane_center) <= (LANE_CENTER_WIDTH / 2)) {

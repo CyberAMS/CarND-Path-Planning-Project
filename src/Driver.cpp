@@ -43,8 +43,8 @@ void Driver::PlanBehavior() {
 	Trajectory next_possible_trajectory;
 	double cost;
 	double minimal_cost = std::numeric_limits<double>::max();
-	behavior_state best_behavior;
-	Trajectory best_trajectory;
+	behavior_state best_behavior = this->behavior;
+	Trajectory best_trajectory = this->trajectory;
 	
 	// initialize all objects for next step
 	if (this->trajectory.Get_is_initialized()) {
@@ -60,7 +60,7 @@ void Driver::PlanBehavior() {
 	this->state.Init(this->ego, this->trajectory, finished_steps);
 	
 	// get next possible states
-	next_possible_behaviors = state.GetNextPossibleBehaviors(this->Get_ego().Get_lane());
+	next_possible_behaviors = state.GetNextPossibleBehaviors(this->Get_ego()->Get_lane());
 	
 	// generate trajectories for all states
 	for (count = 0; count < next_possible_behaviors.size(); count++) {
@@ -108,23 +108,42 @@ void Driver::PlanBehavior() {
 }
 
 // get map object
-Map Driver::Get_map() {
+Map* Driver::Get_map() {
 	
-	return this->map;
+	return &this->map;
 	
 }
 
 // get ego object
-Vehicle Driver::Get_ego() {
+Vehicle* Driver::Get_ego() {
 	
-	return this->ego;
+	return &this->ego;
 	
 }
 
 // set vehicles object vector
 void Driver::Set_vehicles(vector<Vehicle> vehicles) {
 	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_DRIVER_SETVEHICLES) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "Driver: Set_vehicles - Start" << endl;
+		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		
+	}
+	
 	this->vehicles = vehicles;
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_DRIVER_SETVEHICLES) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  this->vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(this->vehicles);
+		cout << "--- DRIVER: Set_vehicles - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
 	
 }
 
@@ -143,8 +162,8 @@ vector<double> Driver::Get_next_y() {
 }
 
 // get previous_path object
-Path Driver::Get_previous_path() {
+Path* Driver::Get_previous_path() {
 	
-	this->previous_path;
+	return &this->previous_path;
 	
 }

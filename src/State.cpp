@@ -92,6 +92,11 @@ void State::SetBehavior(behavior_state new_behavior, unsigned long add_step) {
 		// determine step when transition will be finished
 		no_change_before_step = current_step + LANE_CHANGE_TRANSITION_TIME;
 		
+	} else {
+		
+		// allow change in current step
+		no_change_before_step = current_step;
+		
 	}
 	
 	// set behavior state
@@ -184,10 +189,8 @@ vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane
 		
 	}
 	
-	return next_possible_behaviors;
-	
 	// display message if required
-	if (bDISPLAY && bDISPLAY_STATE_SETBEHAVIOR) {
+	if (bDISPLAY && bDISPLAY_STATE_GETNEXTPOSSIBLEBEHAVIORS) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  can_move_left: " << can_move_left << endl;
@@ -196,6 +199,8 @@ vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane
 		cout << "--- STATE: GetNextPossibleBehaviors - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
+	return next_possible_behaviors;
+	
 	}
 	
 }
@@ -218,7 +223,6 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 	
 	// define variables
 	double sv_continue = trajectory.Get_sv()[from_step];
-	//double sa_continue = trajectory.Get_sa()[from_step];
 	double s_target = 0.0;
 	double sv_target = 0.0;
 	double sa_target = 0.0;
@@ -326,11 +330,11 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 		cout << "  current_lane: " << current_lane << endl;
 		cout << "  speed_factor: " << speed_factor << endl;
 		cout << "  s_target: " << s_target << endl;
-		cout << "  sv_target: " << s_target << endl;
-		cout << "  sa_target: " << s_target << endl;
-		cout << "  d_target: " << s_target << endl;
-		cout << "  dv_target: " << s_target << endl;
-		cout << "  da_target: " << s_target << endl;
+		cout << "  sv_target: " << sv_target << endl;
+		cout << "  sa_target: " << sa_target << endl;
+		cout << "  d_target: " << d_target << endl;
+		cout << "  dv_target: " << dv_target << endl;
+		cout << "  da_target: " << da_target << endl;
 		cout << "  new_trajectory: " << endl << new_trajectory.CreateString();
 		cout << "--- STATE: GenerateTrajectoryFromBehavior - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;

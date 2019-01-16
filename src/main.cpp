@@ -95,7 +95,7 @@ int main() {
 	}
 	
 	// initialize driver's map
-	driver.Get_map().Init(map_waypoints_x, map_waypoints_y, map_waypoints_s, map_waypoints_dx, map_waypoints_dy);
+	driver.Get_map()->Init(map_waypoints_x, map_waypoints_y, map_waypoints_s, map_waypoints_dx, map_waypoints_dy);
 	
 	h.onMessage([&driver,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
 		// "42" at the start of the message means there's a websocket message event.
@@ -158,7 +158,7 @@ int main() {
 					// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
 					
 					// update objects with data from simulator
-					driver.Get_ego().Update(car_x, car_y, car_s, car_d, Deg2Rad(car_yaw), Mph2Ms(car_speed));
+					driver.Get_ego()->Update(car_x, car_y, car_s, car_d, Deg2Rad(car_yaw), Mph2Ms(car_speed));
 					vector<Vehicle> vehicles;
 					for (auto sf : sensor_fusion) {
 						
@@ -167,7 +167,7 @@ int main() {
 						
 					}
 					driver.Set_vehicles(vehicles);
-					driver.Get_previous_path().Set(previous_path_x, previous_path_y, end_path_s, end_path_d);
+					driver.Get_previous_path()->Set(previous_path_x, previous_path_y, end_path_s, end_path_d);
 					
 					// determine next xy values by planning the behavior
 					driver.PlanBehavior();
@@ -192,13 +192,6 @@ int main() {
 						
 					}
 					
-					// set standard output to screen if necessary
-					if (bFILEOUTPUT) {
-						
-						cout.rdbuf(coutbuf);
-						
-					}
-					
 				}
 				
 			} else {
@@ -213,17 +206,17 @@ int main() {
 		
 	});
 	
-	// set standard output to screen if necessary
-	if (bFILEOUTPUT) {
-		
-		cout.rdbuf(coutbuf);
-		
-	}
-	
 	// We don't need this since we're not using HTTP but if it's removed the
 	// program
 	// doesn't compile :-(
 	h.onHttpRequest([](uWS::HttpResponse *res, uWS::HttpRequest req, char *data, size_t, size_t) {
+		
+		// set standard output to screen if necessary
+		if (bFILEOUTPUT) {
+			
+			cout.rdbuf(coutbuf);
+			
+		}
 		
 		const std::string s = "<h1>Hello world!</h1>";
 		if (req.getUrl().valueLength == 1) {
@@ -241,16 +234,37 @@ int main() {
 	
 	h.onConnection([&h](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
 		
+		// set standard output to screen if necessary
+		if (bFILEOUTPUT) {
+			
+			cout.rdbuf(coutbuf);
+			
+		}
+		
 		std::cout << "Connected!!!" << std::endl;
 		
 	});
 	
 	h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length) {
 		
+		// set standard output to screen if necessary
+		if (bFILEOUTPUT) {
+			
+			cout.rdbuf(coutbuf);
+			
+		}
+		
 		ws.close();
 		std::cout << "Disconnected" << std::endl;
 		
 	});
+	
+	// set standard output to screen if necessary
+	if (bFILEOUTPUT) {
+		
+		cout.rdbuf(coutbuf);
+		
+	}
 	
 	int port = 4567;
 	if (h.listen(port)) {

@@ -260,11 +260,11 @@ void Trajectory::Generate(Map map, Trajectory trajectory, unsigned long from_ste
 		cout << "  trajectory: " << endl << trajectory.CreateString();
 		cout << "  from_step: " << from_step << endl;
 		cout << "  s_target: " << s_target << endl;
-		cout << "  sv_target: " << s_target << endl;
-		cout << "  sa_target: " << s_target << endl;
-		cout << "  d_target: " << s_target << endl;
-		cout << "  dv_target: " << s_target << endl;
-		cout << "  da_target: " << s_target << endl;
+		cout << "  sv_target: " << sv_target << endl;
+		cout << "  sa_target: " << sa_target << endl;
+		cout << "  d_target: " << d_target << endl;
+		cout << "  dv_target: " << dv_target << endl;
+		cout << "  da_target: " << da_target << endl;
 		
 	}
 	
@@ -306,7 +306,7 @@ bool Trajectory::Valid() {
 	}
 	
 	// initialize outputs
-	bool is_valid = false;
+	bool is_valid = true;
 	
 	
 	
