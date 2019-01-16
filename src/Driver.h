@@ -48,6 +48,12 @@ public:
 	// set vehicles object vector
 	void Set_vehicles(vector<Vehicle> vehicles);
 	
+	// get list of vehicle objects
+	vector<Vehicle>* Get_vehicles();
+	
+	// get state object
+	State* Get_state();
+	
 	// get x values of path
 	vector<double> Get_next_x();
 	
