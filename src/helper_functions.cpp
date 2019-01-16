@@ -262,4 +262,4 @@ vector<unsigned int> SortDoubleVector(const vector<double> &double_vector) {
 	
 	return index;
 	
-}
+}		

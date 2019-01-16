@@ -189,6 +189,10 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 		dv_last = this->Get_dv()[trajectory_length - 1];
 		da_last = this->Get_da()[trajectory_length - 1];
 		
+	} else {
+		
+		// TODO: XXXX !!!!! need else for case when we don't start
+		
 	}
 	
 	// determine coefficients for jerk minimizing trajectory
@@ -240,6 +244,7 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADDJERKMINIMIZINGTRAJECTORY) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  trajectory_length: " << trajectory_length << endl;
 		cout << "  this: " << endl << this->CreateString();
 		cout << "--- TRAJECTORY: AddJerkMinimizingTrajectory - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
