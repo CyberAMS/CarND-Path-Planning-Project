@@ -215,7 +215,7 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "STATE: GenerateTrajectoryFromBehavior - Start" << endl;
-		cout << "  map: " << endl << map.CreateString();
+		// cout << "  map: " << endl << map.CreateString();
 		cout << "  ego: " << endl << ego.CreateString();
 		cout << "  trajectory: " << endl << trajectory.CreateString();
 		cout << "  from_step: " << from_step << endl;

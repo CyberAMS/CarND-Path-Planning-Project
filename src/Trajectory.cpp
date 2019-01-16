@@ -130,7 +130,7 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: AddJerkMinimizingTrajectory - Start" << endl;
-		cout << "  map: " << endl << map.CreateString();
+		// cout << "  map: " << endl << map.CreateString();
 		cout << "  s_target: " << s_target << endl;
 		cout << "  sv_target: " << sv_target << endl;
 		cout << "  sa_target: " << sa_target << endl;
@@ -256,7 +256,7 @@ void Trajectory::Generate(Map map, Trajectory trajectory, unsigned long from_ste
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: Generate - Start" << endl;
-		cout << "  map: " << endl << map.CreateString();
+		// cout << "  map: " << endl << map.CreateString();
 		cout << "  trajectory: " << endl << trajectory.CreateString();
 		cout << "  from_step: " << from_step << endl;
 		cout << "  s_target: " << s_target << endl;
@@ -281,6 +281,9 @@ void Trajectory::Generate(Map map, Trajectory trajectory, unsigned long from_ste
 	
 	// add final segment as jerk minimizing trajectory
 	this->AddJerkMinimizingTrajectory(map, s_target, sv_target, sa_target, d_target, dv_target, da_target);
+	
+	// prevent to reinitialize this trajectory
+	this->is_initialized = true;
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_GENERATE) {
