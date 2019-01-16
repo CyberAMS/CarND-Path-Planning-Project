@@ -284,6 +284,7 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 	sv_target = max(sv_target, MAX_SPEED);
 	
 	// determine position after time interval of next step
+	// TODO XXXXXX !!!!! confused from_step and finished_steps
 	s_target = (trajectory.Get_s()[from_step] + sv_target * STEP_TIME_INTERVAL);
 	
 	// determine target values based on lateral behavior
