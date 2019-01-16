@@ -18,6 +18,7 @@
 #include <functional>
 #include "helper_functions.h"
 #include "Eigen-3.3/Eigen/Core"
+#include "Eigen-3.3/Eigen/Dense"
 #include "Eigen-3.3/Eigen/QR"
 
 using std::vector;
@@ -32,6 +33,8 @@ using std::sort;
 using std::begin;
 using std::end;
 using std::copy;
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 // convert degrees to radians
 double Deg2Rad(const double &x) {
@@ -100,6 +103,10 @@ double GetY(const double &theta, const double &magnitude) {
 vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector<double> end, double T) {
 	
 	// define variables
+	double T2 = 0.0;
+	double T3 = 0.0;
+	double T4 = 0.0;
+	double T5 = 0.0;
 	MatrixXd T_matrix(3, 3);
 	VectorXd sf_diff(3);
 	VectorXd coefficients_vector;
@@ -125,14 +132,24 @@ vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector
 	coefficients_vector = T_matrix.inverse() * sf_diff;
 	
 	// determine coefficients
-	coefficients = vector<double> {start[0], start[1], (0.5 * start[2]), coeffs[0], coeffs[1], coeffs[2]};
+	coefficients = (vector<double>){start[0], start[1], (0.5 * start[2]), coefficients_vector[0], coefficients_vector[1], coefficients_vector[2]};
 	
 	return coefficients;
 	
 }
 
 // determine states with jerk minimizing trajectory
-vector<double> JerkMinimizingTrajectoryState(poly, start, t) {
+vector<double> JerkMinimizingTrajectoryState(vector<double> poly, vector<double> start, double t) {
+	
+	// define variables
+	double t2 = 0.0;
+	double t3 = 0.0;
+	double t4 = 0.0;
+	double t5 = 0.0;
+	double state = 0.0;
+	double state_d = 0.0;
+	double state_dd = 0.0;
+	double state_ddd = 0.0;
 	
 	//initialize outputs
 	vector<double> states;

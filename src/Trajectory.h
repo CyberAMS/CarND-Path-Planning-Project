@@ -14,9 +14,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "Map.h"
 #include "Vehicle.h"
 #include "Path.h"
-#include "State.h"
 #include "helper_functions.h"
 
 using std::vector;
@@ -28,29 +28,19 @@ using std::endl;
 const double SAMPLE_TIME = 0.020; // 20 ms sample time of simulator (50 Hz)
 const double STEP_TIME_INTERVAL = 1.7; // number of seconds from step to step
 
+// trajectory definitions
+const long NO_PREVIOUS_PATH_STEPS = 0;
+const long NUM_PREVIOUS_PATH_STEPS = 10;
+
 // longitudinal definitions
 const double SAFETY_DELTA_SPEED = 2 * MPH2MS; // travel 2 mph below maximum speed
 const double MAX_SPEED = (50 * MPH2MS) - SAFETY_DELTA_SPEED; // 50 mph minus safety delta in m/s
 const double MAX_ACCELERATION_S = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
 const double TARGET_SPEED_FROM_ZERO = 8.0; // MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
-const double LOW_SPEED_LIMIT = 10;
+const double LOW_SPEED_ACCELERATION_LIMIT = 10;
 const double HIGH_SPEED_ACCELERATION_FACTOR = 1.05; // MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
 const double LOW_SPEED_ACCELERATION_FACTOR = 1.1; // MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
 const double DECELERATION_FACTOR = 0.85; // MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
-
-
-//const double MAX_WAYPOINT_DISTANCE = 10.0 * MAX_V; // don't look ahead more than 30 seconds at max speed
-
-// lateral distance definitions
-//const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
-
-// path and trajectory parameters
-//const unsigned int PREVIOUS_PATH_STEPS = 10; // !!! XXX TODO Should be 3 not 30 // maximum steps considered from old trajectory
-//const double BACK_DISTANCE = MAX_V * SAMPLE_TIME; // spline parameter for keeping theta at segment transition (taking a large time step)
-
-
-
-
 
 class Trajectory {
 
@@ -69,10 +59,7 @@ public:
 	void Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
 	
 	// add jerk minimizing trajectory
-	void AddJerkMinimizingTrajectory(double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target);
-	
-	// generate new trajectory from behavior
-	void GenerateFromBehavior(Map map, Vehicle ego, Trajectory trajectory, unsigned long from_step, behavior_state behavior);
+	void AddJerkMinimizingTrajectory(Map map, double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target);
 	
 	// generate new trajectory
 	void Generate(Map map, Trajectory trajectory, unsigned long from_step, double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target);
@@ -115,6 +102,9 @@ public:
 	
 	// get trajectory orientation angles
 	vector<double> Get_theta();
+	
+	// get initialization status
+	bool Get_is_initialized();
 	
 	// display Trajectory object as string
 	string CreateString();

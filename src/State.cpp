@@ -12,6 +12,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cmath>
 #include "State.h"
 #include "Map.h"
 #include "Vehicle.h"
@@ -23,6 +24,7 @@ using std::to_string;
 using std::cout;
 using std::endl;
 using std::ostringstream;
+using std::max;
 
 // initialize state
 void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
@@ -65,26 +67,27 @@ void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
 }
 
 // set state
-void State::SetBehavior(behavior_state behavior, unsigned long add_step) {
+void State::SetBehavior(behavior_state new_behavior, unsigned long add_step) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_SETBEHAVIOR) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "STATE: SetBehavior - Start" << endl;
-		cout << "  behavior_state: " << endl << this->CreateBehaviorString(behavior);
+		cout << "  new_behavior: " << endl << this->CreateBehaviorString(new_behavior);
 		cout << "  add_step: " << add_step << endl;
 		
 	}
 	
 	// define variables
 	unsigned long current_step;
+	unsigned long no_change_before_step;
 	
 	// determine next step
 	current_step = this->current_step + add_step; // + 1; // TODO: check whether this really needs to be increased by 1 or wait for previous_path to increment this
 	
 	// check whether transitions must be locked to ensure complete state change
-	if (((this->behavior.lateral_state == PREPARE_LANE_CHANGE_LEFT) && (behavior.lateral_state == CHANGE_LANE_LEFT)) || ((this->behavior.lateral_state == PREPARE_LANE_CHANGE_RIGHT) && (behavior.lateral_state == CHANGE_LANE_RIGHT))) {
+	if (((this->behavior.lateral_state == PREPARE_LANE_CHANGE_LEFT) && (new_behavior.lateral_state == CHANGE_LANE_LEFT)) || ((this->behavior.lateral_state == PREPARE_LANE_CHANGE_RIGHT) && (new_behavior.lateral_state == CHANGE_LANE_RIGHT))) {
 		
 		// determine step when transition will be finished
 		no_change_before_step = current_step + LANE_CHANGE_TRANSITION_TIME;
@@ -92,7 +95,7 @@ void State::SetBehavior(behavior_state behavior, unsigned long add_step) {
 	}
 	
 	// set behavior state
-	this->behavior = behavior;
+	this->behavior = new_behavior;
 	this->current_step = current_step;
 	this->no_change_before_step = no_change_before_step;
 	
@@ -189,11 +192,152 @@ vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  can_move_left: " << can_move_left << endl;
 		cout << "  can_move_right: " << can_move_right << endl;
-		cout << "  next_behaviors: " << endl << this->CreateBehaviorVectorString(next_behaviors);
+		cout << "  next_possible_behaviors: " << endl << this->CreateBehaviorVectorString(next_possible_behaviors);
 		cout << "--- STATE: GetNextPossibleBehaviors - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
+	
+}
+
+// generate new trajectory from behavior
+Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajectory trajectory, unsigned long from_step, behavior_state behavior) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "STATE: GenerateTrajectoryFromBehavior - Start" << endl;
+		cout << "  map: " << endl << map.CreateString();
+		cout << "  ego: " << endl << ego.CreateString();
+		cout << "  trajectory: " << endl << trajectory.CreateString();
+		cout << "  from_step: " << from_step << endl;
+		cout << "  behavior: " << endl << CreateBehaviorString(behavior);
+		
+	}
+	
+	// define variables
+	double sv_continue = trajectory.Get_sv()[from_step];
+	//double sa_continue = trajectory.Get_sa()[from_step];
+	double s_target = 0.0;
+	double sv_target = 0.0;
+	double sa_target = 0.0;
+	double d_target = 0.0;
+	double dv_target = 0.0;
+	double da_target = 0.0;
+	double speed_factor = 1.0;
+	unsigned int current_lane = ego.Get_lane();
+	
+	// initialize outputs
+	Trajectory new_trajectory;
+	
+	// determine target values based on longitudinal behavior
+	switch (behavior.longitudinal_state) {
+		
+		case ACCELERATE:
+			
+			// check for starting from zero speed
+			if (sv_continue == 0) {
+				
+				sv_target = TARGET_SPEED_FROM_ZERO;
+				
+			} else {
+				
+				// check speed range
+				if (sv_continue < LOW_SPEED_ACCELERATION_LIMIT) {
+					
+					speed_factor = LOW_SPEED_ACCELERATION_FACTOR;
+					
+				} else {
+					
+					speed_factor = HIGH_SPEED_ACCELERATION_FACTOR;
+					
+				}
+				
+				// set target speed
+				sv_target = sv_continue * speed_factor;
+				
+			}
+			break; // switch
+			
+		case KEEP_SPEED:
+			
+			// set target speed
+			sv_target = sv_continue;
+			break; // switch
+			
+		case DECELERATE:
+			
+			// set target speed
+			sv_target = sv_continue * DECELERATION_FACTOR;
+			break; // switch
+			
+	}
+	
+	// ensure speed limit is kept
+	sv_target = max(sv_target, MAX_SPEED);
+	
+	// determine position after time interval of next step
+	s_target = (trajectory.Get_s()[from_step] + sv_target * STEP_TIME_INTERVAL);
+	
+	// determine target values based on lateral behavior
+	switch (behavior.lateral_state) {
+	
+		case KEEP_LANE:
+			
+			d_target = ego.GetLaneD(current_lane);
+			break; // switch
+			
+		case PREPARE_LANE_CHANGE_LEFT:
+			
+			d_target = ego.GetLaneD(current_lane);
+			break; // switch
+			
+		case PREPARE_LANE_CHANGE_RIGHT:
+			
+			d_target = ego.GetLaneD(current_lane);
+			break; // switch
+			
+		case CHANGE_LANE_LEFT:
+			
+			d_target = ego.GetLaneD(current_lane - 1);
+			break; // switch
+			
+		case CHANGE_LANE_RIGHT:
+			
+			d_target = ego.GetLaneD(current_lane + 1);
+			break; // switch
+			
+	}
+	
+	// keep lane if trajectory is too short // TODO: !!!!!! XXXXXXX Why?
+	if (trajectory.Get_d().size() < 5) {
+		
+		d_target = trajectory.Get_d()[0];
+		
+	}
+	
+	new_trajectory.Generate(map, trajectory, from_step, s_target, sv_target, sa_target, d_target, dv_target, da_target);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  current_lane: " << current_lane << endl;
+		cout << "  speed_factor: " << speed_factor << endl;
+		cout << "  s_target: " << s_target << endl;
+		cout << "  sv_target: " << s_target << endl;
+		cout << "  sa_target: " << s_target << endl;
+		cout << "  d_target: " << s_target << endl;
+		cout << "  dv_target: " << s_target << endl;
+		cout << "  da_target: " << s_target << endl;
+		cout << "  new_trajectory: " << endl << new_trajectory.CreateString();
+		cout << "--- STATE: GenerateTrajectoryFromBehavior - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return new_trajectory;
 	
 }
 

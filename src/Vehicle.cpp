@@ -153,6 +153,35 @@ void Vehicle::Update() {
 }
 
 // get d values for lanes
+double Vehicle::GetLaneD(const unsigned int &lane) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_GETLANED) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: GetLaneD - Start" << endl;
+		cout << "  lane: " << lane << endl;
+		
+	}
+	
+	// initialize outputs
+	double d = 0;
+	
+	d = (LANE_WIDTH / 2) + (LANE_WIDTH * ((double)lane - 1));
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_GETLANED) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  d: " << d << endl;
+		cout << "--- VEHICLE: GetLaneD - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return d;
+	
+}
 vector<double> Vehicle::GetLaneD(const vector<unsigned int> &lanes) {
 	
 	// display message if required
@@ -173,7 +202,7 @@ vector<double> Vehicle::GetLaneD(const vector<unsigned int> &lanes) {
 	
 	for (count = 0; count < lanes.size(); count++) {
 		
-		d = (LANE_WIDTH / 2) + (LANE_WIDTH * ((double) lanes[count] - 1));
+		d = this->GetLaneD(lanes[count]);
 		d_values.push_back(d);
 		
 	}

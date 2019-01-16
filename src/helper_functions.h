@@ -38,7 +38,7 @@ const bool bDISPLAY_VEHICLE_CHECKINSIDELANE = true;
 const bool bDISPLAY_PATH_SET = false;
 const bool bDISPLAY_TRAJECTORY_INIT = true;
 const bool bDISPLAY_TRAJECTORY_ADD = true;
-const bool bDISPLAY_TRAJECTORY_GENERATEFROMBEHAVIOR = true;
+const bool bDISPLAY_TRAJECTORY_ADDJERKMINIMIZINGTRAJECTORY = true;
 const bool bDISPLAY_TRAJECTORY_GENERATE = true;
 const bool bDISPLAY_TRAJECTORY_VALID = true;
 const bool bDISPLAY_TRAJECTORY_COST = true;
@@ -46,6 +46,7 @@ const bool bDISPLAY_TRAJECTORY_REMOVEFIRSTSTEPS = true;
 const bool bDISPLAY_STATE_INIT = true;
 const bool bDISPLAY_STATE_SETBEHAVIOR = true;
 const bool bDISPLAY_STATE_GETNEXTPOSSIBLEBEHAVIORS = true;
+const bool bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR = true;
 const string DISPLAY_PREFIX = "    ";
 
 // define constants
@@ -82,7 +83,7 @@ double GetY(const double &theta, const double &magnitude);
 vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector<double> end, double T);
 
 // determine states with jerk minimizing trajectory
-vector<double> JerkMinimizingTrajectoryState(poly, start, t);
+vector<double> JerkMinimizingTrajectoryState(vector<double> poly, vector<double> start, double t);
 
 // display double vector as string
 string CreateDoubleVectorString(const vector<double> &double_vector);

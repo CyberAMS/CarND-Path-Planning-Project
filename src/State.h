@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "Map.h"
 #include "Vehicle.h"
 #include "Trajectory.h"
 
@@ -82,6 +83,9 @@ public:
 	
 	// get next possible states
 	vector<behavior_state> GetNextPossibleBehaviors(unsigned int current_lane);
+	
+	// generate new trajectory from behavior
+	Trajectory GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajectory trajectory, unsigned long from_step, behavior_state behavior);
 	
 	// get behavior state
 	behavior_state Get_behavior();

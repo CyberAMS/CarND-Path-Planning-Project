@@ -47,7 +47,7 @@ void Driver::PlanBehavior() {
 	Trajectory best_trajectory;
 	
 	// initialize all objects for next step
-	if (this->trajectory.is_initialized) {
+	if (this->trajectory.Get_is_initialized()) {
 		
 		from_step = NUM_PREVIOUS_PATH_STEPS;
 		
@@ -66,7 +66,7 @@ void Driver::PlanBehavior() {
 	for (count = 0; count < next_possible_behaviors.size(); count++) {
 		
 		// generate trajectory for current state
-		next_possible_trajectory.GenerateFromBehavior(this->map, this->ego, this->trajectory, from_step, next_possible_behaviors[count]);
+		next_possible_trajectory = state.GenerateTrajectoryFromBehavior(this->map, this->ego, this->trajectory, from_step, next_possible_behaviors[count]);
 		
 		// check whether trajectory is valid
 		if (next_possible_trajectory.Valid()) {
@@ -97,8 +97,8 @@ void Driver::PlanBehavior() {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  finished_steps: " << finished_steps << endl;
-		cout << "  next_possible_behaviors: " << endl << CreateBehaviorVectorString(next_possible_behaviors);
-		cout << "  best_behavior: " << endl << CreateBehaviorString(best_behavior);
+		cout << "  next_possible_behaviors: " << endl << state.CreateBehaviorVectorString(next_possible_behaviors);
+		cout << "  best_behavior: " << endl << state.CreateBehaviorString(best_behavior);
 		cout << "  best_trajectory: " << endl << best_trajectory.CreateString();
 		cout << "--- DRIVER: PlanBehavior - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;

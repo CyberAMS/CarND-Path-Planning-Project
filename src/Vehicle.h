@@ -46,6 +46,7 @@ public:
 	void Update();
 	
 	// get d values for lanes
+	double GetLaneD(const unsigned int &lane);
 	vector<double> GetLaneD(const vector<unsigned int> &lanes);
 	
 	// determine lane
