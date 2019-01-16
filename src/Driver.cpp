@@ -92,6 +92,10 @@ void Driver::PlanBehavior() {
 	this->state.SetBehavior(best_behavior, NO_STEP_INCREASE);
 	this->trajectory = best_trajectory;
 	
+	// save next xy values
+	this->next_x_vals = this->trajectory.Get_x();
+	this->next_y_vals = this->trajectory.Get_y();
+	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_PLANBEHAVIOR) {
 		
@@ -100,6 +104,7 @@ void Driver::PlanBehavior() {
 		cout << "  next_possible_behaviors: " << endl << this->state.CreateBehaviorVectorString(next_possible_behaviors);
 		cout << "  best_behavior: " << endl << this->state.CreateBehaviorString(best_behavior);
 		cout << "  best_trajectory: " << endl << best_trajectory.CreateString();
+		cout << "  next_x_vals, next_y_vals: " << endl << CreateDoubleVectorsString((vector<vector<double>>){next_x_vals, next_y_vals});
 		cout << "--- DRIVER: PlanBehavior - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
