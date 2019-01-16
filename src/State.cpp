@@ -174,12 +174,14 @@ vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane
 					// get potential lateral state
 					potential_lateral_state = next_potential_behaviors[count_b].lateral_state;
 					
-					// only include lateral changes if there are valid lanes for it
-					if ((((potential_lateral_state == PREPARE_LANE_CHANGE_LEFT) || (potential_lateral_state == CHANGE_LANE_LEFT)) && can_move_left) || ((potential_lateral_state == PREPARE_LANE_CHANGE_RIGHT) || (potential_lateral_state == CHANGE_LANE_RIGHT)) && can_move_right) {
+					// only include lateral changes if there are valid lanes for it or no lane change necessary
+					if ((((potential_lateral_state == PREPARE_LANE_CHANGE_LEFT) || (potential_lateral_state == CHANGE_LANE_LEFT)) && can_move_left) || 
+					    (((potential_lateral_state == PREPARE_LANE_CHANGE_RIGHT) || (potential_lateral_state == CHANGE_LANE_RIGHT)) && can_move_right) ||
+							(potential_lateral_state == KEEP_LANE)) {
 						
 						next_possible_behaviors.push_back(next_potential_behaviors[count_b]);
 						
-					};
+					}
 					
 				}
 				
