@@ -102,7 +102,7 @@ double GetY(const double &theta, const double &magnitude) {
 	
 }
 
-// determine coefficients for jerk minimizing trajectory
+// determine polynomial coefficients for jerk minimizing trajectory
 vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector<double> end, double T) {
 	
 	// define variables
@@ -111,9 +111,9 @@ vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector
 	double T4 = 0.0;
 	double T5 = 0.0;
 	MatrixXd T_matrix(3, 3);
-	VectorXd sf_diff(3);
-	VectorXd coefficients_vector;
-	vector<double> coefficients;
+	VectorXd diff_vector(3);
+	VectorXd poly_vector;
+	vector<double> poly;
 	
 	// determine time values
 	T2 = pow(T, 2);
@@ -127,17 +127,17 @@ vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector
 	             6 * T, 12 * T2, 20 * T3;
 	
 	// determine difference based on start and end
-	sf_diff << end[0] - (start[0] + start[1] * T + 0.5 * start[2] * pow(T, 2)),
-	                                        end[1] - (start[1] + start[2] * T),
-	                                                         end[2] - start[2];
+	diff_vector << end[0] - (start[0] + start[1] * T + 0.5 * start[2] * T2),
+	               end[1] - (start[1] + start[2] * T),
+	               end[2] - (start[2]);
 	
-	// calculate coefficients vector
-	coefficients_vector = T_matrix.inverse() * sf_diff;
+	// calculate polynomial coefficients vector
+	poly_vector = T_matrix.inverse() * diff_vector;
 	
-	// determine coefficients
-	coefficients = (vector<double>){start[0], start[1], (0.5 * start[2]), coefficients_vector[0], coefficients_vector[1], coefficients_vector[2]};
+	// determine polynomial coefficients
+	poly = (vector<double>){start[0], start[1], (0.5 * start[2]), poly_vector[0], poly_vector[1], poly_vector[2]};
 	
-	return coefficients;
+	return poly;
 	
 }
 

@@ -30,8 +30,8 @@ const double SAMPLE_TIME = 0.020; // 20 ms sample time of simulator (50 Hz)
 const double STEP_TIME_INTERVAL = 1.7; // number of seconds from step to step
 
 // trajectory definitions
-const long NO_PREVIOUS_PATH_STEPS = 0;
 const long NUM_PREVIOUS_PATH_STEPS = 10;
+const long MIN_PREVIOUS_PATH_STEPS = 0;
 
 // longitudinal definitions
 const double SAFETY_DELTA_SPEED = 2 * MPH2MS; // travel 2 mph below maximum speed
@@ -56,14 +56,19 @@ public:
 	// initialize trajectory
 	unsigned long Init(Map map, Vehicle ego, Path previous_path);
 	
+	// start trajectory
+	void Start(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
+	
 	// add segment to trajectory
 	void Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
+	void Add(Trajectory trajectory, unsigned long max_num_steps);
+	void Add(Trajectory trajectory);
 	
 	// add jerk minimizing trajectory
 	void AddJerkMinimizingTrajectory(Map map, double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target);
 	
 	// generate new trajectory
-	void Generate(Map map, Trajectory trajectory, unsigned long from_step, double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target);
+	void Generate(Map map, Trajectory trajectory, double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target);
 	
 	// check trajectory for being valid
 	bool Valid();
@@ -113,7 +118,10 @@ public:
 private:
 	
 	// remove steps from the front
-	void RemoveFirstSteps(const unsigned long &finished_steps);
+	void RemoveFirstSteps(const unsigned long &steps);
+	
+	// keep steps from the front
+	void KeepFirstSteps(const unsigned long &steps);
 	
 	// trajectory values in xy
 	vector<double> x_values;

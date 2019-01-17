@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cmath>
 #include "Driver.h"
 #include "Map.h"
 #include "Vehicle.h"
@@ -23,6 +24,7 @@ using std::vector;
 using std::string;
 using std::cout;
 using std::endl;
+using std::min;
 
 // determine next action
 void Driver::PlanBehavior() {
@@ -36,7 +38,6 @@ void Driver::PlanBehavior() {
 	}
 	
 	// define variables
-	unsigned long from_step = 0;
 	unsigned long finished_steps = 0;
 	vector<behavior_state> next_possible_behaviors;
 	unsigned int count = 0;
@@ -46,16 +47,6 @@ void Driver::PlanBehavior() {
 	behavior_state best_behavior = this->state.Get_behavior();
 	Trajectory best_trajectory = this->trajectory;
 	
-	// initialize all objects for next step
-	if (this->trajectory.Get_is_initialized()) {
-		
-		from_step = NUM_PREVIOUS_PATH_STEPS;
-		
-	} else {
-		
-		from_step = NO_PREVIOUS_PATH_STEPS;
-		
-	}
 	finished_steps = this->trajectory.Init(this->map, this->ego, this->previous_path);
 	this->state.Init(this->ego, this->trajectory, finished_steps);
 	
@@ -63,10 +54,10 @@ void Driver::PlanBehavior() {
 	next_possible_behaviors = this->state.GetNextPossibleBehaviors(this->Get_ego()->Get_lane());
 	
 	// generate trajectories for all states
-	for (count = 0; count < next_possible_behaviors.size(); count++) {
+	for (count = 0; count < min(1, (int)next_possible_behaviors.size()); count++) {
 		
 		// generate trajectory for current state
-		next_possible_trajectory = this->state.GenerateTrajectoryFromBehavior(this->map, this->ego, this->trajectory, from_step, next_possible_behaviors[count]);
+		next_possible_trajectory = this->state.GenerateTrajectoryFromBehavior(this->map, this->ego, this->trajectory, next_possible_behaviors[count]);
 		
 		// check whether trajectory is valid
 		if (next_possible_trajectory.Valid()) {

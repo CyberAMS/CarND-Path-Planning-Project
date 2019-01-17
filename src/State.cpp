@@ -24,7 +24,7 @@ using std::to_string;
 using std::cout;
 using std::endl;
 using std::ostringstream;
-using std::max;
+using std::min;
 
 // initialize state
 void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
@@ -208,7 +208,7 @@ vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane
 }
 
 // generate new trajectory from behavior
-Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajectory trajectory, unsigned long from_step, behavior_state behavior) {
+Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajectory trajectory, behavior_state behavior) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR) {
@@ -218,13 +218,12 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 		// cout << "  map: " << endl << map.CreateString();
 		cout << "  ego: " << endl << ego.CreateString();
 		cout << "  trajectory: " << endl << trajectory.CreateString();
-		cout << "  from_step: " << from_step << endl;
 		cout << "  behavior: " << endl << CreateBehaviorString(behavior);
 		
 	}
 	
 	// define variables
-	double sv_continue = trajectory.Get_sv()[from_step];
+	double sv_continue = trajectory.Get_sv()[trajectory.Get_sv().size() - 1];
 	double s_target = 0.0;
 	double sv_target = 0.0;
 	double sa_target = 0.0;
@@ -281,11 +280,10 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 	}
 	
 	// ensure speed limit is kept
-	sv_target = max(sv_target, MAX_SPEED);
+	sv_target = min(sv_target, MAX_SPEED);
 	
-	// determine position after time interval of next step
-	// TODO XXXXXX !!!!! confused from_step and finished_steps
-	s_target = (trajectory.Get_s()[from_step] + sv_target * STEP_TIME_INTERVAL);
+	// determine position after next time interval
+	s_target = (trajectory.Get_s()[trajectory.Get_s().size() - 1] + sv_target * STEP_TIME_INTERVAL);
 	
 	// determine target values based on lateral behavior
 	switch (behavior.lateral_state) {
@@ -317,14 +315,7 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 			
 	}
 	
-	// keep lane if trajectory is too short // TODO: !!!!!! XXXXXXX Why?
-	if (trajectory.Get_d().size() < 5) {
-		
-		d_target = trajectory.Get_d()[0];
-		
-	}
-	
-	new_trajectory.Generate(map, trajectory, from_step, s_target, sv_target, sa_target, d_target, dv_target, da_target);
+	new_trajectory.Generate(map, trajectory, s_target, sv_target, sa_target, d_target, dv_target, da_target);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR) {
