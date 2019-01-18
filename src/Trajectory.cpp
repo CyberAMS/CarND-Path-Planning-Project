@@ -24,6 +24,7 @@ using std::string;
 using std::to_string;
 using std::cout;
 using std::endl;
+using std::min;
 using std::pow;
 
 // init trajectory
@@ -34,6 +35,7 @@ unsigned long Trajectory::Init(Map map, Vehicle ego, Path previous_path) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: Init - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		cout << "  ego: " << endl << ego.CreateString();
 		cout << "  previous_path: " << endl << previous_path.CreateString();
 		
@@ -412,25 +414,208 @@ void Trajectory::Generate(Map map, Trajectory trajectory, double s_target, doubl
 }
 
 // check trajectory for being valid
-bool Trajectory::Valid() {
+bool Trajectory::Valid(Map map, Vehicle ego) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_VALID) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		// cout << "  map: " << endl << map.CreateString();
+		cout << "  ego: " << endl << ego.CreateString();
 		cout << "TRAJECTORY: Valid - Start" << endl;
 		
 	}
 	
+	// define variables
+	double max_sv = 0.0;
+	double min_sv = 0.0;
+	double average_sv = 0.0;
+	double max_sa = 0.0;
+	double min_sa = 0.0;
+	double average_sa = 0.0;
+	double max_sj = 0.0;
+	double min_sj = 0.0;
+	double average_sj = 0.0;
+	double max_d = 0.0;
+	double min_d = 0.0;
+	double max_dv = 0.0;
+	double min_dv = 0.0;
+	double average_dv = 0.0;
+	double max_da = 0.0;
+	double min_da = 0.0;
+	double average_da = 0.0;
+	double max_dj = 0.0;
+	double min_dj = 0.0;
+	double average_dj = 0.0;
+	vector<double> v_values;
+	double max_v = 0.0;
+	double min_v = 0.0;
+	double average_v = 0.0;
+	vector<double> a_values;
+	double max_a = 0.0;
+	double min_a = 0.0;
+	double average_a = 0.0;
+	vector<double> j_values;
+	double max_j = 0.0;
+	double min_j = 0.0;
+	double average_j = 0.0;
+	double gain_sv = NEUTRAL_GAIN;
+	double gain_sa = NEUTRAL_GAIN;
+	double gain_v = NEUTRAL_GAIN;
+	double gain_a = NEUTRAL_GAIN;
+	double gain = NEUTRAL_GAIN;
+	double d = 0.0;
+	vector<vector<double>> xy_values;
+	
 	// initialize outputs
 	bool is_valid = true;
 	
+	// calculate distance, speed, acceleration and jerk values based on s and d values
+	max_sv = Maximum(this->Get_sv());
+	min_sv = Minimum(this->Get_sv());
+	average_sv = AbsAverage(this->Get_sv());
+	max_sa = Maximum(this->Get_sa());
+	min_sa = Minimum(this->Get_sa());
+	average_sa = AbsAverage(this->Get_sa());
+	max_sj = Maximum(this->Get_sj());
+	min_sj = Minimum(this->Get_sj());
+	average_sj = AbsAverage(this->Get_sj());
+	max_d = Maximum(this->Get_d());
+	min_d = Minimum(this->Get_d());
+	max_dv = Maximum(this->Get_dv());
+	min_dv = Minimum(this->Get_dv());
+	average_dv = AbsAverage(this->Get_dv());
+	max_da = Maximum(this->Get_da());
+	min_da = Minimum(this->Get_da());
+	average_da = AbsAverage(this->Get_da());
+	max_dj = Maximum(this->Get_dj());
+	min_dj = Minimum(this->Get_dj());
+	average_dj = AbsAverage(this->Get_dj());
 	
+	// calculate speed, acceleration and jerk values based on xy values
+	v_values = Multiply(Differential(Magnitude(this->Get_x(), this->Get_y())), (1 / SAMPLE_TIME));
+	max_v = Maximum(v_values);
+	min_v = Minimum(v_values);
+	average_v = AbsAverage(v_values);
+	a_values = Multiply(Differential(v_values), (1 / SAMPLE_TIME));
+	max_a = Maximum(a_values);
+	min_a = Minimum(a_values);
+	average_a = AbsAverage(a_values);
+	j_values = Multiply(Differential(a_values), (1 / SAMPLE_TIME));
+	max_j = Maximum(j_values);
+	min_j = Minimum(j_values);
+	average_j = AbsAverage(j_values);
+	
+	// determine gain for trajectory to be conform with maximum longitudinal speed, acceleration and deceleration
+	if (max_sv > MAX_SPEED) {
+		
+		gain_sv = min(gain_sv, (MAX_SPEED / max_sv));
+		
+	}
+	if (max_sa > MAX_ACCELERATION_S) {
+		
+		gain_sa = min(gain_sa, (MAX_ACCELERATION_S / max_sa));
+		
+	}
+	if (min_sa < MAX_DECELERATION_S) {
+		
+		gain_sa = min(gain_sa, (MAX_DECELERATION_S / min_sa));
+		
+	}
+	if (max_v > MAX_SPEED) {
+		
+		gain_v = min(gain_v, (MAX_SPEED / max_v));
+		
+	}
+	if (max_a > MAX_ACCELERATION_S) {
+		
+		gain_a = min(gain_a, (MAX_ACCELERATION_S / max_a));
+		
+	}
+	if (min_a < MAX_DECELERATION_S) {
+		
+		gain_a = min(gain_a, (MAX_DECELERATION_S / min_a));
+		
+	}
+	gain = min(min(min(gain_sv, gain_sa), gain_v), gain_a);
+	
+	// apply gain if necessary
+	if (gain < NEUTRAL_GAIN) {
+		
+		// adjust speed
+		this->sv_values = Multiply(this->Get_sv(), gain);
+		
+		// generate distance, acceleration and jerk
+		this->s_values = Accumulate(Multiply(this->Get_sv(), SAMPLE_TIME));
+		this->sa_values = Accumulate(Multiply(this->Get_sv(), (1 / SAMPLE_TIME)));
+		this->sj_values = Accumulate(Multiply(this->Get_sa(), (1 / SAMPLE_TIME)));
+		
+		// regenerate xy values including theta
+		xy_values = map.Frenet2Xy(this->Get_s(), this->Get_d());
+		this->x_values = xy_values[0];
+		this->y_values = xy_values[1];
+		this->theta_values = Angle(this->Get_x(), this->Get_y());
+		
+	}
+	
+	// check whether lateral trajectory accelerations are valid
+	if ((max_da > MAX_ACCELERATION_D) || (min_da < -MAX_ACCELERATION_D)) {
+		
+		is_valid = false;
+		
+	}
+	
+	// check whether trajectory stays in lane
+	d = this->Get_d()[this->Get_d().size() - 1];
+	if (!ego.CheckInsideLane(d, ego.DetermineLane(d))) {
+		
+		is_valid = false;
+		
+	}
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_VALID) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  max_sv: " << max_sv << endl;
+		cout << "  min_sv: " << min_sv << endl;
+		cout << "  average_sv: " << average_sv << endl;
+		cout << "  max_sa: " << max_sa << endl;
+		cout << "  min_sa: " << min_sa << endl;
+		cout << "  average_sa: " << average_sa << endl;
+		cout << "  max_sj: " << max_sj << endl;
+		cout << "  min_sj: " << min_sj << endl;
+		cout << "  average_sj: " << average_sj << endl;
+		cout << "  max_d: " << max_d << endl;
+		cout << "  min_d: " << min_d << endl;
+		cout << "  max_dv: " << max_dv << endl;
+		cout << "  min_dv: " << min_dv << endl;
+		cout << "  average_dv: " << average_dv << endl;
+		cout << "  max_da: " << max_da << endl;
+		cout << "  min_da: " << min_da << endl;
+		cout << "  average_da: " << average_da << endl;
+		cout << "  max_dj: " << max_dj << endl;
+		cout << "  min_dj: " << min_dj << endl;
+		cout << "  average_dj: " << average_dj << endl;
+		cout << "  v_values: " << endl << CreateDoubleVectorString(v_values);
+		cout << "  max_v: " << max_v << endl;
+		cout << "  min_v: " << min_v << endl;
+		cout << "  average_v: " << average_v << endl;
+		cout << "  a_values: " << endl << CreateDoubleVectorString(a_values);
+		cout << "  max_a: " << max_a << endl;
+		cout << "  min_a: " << min_a << endl;
+		cout << "  average_a: " << average_a << endl;
+		cout << "  j_values: " << endl << CreateDoubleVectorString(j_values);
+		cout << "  max_j: " << max_j << endl;
+		cout << "  min_j: " << min_j << endl;
+		cout << "  average_j: " << average_j << endl;
+		cout << "  gain_sv: " << gain_sv << endl;
+		cout << "  gain_sa: " << gain_sa << endl;
+		cout << "  gain_v: " << gain_v << endl;
+		cout << "  gain_a: " << gain_a << endl;
+		cout << "  gain: " << gain << endl;
+		cout << "  this: " << endl << this->CreateString();
+		cout << "  is_valid: " << is_valid << endl;
 		cout << "--- TRAJECTORY: Valid - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

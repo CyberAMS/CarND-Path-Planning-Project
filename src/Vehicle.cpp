@@ -66,8 +66,8 @@ void Vehicle::Update(unsigned int id, double x, double y, double vx, double vy, 
 	this->d = d;
 	
 	// calculate missing states
-	this->theta = GetAngle(vx, vy);
-	this->v = GetMagnitude(vx, vy);
+	this->theta = Angle(vx, vy);
+	this->v = Magnitude(vx, vy);
 	
 	// determine values
 	this->Update();
@@ -222,32 +222,6 @@ vector<double> Vehicle::GetLaneD(const vector<unsigned int> &lanes) {
 }
 
 // determine lane
-unsigned int Vehicle::DetermineLane() {
-	
-	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
-		
-		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "VEHICLE: DetermineLane - Start" << endl;
-		
-	}
-	
-	// initialize outputs
-	unsigned int lane = this->DetermineLane(this->d);
-	
-	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
-		
-		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  lane: " << lane << endl;
-		cout << "--- VEHICLE: DetermineLane - End" << endl;
-		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
-		
-	}
-	
-	return lane;
-	
-}
 unsigned int Vehicle::DetermineLane(const double &d) {
 	
 	// display message if required
@@ -297,9 +271,111 @@ unsigned int Vehicle::DetermineLane(const double &d) {
 	return lane;
 	
 }
+unsigned int Vehicle::DetermineLane() {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: DetermineLane - Start" << endl;
+		
+	}
+	
+	// initialize outputs
+	unsigned int lane = this->DetermineLane(this->d);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  lane: " << lane << endl;
+		cout << "--- VEHICLE: DetermineLane - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return lane;
+	
+}
+
+// check whether vehicle is inside the determined lane
+bool Vehicle::CheckInsideLane(const double &d, const unsigned int &lane) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_CHECKINSIDELANE) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: CheckInsideLane - Start" << endl;
+		cout << "  d: " << d << endl;
+		cout << "  lane: " << lane << endl;
+		
+	}
+	
+	// define variables
+	double lane_center;
+	
+	// initialize outputs
+	bool is_inside_lane = false;
+	
+	// get lane center d value of vehicle's lane
+	lane_center = GetLaneD(this->lane);
+	
+	// check whether vehicle is within lane center range
+	if (fabs(this->d - lane_center) <= (LANE_CENTER_WIDTH / 2)) {
+		
+		is_inside_lane = true;
+		
+	} else {
+		
+		is_inside_lane = false;
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_CHECKINSIDELANE) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  is_inside_lane: " << is_inside_lane << endl;
+		cout << "--- VEHICLE: CheckInsideLane - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return is_inside_lane;
+	
+}
+bool Vehicle::CheckInsideLane() {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_CHECKINSIDELANE) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: CheckInsideLane - Start" << endl;
+		
+	}
+	
+	// initialize outputs
+	bool is_inside_lane = false;
+	
+	// check this vehicle for being inside its lane
+	is_inside_lane = this->CheckInsideLane(this->d, this->lane);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_CHECKINSIDELANE) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  is_inside_lane: " << is_inside_lane << endl;
+		cout << "--- VEHICLE: CheckInsideLane - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return is_inside_lane;
+	
+}
 
 // get vehicles ahead of own vehicle
-vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, unsigned int lane) {
+vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, const unsigned int &lane) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_AHEAD) {
@@ -340,7 +416,7 @@ vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, unsigned int lan
 }
 
 // get vehicles behind own vehicle
-vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, unsigned int lane) {
+vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned int &lane) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_BEHIND) {
@@ -491,50 +567,5 @@ string Vehicle::CreateVehiclesVectorString(vector<Vehicle> vehicles_vector) {
 	
 	// return output
 	return text;
-	
-}
-
-// check whether vehicle is inside the determined lane
-bool Vehicle::CheckInsideLane() {
-	
-	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_CHECKINSIDELANE) {
-		
-		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "VEHICLE: CheckInsideLane - Start" << endl;
-		
-	}
-	
-	// define variables
-	double lane_center;
-	
-	// initialize outputs
-	bool is_inside_lane = false;
-	
-	// get lane center d value of vehicle's lane
-	lane_center = GetLaneD(this->lane);
-	
-	// check whether vehicle is within lane center range
-	if (fabs(this->d - lane_center) <= (LANE_CENTER_WIDTH / 2)) {
-		
-		is_inside_lane = true;
-		
-	} else {
-		
-		is_inside_lane = false;
-		
-	}
-	
-	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_CHECKINSIDELANE) {
-		
-		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  is_inside_lane: " << is_inside_lane << endl;
-		cout << "--- VEHICLE: CheckInsideLane - End" << endl;
-		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
-		
-	}
-	
-	return is_inside_lane;
 	
 }

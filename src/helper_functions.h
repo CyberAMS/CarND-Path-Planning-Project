@@ -42,7 +42,7 @@ const bool bDISPLAY_TRAJECTORY_START = false;
 const bool bDISPLAY_TRAJECTORY_ADD = false;
 const bool bDISPLAY_TRAJECTORY_ADDJERKMINIMIZINGTRAJECTORY = false;
 const bool bDISPLAY_TRAJECTORY_GENERATE = false;
-const bool bDISPLAY_TRAJECTORY_VALID = false;
+const bool bDISPLAY_TRAJECTORY_VALID = true;
 const bool bDISPLAY_TRAJECTORY_COST = false;
 const bool bDISPLAY_TRAJECTORY_REMOVEFIRSTSTEPS = false;
 const bool bDISPLAY_TRAJECTORY_KEEPFIRSTSTEPS = false;
@@ -55,6 +55,8 @@ const unsigned int DISPLAY_COLUMN_WIDTH = 15;
 
 // define constants
 const double MPH2MS = 0.44704; // factor between miles per hour and meters per second
+const double ZERO_DIFFERENTIAL_VALUE = 0.0;
+const double NEUTRAL_GAIN = 1.0;
 
 // convert degrees to radians
 double Deg2Rad(const double &x);
@@ -72,16 +74,39 @@ double Ms2Mph(const double &speed);
 double Distance(const double &x1, const double &y1, const double &x2, const double &y2);
 
 // calculate angle of vector
-double GetAngle(const double &x, const double &y);
+double Angle(const double &x, const double &y);
+vector<double> Angle(const vector<double> &x_vector, const vector<double> &y_vector);
 
 // calculate angle of vector
-double GetMagnitude(const double &x, const double &y);
+double Magnitude(const double &x, const double &y);
+vector<double> Magnitude(const vector<double> &x_vector, const vector<double> &y_vector);
 
 // calculate angle of vector
 double GetX(const double &theta, const double &magnitude);
 
 // calculate angle of vector
 double GetY(const double &theta, const double &magnitude);
+
+// calculate average of double vector
+double AbsAverage(const vector<double> &vector_data);
+
+// calculate maximum of double vector
+double Maximum(const vector<double> &vector_data);
+
+// calculate minimum of double vector
+double Minimum(const vector<double> &vector_data);
+
+// calculate sum of double vector
+double Sum(const vector<double> &vector_data);
+
+// calculate differential of double vector
+vector<double> Differential(const vector<double> &vector_data);
+
+// multiply double vector with gain
+vector<double> Multiply(const vector<double> &vector_data, const double &gain);
+
+// accumulate double vector
+vector<double> Accumulate(const vector<double> &vector_data);
 
 // determine coefficients for jerk minimizing trajectory
 vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector<double> end, double T);

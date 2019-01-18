@@ -36,12 +36,16 @@ const long MIN_PREVIOUS_PATH_STEPS = 0;
 // longitudinal definitions
 const double SAFETY_DELTA_SPEED = 2 * MPH2MS; // travel 2 mph below maximum speed
 const double MAX_SPEED = (50 * MPH2MS) - SAFETY_DELTA_SPEED; // 50 mph minus safety delta in m/s
-const double MAX_ACCELERATION_S = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
-const double TARGET_SPEED_FROM_ZERO = 8.0; // MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
+const double MAX_ACCELERATION_S = 10.0; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
+const double MAX_DECELERATION_S = -MAX_ACCELERATION_S;
+const double TARGET_SPEED_FROM_ZERO = 8.0; // TODO: MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
 const double LOW_SPEED_ACCELERATION_LIMIT = 10;
-const double HIGH_SPEED_ACCELERATION_FACTOR = 1.05; // MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
-const double LOW_SPEED_ACCELERATION_FACTOR = 1.1; // MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
-const double DECELERATION_FACTOR = 0.85; // MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
+const double HIGH_SPEED_ACCELERATION_FACTOR = 1.05; // TODO: MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
+const double LOW_SPEED_ACCELERATION_FACTOR = 1.1; // TODO: MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
+const double DECELERATION_FACTOR = 0.85; // TODO: MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
+
+// lateral definitions
+const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
 
 class Trajectory {
 
@@ -71,7 +75,7 @@ public:
 	void Generate(Map map, Trajectory trajectory, double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target);
 	
 	// check trajectory for being valid
-	bool Valid();
+	bool Valid(Map map, Vehicle ego);
 	
 	// determine cost of trajectory
 	double Cost();

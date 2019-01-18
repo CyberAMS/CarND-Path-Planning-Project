@@ -31,6 +31,7 @@ using std::ostringstream;
 using std::setw;
 using std::setfill;
 using std::sqrt;
+using std::fabs;
 using std::iota;
 using std::sort;
 using std::begin;
@@ -75,16 +76,50 @@ double Distance(const double &x1, const double &y1, const double &x2, const doub
 }
 
 // calculate angle of vector
-double GetAngle(const double &x, const double &y) {
+double Angle(const double &x, const double &y) {
 	
 	return atan2(y, x);
 	
 }
+vector<double> Angle(const vector<double> &x_vector, const vector<double> &y_vector) {
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	vector<double> angle_vector;
+	
+	for (count = 0; count < x_vector.size(); count++) {
+		
+		angle_vector.push_back(Angle(x_vector[count], y_vector[count]));
+		
+	}
+	
+	return angle_vector;
+	
+}
 
 // calculate magnitude of vector
-double GetMagnitude(const double &x, const double &y) {
+double Magnitude(const double &x, const double &y) {
 	
 	return sqrt((x * x) + (y * y));
+	
+}
+vector<double> Magnitude(const vector<double> &x_vector, const vector<double> &y_vector) {
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	vector<double> magnitude_vector;
+	
+	for (count = 0; count < x_vector.size(); count++) {
+		
+		magnitude_vector.push_back(Magnitude(x_vector[count], y_vector[count]));
+		
+	}
+	
+	return magnitude_vector;
 	
 }
 
@@ -99,6 +134,179 @@ double GetX(const double &theta, const double &magnitude) {
 double GetY(const double &theta, const double &magnitude) {
 	
 	return (magnitude * sin(theta));
+	
+}
+
+// calculate average of double vector
+double AbsAverage(const vector<double> &vector_data) {
+	
+	// define variables
+	unsigned long count = 0;
+	double sum = 0.0;
+	
+	// initialize outputs
+	double average = 0.0;
+	
+	// calculate sum
+	for (count = 0; count < vector_data.size(); count++) {
+		
+		sum += fabs(vector_data[count]);
+		
+	}
+	
+	// calculate average
+	average = (sum / vector_data.size());
+	
+	return average;
+	
+}
+
+// calculate maximum of double vector
+double Maximum(const vector<double> &vector_data) {
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	double maximum = std::numeric_limits<double>::min();
+	
+	// calculate maximum
+	for (count = 0; count < vector_data.size(); count++) {
+		
+		// check for new maximum
+		if (vector_data[count] > maximum) {
+			
+			// save maximum
+			maximum = vector_data[count];
+			
+		}
+		
+	}
+	
+	return maximum;
+	
+}
+
+// calculate minimum of double vector
+double Minimum(const vector<double> &vector_data) {
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	double minimum = std::numeric_limits<double>::max();
+	
+	// calculate minimum
+	for (count = 0; count < vector_data.size(); count++) {
+		
+		// check for new minimum
+		if (vector_data[count] < minimum) {
+			
+			// save minimum
+			minimum = vector_data[count];
+			
+		}
+		
+	}
+	
+	return minimum;
+	
+}
+
+// calculate sum of double vector
+double Sum(const vector<double> &vector_data) {
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	double sum = 0.0;
+	
+	// calculate sum
+	for (count = 0; count < vector_data.size(); count++) {
+		
+		// add current entry
+		sum += vector_data[count];
+		
+	}
+	
+	return sum;
+	
+}
+
+// calculate differential of double vector
+vector<double> Differential(const vector<double> &vector_data) {
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	vector<double> differential;
+	
+	// no difference for first element
+	differential.push_back(ZERO_DIFFERENTIAL_VALUE);
+	
+	// calculate differential
+	for (count = 1; count < vector_data.size(); count++) {
+		
+		// add current entry
+		differential.push_back(differential[count] - differential[count -1]);
+		
+	}
+	
+	return differential
+	
+}
+
+// multiply double vector with gain
+vector<double> Multiply(const vector<double> &vector_data, const double &gain) {
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	vector<double> multiplication;
+	
+	// calculate multiplication
+	for (count = 0; count < vector_data.size(); count++) {
+		
+		// process current entry
+		multiplication.push_back(vector_data[count] * gain);
+		
+	}
+	
+	return multiplication
+	
+}
+
+// accumulate double vector
+vector<double> Accumulate(const vector<double> &vector_data) {
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	vector<double> accumulation;
+	
+	// calculate accumulation
+	for (count = 0; count < vector_data.size(); count++) {
+		
+		// check for first element
+		if (count == 0) {
+			
+			// add first value
+			accumulation.push_back(vector_data[count]);
+			
+		} else {
+			
+			// add accumulated value
+			accumulation.push_back(accumulation[count - 1] + vector_data[count]);
+			
+		}
+		
+	}
+	
+	return accumulation
 	
 }
 

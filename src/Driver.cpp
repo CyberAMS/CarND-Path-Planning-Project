@@ -60,7 +60,7 @@ void Driver::PlanBehavior() {
 		next_possible_trajectory = this->state.GenerateTrajectoryFromBehavior(this->map, this->ego, this->trajectory, next_possible_behaviors[count]);
 		
 		// check whether trajectory is valid
-		if (next_possible_trajectory.Valid()) {
+		if (next_possible_trajectory.Valid(this->map, this->ego)) {
 			
 			// determine cost of trajectory
 			cost = next_possible_trajectory.Cost();

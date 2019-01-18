@@ -50,14 +50,18 @@ public:
 	vector<double> GetLaneD(const vector<unsigned int> &lanes);
 	
 	// determine lane
-	unsigned int DetermineLane();
 	unsigned int DetermineLane(const double &d);
+	unsigned int DetermineLane();
+	
+	// check whether vehicle is inside the determined lane
+	bool CheckInsideLane(const double &d, const unsigned int &lane);
+	bool CheckInsideLane();
 	
 	// get vehicles ahead of own vehicle
-	vector<Vehicle> Ahead(const vector<Vehicle> &vehicles, unsigned int lane);
+	vector<Vehicle> Ahead(const vector<Vehicle> &vehicles, const unsigned int &lane);
 	
 	// get vehicles behind own vehicle
-	vector<Vehicle> Behind(const vector<Vehicle> &vehicles, unsigned int lane);
+	vector<Vehicle> Behind(const vector<Vehicle> &vehicles, const unsigned int &lane);
 	
 	// get x value
 	double Get_x();
@@ -96,9 +100,6 @@ public:
 	string CreateVehiclesVectorString(vector<Vehicle> vehicles_vector);
 
 private:
-	
-	// check whether vehicle is inside the determined lane
-	bool CheckInsideLane();
 	
 	// state values
 	double id = 0;

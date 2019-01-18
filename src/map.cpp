@@ -60,6 +60,7 @@ void Map::Init(vector<double> map_waypoints_x, vector<double> map_waypoints_y, v
 	
 }
 
+// convert xy to Frenet coordinates
 vector<double> Map::Xy2Frenet(const double &x, const double &y, const double &theta) {
 	
 	// display message if required
@@ -154,6 +155,7 @@ vector<double> Map::Xy2Frenet(const double &x, const double &y, const double &th
 	return (vector<double>){s, d};
 }
 
+// convert Frenet to xy coordinates
 vector<double> Map::Frenet2Xy(const double &s, const double &d) {
 	
 	// display message if required
@@ -192,6 +194,49 @@ vector<double> Map::Frenet2Xy(const double &s, const double &d) {
 	}
 	
 	return (vector<double>){x, y};
+	
+}
+vector<vector<double>> Map::Frenet2Xy(const vector<double> &s_values, const vector<double> &d_values) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_FRENET2XY) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "MAP: Frenet2Xy - Start" << endl;
+		cout << "  s_values: " << endl << CreateDoubleVectorString(s_values);
+		cout << "  d_values: " << endl << CreateDoubleVectorString(d_values);
+		
+	}
+	
+	// define variables
+	unsigned long count = 0;
+	vector<double> xy_value;
+	
+	// initialize outputs
+	vector<double> x_values;
+	vector<double> y_values;
+	
+	for (count = 0; count < s_values.size(); count++) {
+		
+		// convert current element from Frenet to xy coordinates
+		xy_value = this->Frenet2Xy(x_values[count], y_values[count]);
+		x_values.pushback(xy_value[0]);
+		y_values.pushback(xy_value[1]);
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_FRENET2XY) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  x_values: " << endl << CreateDoubleVectorString(x_values);
+		cout << "  y_values: " << endl << CreateDoubleVectorString(y_values);
+		cout << "--- MAP: Frenet2Xy - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return (vector<vector<double>>){x_values, y_values};
 	
 }
 

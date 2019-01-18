@@ -48,6 +48,7 @@ public:
 	
 	// convert Frenet to xy coordinates
 	vector<double> Frenet2Xy(const double &s, const double &d);
+	vector<vector<double>> Frenet2Xy(const vector<double> &s_values, const vector<double> &d_values);
 	
 	// display Map object as string
 	string CreateString();
