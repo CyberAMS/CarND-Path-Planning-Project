@@ -509,7 +509,7 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	
 	// calculate speed, acceleration and jerk values based on xy values
 	v_values = Multiply(Magnitude(Differential(this->Get_x()), Differential(this->Get_y())), (1 / SAMPLE_TIME));
-	v_values.erase(v_values.begin() + 1, v_values.end()); // make sure to not use first values that came from Differential and are ZERO_DIFFERENTIAL_VALUE
+	v_values.erase(v_values.begin(), v_values.begin() + 1); // make sure to not use first values that came from Differential and are ZERO_DIFFERENTIAL_VALUE
 	max_v = Maximum(v_values);
 	min_v = Minimum(v_values);
 	average_v = AbsAverage(v_values);
