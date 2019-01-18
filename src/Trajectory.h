@@ -29,8 +29,8 @@ using std::endl;
 const double SAMPLE_TIME = 0.020; // 20 ms sample time of simulator (50 Hz)
 const double STEP_TIME_INTERVAL = 1.7; // number of seconds from step to step
 const double NEUTRAL_GAIN = 1.0;
-enum TRAJECTORY_VALID_GAIN {NOTHING, VELOCITIES, ALL};
-const TRAJECTORY_VALID_GAIN TRAJECTORY_VALID_GAIN_SELECTION = ALL;
+enum TRAJECTORY_VALID_GAIN {NOTHING, SV_V, SV_SA, SV_SA_V, ALL};
+const TRAJECTORY_VALID_GAIN TRAJECTORY_VALID_GAIN_SELECTION = SV_SA_V;
 
 // trajectory definitions
 const long NUM_PREVIOUS_PATH_STEPS = 10;

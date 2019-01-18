@@ -513,11 +513,13 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	max_v = Maximum(v_values);
 	min_v = Minimum(v_values);
 	average_v = AbsAverage(v_values);
-	a_values = Multiply(Differential(v_values), (1 / SAMPLE_TIME));
+	a_values = Multiply(Differential(v_values), (1 / SAMPLE_TIME)); // TODO: Sometimes the a values don't make sense and are higher than sa values for unknown reason - v values seem to be OK!
+	a_values.erase(a_values.begin(), a_values.begin() + 1); // make sure to not use first values that came from Differential and are ZERO_DIFFERENTIAL_VALUE
 	max_a = Maximum(a_values);
 	min_a = Minimum(a_values);
 	average_a = AbsAverage(a_values);
 	j_values = Multiply(Differential(a_values), (1 / SAMPLE_TIME));
+	j_values.erase(j_values.begin(), j_values.begin() + 1); // make sure to not use first values that came from Differential and are ZERO_DIFFERENTIAL_VALUE
 	max_j = Maximum(j_values);
 	min_j = Minimum(j_values);
 	average_j = AbsAverage(j_values);
@@ -563,10 +565,22 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 			gain = NEUTRAL_GAIN;
 			break; // switch
 			
-		case VELOCITIES:
+		case SV_V:
 			
 			// only use velocity gains
 			gain = min(gain_sv, gain_v);
+			break; // switch
+			
+		case SV_SA:
+			
+			// only use sd gains
+			gain = min(gain_sv, gain_sa);
+			break; // switch
+			
+		case SV_SA_V:
+			
+			// only use sd gains and velocity
+			gain = min(min(gain_sv, gain_sa), gain_v);
 			break; // switch
 			
 		case ALL:
@@ -612,11 +626,21 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 			// make sure to not use first values that came from Differential and are ZERO_DIFFERENTIAL_VALUE
 			if (count == previous_trajectory_steps) {
 				
-				// update only valid values of current step
+				// update only valid values of current step (not first or higher Differential)
 				this->s_values[count] = new_s_values[count - previous_trajectory_steps];
 				this->sv_values[count] = new_sv_values[count - previous_trajectory_steps];
 				this->x_values[count] = new_x_values[count - previous_trajectory_steps];
 				this->y_values[count] = new_y_values[count - previous_trajectory_steps];
+				
+			} else if (count == (previous_trajectory_steps + 1)) {
+				
+				// update only valid values of current step (no second Differential)
+				this->s_values[count] = new_s_values[count - previous_trajectory_steps];
+				this->sv_values[count] = new_sv_values[count - previous_trajectory_steps];
+				this->sa_values[count] = new_sa_values[count - previous_trajectory_steps];
+				this->x_values[count] = new_x_values[count - previous_trajectory_steps];
+				this->y_values[count] = new_y_values[count - previous_trajectory_steps];
+				this->theta_values[count] = new_theta_values[count - previous_trajectory_steps];
 				
 			} else {
 				
@@ -674,7 +698,10 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 		cout << "  max_dj: " << max_dj << endl;
 		cout << "  min_dj: " << min_dj << endl;
 		cout << "  average_dj: " << average_dj << endl;
-		cout << "  v_values, a_values, j_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){v_values, a_values, j_values});
+		//cout << "  v_values, a_values, j_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){v_values, a_values, j_values});
+		cout << "  v_values: " << endl << CreateDoubleVectorString(v_values);
+		cout << "  a_values: " << endl << CreateDoubleVectorString(a_values);
+		cout << "  j_values: " << endl << CreateDoubleVectorString(j_values);
 		cout << "  max_v: " << max_v << endl;
 		cout << "  min_v: " << min_v << endl;
 		cout << "  average_v: " << average_v << endl;
