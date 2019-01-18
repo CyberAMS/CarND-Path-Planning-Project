@@ -420,9 +420,9 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_VALID) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "TRAJECTORY: Valid - Start" << endl;
 		// cout << "  map: " << endl << map.CreateString();
 		cout << "  ego: " << endl << ego.CreateString();
-		cout << "TRAJECTORY: Valid - Start" << endl;
 		
 	}
 	
@@ -493,7 +493,7 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	average_dj = AbsAverage(this->Get_dj());
 	
 	// calculate speed, acceleration and jerk values based on xy values
-	v_values = Multiply(Differential(Magnitude(this->Get_x(), this->Get_y())), (1 / SAMPLE_TIME));
+	v_values = Multiply(Magnitude(Differential(this->Get_x()), Differential(this->Get_y())), (1 / SAMPLE_TIME));
 	max_v = Maximum(v_values);
 	min_v = Minimum(v_values);
 	average_v = AbsAverage(v_values);
@@ -538,6 +538,8 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 		
 	}
 	gain = min(min(min(gain_sv, gain_sa), gain_v), gain_a);
+	//gain = min(gain_sv, gain_v);
+	//gain = NEUTRAL_GAIN;
 	
 	// apply gain if necessary
 	if (gain < NEUTRAL_GAIN) {
@@ -554,7 +556,7 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 		xy_values = map.Frenet2Xy(this->Get_s(), this->Get_d());
 		this->x_values = xy_values[0];
 		this->y_values = xy_values[1];
-		this->theta_values = Angle(this->Get_x(), this->Get_y());
+		this->theta_values = Angle(Differential(this->Get_x()), Differential(this->Get_y()));
 		
 	}
 	
@@ -597,15 +599,13 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 		cout << "  max_dj: " << max_dj << endl;
 		cout << "  min_dj: " << min_dj << endl;
 		cout << "  average_dj: " << average_dj << endl;
-		cout << "  v_values: " << endl << CreateDoubleVectorString(v_values);
+		cout << "  v_values, a_values, j_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){v_values, a_values, j_values});
 		cout << "  max_v: " << max_v << endl;
 		cout << "  min_v: " << min_v << endl;
 		cout << "  average_v: " << average_v << endl;
-		cout << "  a_values: " << endl << CreateDoubleVectorString(a_values);
 		cout << "  max_a: " << max_a << endl;
 		cout << "  min_a: " << min_a << endl;
 		cout << "  average_a: " << average_a << endl;
-		cout << "  j_values: " << endl << CreateDoubleVectorString(j_values);
 		cout << "  max_j: " << max_j << endl;
 		cout << "  min_j: " << min_j << endl;
 		cout << "  average_j: " << average_j << endl;

@@ -250,7 +250,7 @@ vector<double> Differential(const vector<double> &vector_data) {
 	for (count = 1; count < vector_data.size(); count++) {
 		
 		// add current entry
-		differential.push_back(differential[count] - differential[count -1]);
+		differential.push_back(vector_data[count] - vector_data[count -1]);
 		
 	}
 	
