@@ -242,25 +242,15 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 		case ACCELERATE:
 			
 			// check for starting from zero speed
-			if (sv_continue == 0) {
+			if (sv_continue < TARGET_SPEED_FROM_ZERO) {
 				
 				sv_target = TARGET_SPEED_FROM_ZERO;
 				
 			} else {
 				
-				// check speed range
-				if (sv_continue < LOW_SPEED_ACCELERATION_LIMIT) {
-					
-					speed_factor = LOW_SPEED_ACCELERATION_FACTOR;
-					
-				} else {
-					
-					speed_factor = HIGH_SPEED_ACCELERATION_FACTOR;
-					
-				}
-				
 				// set target speed
-				sv_target = sv_continue * speed_factor;
+				//sv_target = sv_continue * ACCELERATION_FACTOR;
+				sv_target = sv_continue + (NORMAL_ACCELERATION_S * STEP_TIME_INTERVAL);
 				
 			}
 			break; // switch
@@ -274,7 +264,8 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 		case DECELERATE:
 			
 			// set target speed
-			sv_target = sv_continue * DECELERATION_FACTOR;
+			//sv_target = sv_continue * DECELERATION_FACTOR;
+			sv_target = sv_continue + (NORMAL_DECELERATION_S * STEP_TIME_INTERVAL);
 			break; // switch
 			
 	}

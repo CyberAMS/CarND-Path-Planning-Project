@@ -258,6 +258,27 @@ vector<double> Differential(const vector<double> &vector_data) {
 	
 }
 
+// add number to double vector
+vector<double> Addition(const vector<double> &vector_data, const double &add) {
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	vector<double> addition;
+	
+	// calculate multiplication
+	for (count = 0; count < vector_data.size(); count++) {
+		
+		// process current entry
+		addition.push_back(vector_data[count] + add);
+		
+	}
+	
+	return addition;
+	
+}
+
 // multiply double vector with gain
 vector<double> Multiply(const vector<double> &vector_data, const double &gain) {
 	

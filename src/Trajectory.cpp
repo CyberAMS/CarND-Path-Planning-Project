@@ -82,6 +82,9 @@ unsigned long Trajectory::Init(Map map, Vehicle ego, Path previous_path) {
 		
 	}
 	
+	// remember how many steps have been taken from previous trajectory
+	this->previous_trajectory_steps = this->Get_x().size();
+	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_INIT) {
 		
@@ -398,8 +401,9 @@ void Trajectory::Generate(Map map, Trajectory trajectory, double s_target, doubl
 	// add final segment as jerk minimizing trajectory
 	this->AddJerkMinimizingTrajectory(map, s_target, sv_target, sa_target, d_target, dv_target, da_target);
 	
-	// prevent to reinitialize this trajectory
+	// prevent to reinitialize this trajectory and set all necessary variables
 	this->is_initialized = true;
+	this->previous_trajectory_steps = trajectory.Get_previous_trajectory_steps();
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_GENERATE) {
@@ -464,6 +468,9 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	double gain_v = NEUTRAL_GAIN;
 	double gain_a = NEUTRAL_GAIN;
 	double gain = NEUTRAL_GAIN;
+	unsigned long count = 0;
+	vector<double> new_sv_values;
+	vector<double> new_d_values;
 	double d = 0.0;
 	vector<vector<double>> xy_values;
 	
@@ -537,23 +544,32 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 		gain_a = min(gain_a, (MAX_DECELERATION_S / min_a));
 		
 	}
-	gain = min(min(min(gain_sv, gain_sa), gain_v), gain_a);
-	//gain = min(gain_sv, gain_v);
+	//gain = min(min(min(gain_sv, gain_sa), gain_v), gain_a);
+	gain = min(gain_sv, gain_v);
 	//gain = NEUTRAL_GAIN;
 	
 	// apply gain if necessary
 	if (gain < NEUTRAL_GAIN) {
 		
+		// select new segment only
+		for (count = this->Get_previous_trajectory_steps(); count < this->Get_sv().size(); count++) {
+			
+			// save current step
+			new_sv_values.push_back(this->Get_sv()[count]);
+			new_d_values.push_back(this->Get_d()[count]);
+			
+		}
+		
 		// adjust speed
-		this->sv_values = Multiply(this->Get_sv(), gain);
+		this->sv_values = Multiply(sv_values, gain);
 		
 		// generate distance, acceleration and jerk
-		this->s_values = Accumulate(Multiply(this->Get_sv(), SAMPLE_TIME));
-		this->sa_values = Accumulate(Multiply(this->Get_sv(), (1 / SAMPLE_TIME)));
-		this->sj_values = Accumulate(Multiply(this->Get_sa(), (1 / SAMPLE_TIME)));
+		this->s_values = Addition(Accumulate(Multiply(this->Get_sv(), SAMPLE_TIME)), this->Get_s()[0]);
+		this->sa_values = Multiply(Differential(this->Get_sv()), (1 / SAMPLE_TIME));
+		this->sj_values = Multiply(Differential(this->Get_sa()), (1 / SAMPLE_TIME));
 		
 		// regenerate xy values including theta
-		xy_values = map.Frenet2Xy(this->Get_s(), this->Get_d());
+		xy_values = map.Frenet2Xy(this->Get_s(), new_d_values);
 		this->x_values = xy_values[0];
 		this->y_values = xy_values[1];
 		this->theta_values = Angle(Differential(this->Get_x()), Differential(this->Get_y()));
@@ -614,6 +630,7 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 		cout << "  gain_v: " << gain_v << endl;
 		cout << "  gain_a: " << gain_a << endl;
 		cout << "  gain: " << gain << endl;
+		cout << "  new_sv_values, new_d_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){new_sv_values, new_d_values});
 		cout << "  this: " << endl << this->CreateString();
 		cout << "  is_valid: " << is_valid << endl;
 		cout << "--- TRAJECTORY: Valid - End" << endl;
@@ -738,6 +755,13 @@ bool Trajectory::Get_is_initialized() {
 	
 }
 
+// get number of initialization steps
+unsigned long Trajectory::Get_previous_trajectory_steps() {
+	
+	return this->previous_trajectory_steps;
+	
+}
+
 // display Trajectory object as string
 string Trajectory::CreateString() {
 	
@@ -747,7 +771,8 @@ string Trajectory::CreateString() {
 	// add information about path to string
 	text += DISPLAY_PREFIX + "this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values =\n" + CreateDoubleVectorsString((vector<vector<double>>){this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values});
 	text += DISPLAY_PREFIX;
-	text += "is_initialized = " + to_string(this->is_initialized) + "\n";
+	text += "is_initialized = " + to_string(this->is_initialized) + " ";
+	text += "previous_trajectory_steps = " + to_string(this->previous_trajectory_steps) + "\n";
 	
 	// return output
 	return text;

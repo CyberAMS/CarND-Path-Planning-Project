@@ -102,6 +102,9 @@ double Sum(const vector<double> &vector_data);
 // calculate differential of double vector
 vector<double> Differential(const vector<double> &vector_data);
 
+// add number to double vector
+vector<double> Addition(const vector<double> &vector_data, const double &add);
+
 // multiply double vector with gain
 vector<double> Multiply(const vector<double> &vector_data, const double &gain);
 

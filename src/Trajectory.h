@@ -36,13 +36,12 @@ const long MIN_PREVIOUS_PATH_STEPS = 0;
 // longitudinal definitions
 const double SAFETY_DELTA_SPEED = 2 * MPH2MS; // travel 2 mph below maximum speed
 const double MAX_SPEED = (50 * MPH2MS) - SAFETY_DELTA_SPEED; // 50 mph minus safety delta in m/s
-const double MAX_ACCELERATION_S = 10.0; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
+const double SAFETY_DELTA_ACCELERATION = 1.0; // keep maximum acceleration 1 m/s below limit
+const double MAX_ACCELERATION_S = 10.0 - SAFETY_DELTA_ACCELERATION; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
 const double MAX_DECELERATION_S = -MAX_ACCELERATION_S;
-const double TARGET_SPEED_FROM_ZERO = 8.0; // TODO: MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
-const double LOW_SPEED_ACCELERATION_LIMIT = 10;
-const double HIGH_SPEED_ACCELERATION_FACTOR = 1.05; // TODO: MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
-const double LOW_SPEED_ACCELERATION_FACTOR = 1.1; // TODO: MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
-const double DECELERATION_FACTOR = 0.85; // TODO: MAX_ACCELERATION_S * <SOME_TIME_INTERVAL> ?!?
+const double NORMAL_ACCELERATION_S = (MAX_ACCELERATION_S / 10);
+const double NORMAL_DECELERATION_S = (MAX_DECELERATION_S / 5);
+const double TARGET_SPEED_FROM_ZERO = (MAX_ACCELERATION_S / 2) * STEP_TIME_INTERVAL; // start with half of the maximum acceleration
 
 // lateral definitions
 const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
@@ -116,6 +115,9 @@ public:
 	// get initialization status
 	bool Get_is_initialized();
 	
+	// get number of initialization steps
+	unsigned long Get_previous_trajectory_steps();
+	
 	// display Trajectory object as string
 	string CreateString();
 
@@ -146,8 +148,9 @@ private:
 	// trajectory orientation angles
 	vector<double> theta_values;
 	
-	// remember whether trajectory has been initialized before
+	// remember whether and how trajectory has been initialized before
 	bool is_initialized = false;
+	unsigned long previous_trajectory_steps = 0;
 
 };
 
