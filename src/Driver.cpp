@@ -44,23 +44,23 @@ void Driver::PlanBehavior() {
 	Trajectory next_possible_trajectory;
 	double cost;
 	double minimal_cost = std::numeric_limits<double>::max();
-	behavior_state best_behavior = this->state.Get_behavior();
-	Trajectory best_trajectory = this->trajectory;
+	behavior_state best_behavior = this->state->Get_behavior();
+	Trajectory best_trajectory = this->Get_ego()->Get_trajectory();
 	
-	finished_steps = this->trajectory.Init(this->map, this->ego, this->previous_path);
-	this->state.Init(this->ego, this->trajectory, finished_steps);
+	finished_steps = this->Get_ego_ptr()->Get_trajectory_ptr()->Init(this->Get_map(), this->Get_ego(), this->previous_path);
+	this->Get_state_ptr()->Init(finished_steps);
 	
 	// get next possible states
-	next_possible_behaviors = this->state.GetNextPossibleBehaviors(this->Get_ego()->Get_lane());
+	next_possible_behaviors = this->Get_state().GetNextPossibleBehaviors(this->Get_ego().Get_lane());
 	
 	// generate trajectories for all states
 	for (count = 0; count < min(1, (int)next_possible_behaviors.size()); count++) {
 		
 		// generate trajectory for current state
-		next_possible_trajectory = this->state.GenerateTrajectoryFromBehavior(this->map, this->ego, this->trajectory, next_possible_behaviors[count]);
+		next_possible_trajectory = this->Get_state().GenerateTrajectoryFromBehavior(this->Get_map(), this->Get_ego(), next_possible_behaviors[count]);
 		
 		// check whether trajectory is valid
-		if (next_possible_trajectory.Valid(this->map, this->ego)) {
+		if (next_possible_trajectory.Valid(this->Get_map(), this->Get_ego())) {
 			
 			// determine cost of trajectory
 			cost = next_possible_trajectory.Cost();
@@ -80,12 +80,12 @@ void Driver::PlanBehavior() {
 	}
 	
 	// select behavior for lowest cost trajectory and update trajectory accordingly
-	this->state.SetBehavior(best_behavior, NO_STEP_INCREASE);
-	this->trajectory = best_trajectory;
+	this->Get_state_ptr()->SetBehavior(best_behavior, NO_STEP_INCREASE);
+	this->Get_ego_ptr()->trajectory = best_trajectory;
 	
 	// save next xy values
-	this->next_x_vals = this->trajectory.Get_x();
-	this->next_y_vals = this->trajectory.Get_y();
+	this->next_x_vals = this->Get_ego().Get_Trajectory().Get_x();
+	this->next_y_vals = this->Get_ego().Get_Trajectory().Get_y();
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_PLANBEHAVIOR) {
@@ -100,20 +100,6 @@ void Driver::PlanBehavior() {
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
-	
-}
-
-// get map object
-Map* Driver::Get_map() {
-	
-	return &this->map;
-	
-}
-
-// get ego object
-Vehicle* Driver::Get_ego() {
-	
-	return &this->ego;
 	
 }
 
@@ -143,15 +129,49 @@ void Driver::Set_vehicles(vector<Vehicle> vehicles) {
 	
 }
 
+// get map object
+Map Driver::Get_map() {
+	
+	return this->map;
+	
+}
+Map* Driver::Get_map_ptr() {
+	
+	return &this->map;
+	
+}
+
+// get ego object
+Vehicle Driver::Get_ego() {
+	
+	return this->ego;
+	
+}
+Vehicle* Driver::Get_ego_ptr() {
+	
+	return &this->ego;
+	
+}
+
 // get list of vehicle objects
-vector<Vehicle>* Driver::Get_vehicles() {
+vector<Vehicle> Driver::Get_vehicles() {
+	
+	return this->vehicles;
+	
+}
+vector<Vehicle>* Driver::Get_vehicles_ptr() {
 	
 	return &this->vehicles;
 	
 }
 
 // get state object
-State* Driver::Get_state() {
+State Driver::Get_state() {
+	
+	return this->state;
+	
+}
+State* Driver::Get_state_ptr() {
 	
 	return &this->state;
 	
@@ -163,6 +183,11 @@ vector<double> Driver::Get_next_x() {
 	return this->next_x_vals;
 	
 }
+vector<double>* Driver::Get_next_x_ptr() {
+	
+	return &this->next_x_vals;
+	
+}
 
 // get y values of path
 vector<double> Driver::Get_next_y() {
@@ -170,9 +195,18 @@ vector<double> Driver::Get_next_y() {
 	return this->next_y_vals;
 	
 }
+vector<double>* Driver::Get_next_y_ptr() {
+	
+	return &this->next_y_vals;
+	
+}
 
 // get previous_path object
-Path* Driver::Get_previous_path() {
+Path Driver::Get_previous_path() {
+	
+	return this->previous_path;
+	
+}Path* Driver::Get_previous_path_ptr() {
 	
 	return &this->previous_path;
 	

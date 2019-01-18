@@ -27,7 +27,7 @@ using std::ostringstream;
 using std::min;
 
 // initialize state
-void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
+void State::Init(unsigned long add_step) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_INIT) {
@@ -35,7 +35,6 @@ void State::Init(Vehicle ego, Trajectory trajectory, unsigned long add_step) {
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "STATE: Init - Start" << endl;
 		cout << "  ego: " << endl << ego.CreateString();
-		cout << "  trajectory: " << endl << trajectory.CreateString();
 		
 	}
 	
@@ -208,7 +207,7 @@ vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane
 }
 
 // generate new trajectory from behavior
-Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajectory trajectory, behavior_state behavior) {
+Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_state behavior) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR) {
@@ -217,13 +216,12 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 		cout << "STATE: GenerateTrajectoryFromBehavior - Start" << endl;
 		// cout << "  map: " << endl << map.CreateString();
 		cout << "  ego: " << endl << ego.CreateString();
-		cout << "  trajectory: " << endl << trajectory.CreateString();
 		cout << "  behavior: " << endl << CreateBehaviorString(behavior);
 		
 	}
 	
 	// define variables
-	double sv_continue = trajectory.Get_sv()[trajectory.Get_sv().size() - 1];
+	double sv_continue = ego.Get_trajectory().Get_sv()[trajectory.Get_sv().size() - 1];
 	double s_target = 0.0;
 	double sv_target = 0.0;
 	double sa_target = 0.0;
@@ -273,7 +271,7 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 	sv_target = min(sv_target, MAX_SPEED);
 	
 	// determine position after next time interval
-	s_target = (trajectory.Get_s()[trajectory.Get_s().size() - 1] + sv_target * STEP_TIME_INTERVAL);
+	s_target = (ego.Get_trajectory().Get_s()[ego.Get_trajectory().Get_s().size() - 1] + sv_target * STEP_TIME_INTERVAL);
 	
 	// determine target values based on lateral behavior
 	switch (behavior.lateral_state) {
@@ -305,7 +303,7 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 			
 	}
 	
-	new_trajectory.Generate(map, trajectory, s_target, sv_target, sa_target, d_target, dv_target, da_target);
+	new_trajectory.Generate(map, ego.Get_trajectory(), s_target, sv_target, sa_target, d_target, dv_target, da_target);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR) {

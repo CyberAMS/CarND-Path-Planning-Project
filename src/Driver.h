@@ -39,29 +39,36 @@ public:
 	// determine next action
 	void PlanBehavior();
 	
-	// get map object
-	Map* Get_map();
-	
-	// get ego object
-	Vehicle* Get_ego();
-	
 	// set vehicles object vector
 	void Set_vehicles(vector<Vehicle> vehicles);
 	
+	// get map object
+	Map Get_map();
+	Map* Get_map_ptr();
+	
+	// get ego object
+	Vehicle Get_ego();
+	Vehicle* Get_ego_ptr();
+	
 	// get list of vehicle objects
-	vector<Vehicle>* Get_vehicles();
+	vector<Vehicle> Get_vehicles();
+	vector<Vehicle>* Get_vehicles_ptr();
 	
 	// get state object
-	State* Get_state();
+	State Get_state();
+	State* Get_state_ptr();
 	
 	// get x values of path
 	vector<double> Get_next_x();
+	vector<double>* Get_next_x_ptr();
 	
 	// get y values of path
 	vector<double> Get_next_y();
+	vector<double>* Get_next_y_ptr();
 	
 	// get previous_path object
-	Path* Get_previous_path();
+	Path Get_previous_path();
+	Path* Get_previous_path_ptr();
 
 private:
 	
@@ -75,8 +82,7 @@ private:
 	// behavior state
 	State state;
 	
-	// main trajectory
-	Trajectory trajectory;
+	// next path
 	vector<double> next_x_vals;
 	vector<double> next_y_vals;
 	

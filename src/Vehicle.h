@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "Trajectory.h"
 
 using std::vector;
 using std::string;
@@ -93,6 +94,10 @@ public:
 	// get is_inside_lane value
 	bool Get_is_inside_lane();
 	
+	// get trajectory
+	Trajectory Get_trajectory();
+	Trajectory* Get_trajectory();
+	
 	// display Vehicle object as string
 	string CreateString();
 	
@@ -115,6 +120,9 @@ private:
 	// determined values
 	unsigned int lane = 0;
 	bool is_inside_lane = false;
+	
+	// own trajectory
+	Trajectory trajectory;
 
 };
 

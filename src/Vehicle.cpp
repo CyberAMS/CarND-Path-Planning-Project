@@ -15,6 +15,7 @@
 #include <cmath>
 #include "Vehicle.h"
 #include "Map.h"
+#include "Trajectory.h"
 #include "helper_functions.h"
 
 using std::vector;
@@ -526,6 +527,18 @@ bool Vehicle::Get_is_inside_lane() {
 	
 }
 
+// get trajectory
+Trajectory Vehicle::Get_trajectory() {
+	
+	return this->trajectory;
+	
+}
+Trajectory* Vehicle::Get_trajectory() {
+	
+	return &this->trajectory;
+	
+}
+
 // display Vehicle object as string
 string Vehicle::CreateString() {
 	
@@ -545,6 +558,7 @@ string Vehicle::CreateString() {
 	text += "v = " + to_string(this->v) + " ";
 	text += "lane = " + to_string(this->lane) + " ";
 	text += "is_inside_lane = " + to_string(this->is_inside_lane) + "\n";
+	text += DISPLAY_PREFIX + "this->trajectory =\n" + this->trajectory.CreateString();
 	
 	// return output
 	return text;

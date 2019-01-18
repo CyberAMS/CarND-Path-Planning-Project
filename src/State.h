@@ -76,7 +76,7 @@ public:
 	~State() {}
 	
 	// initialize state
-	void Init(Vehicle ego, Trajectory trajectory, unsigned long add_step);
+	void Init(unsigned long add_step);
 	
 	// set state
 	void SetBehavior(behavior_state behavior, unsigned long add_step);
