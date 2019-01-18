@@ -56,7 +56,6 @@ const unsigned int DISPLAY_COLUMN_WIDTH = 15;
 // define constants
 const double MPH2MS = 0.44704; // factor between miles per hour and meters per second
 const double ZERO_DIFFERENTIAL_VALUE = 0.0;
-const double NEUTRAL_GAIN = 1.0;
 
 // convert degrees to radians
 double Deg2Rad(const double &x);

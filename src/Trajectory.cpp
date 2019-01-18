@@ -522,7 +522,7 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	min_j = Minimum(j_values);
 	average_j = AbsAverage(j_values);
 	
-	// determine gain for trajectory to be conform with maximum longitudinal speed, acceleration and deceleration
+	// determine gains for trajectory to be conform with maximum longitudinal speed, acceleration and deceleration
 	if (max_sv > MAX_SPEED) {
 		
 		gain_sv = min(gain_sv, (MAX_SPEED / max_sv));
@@ -553,9 +553,29 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 		gain_a = min(gain_a, (MAX_DECELERATION_S / min_a));
 		
 	}
-	//gain = min(min(min(gain_sv, gain_sa), gain_v), gain_a);
-	gain = min(gain_sv, gain_v);
-	//gain = NEUTRAL_GAIN;
+	
+	// select gain
+	switch (TRAJECTORY_VALID_GAIN_SELECTION) {
+		
+		case NOTHING:
+			
+			// use no gains
+			gain = NEUTRAL_GAIN;
+			break; // switch
+			
+		case VELOCITIES:
+			
+			// only use velocity gains
+			gain = min(gain_sv, gain_v);
+			break; // switch
+			
+		case ALL:
+			
+			// use all gains
+			gain = min(min(min(gain_sv, gain_sa), gain_v), gain_a);
+			break; // switch
+			
+	}
 	
 	// apply gain if necessary
 	if (gain < NEUTRAL_GAIN) {
