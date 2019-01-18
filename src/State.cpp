@@ -84,7 +84,7 @@ void State::SetBehavior(behavior_state new_behavior, unsigned long add_step) {
 	unsigned long no_change_before_step;
 	
 	// determine next step
-	current_step = this->current_step + add_step; // + 1; // TODO: check whether this really needs to be increased by 1 or wait for previous_path to increment this
+	current_step = this->current_step + add_step;
 	
 	// check whether transitions must be locked to ensure complete state change
 	if (((this->behavior.lateral_state == PREPARE_LANE_CHANGE_LEFT) && (new_behavior.lateral_state == CHANGE_LANE_LEFT)) || ((this->behavior.lateral_state == PREPARE_LANE_CHANGE_RIGHT) && (new_behavior.lateral_state == CHANGE_LANE_RIGHT))) {
