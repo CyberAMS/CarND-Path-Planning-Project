@@ -254,7 +254,7 @@ vector<double> Differential(const vector<double> &vector_data) {
 		
 	}
 	
-	return differential
+	return differential;
 	
 }
 
@@ -275,7 +275,7 @@ vector<double> Multiply(const vector<double> &vector_data, const double &gain) {
 		
 	}
 	
-	return multiplication
+	return multiplication;
 	
 }
 
@@ -306,7 +306,7 @@ vector<double> Accumulate(const vector<double> &vector_data) {
 		
 	}
 	
-	return accumulation
+	return accumulation;
 	
 }
 

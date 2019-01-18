@@ -220,8 +220,8 @@ vector<vector<double>> Map::Frenet2Xy(const vector<double> &s_values, const vect
 		
 		// convert current element from Frenet to xy coordinates
 		xy_value = this->Frenet2Xy(x_values[count], y_values[count]);
-		x_values.pushback(xy_value[0]);
-		y_values.pushback(xy_value[1]);
+		x_values.push_back(xy_value[0]);
+		y_values.push_back(xy_value[1]);
 		
 	}
 	
