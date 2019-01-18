@@ -469,10 +469,18 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	double gain_a = NEUTRAL_GAIN;
 	double gain = NEUTRAL_GAIN;
 	unsigned long count = 0;
+	unsigned long previous_trajectory_steps = 0;
+	vector<double> sv_values;
+	vector<double> d_values;
+	vector<double> new_s_values;
 	vector<double> new_sv_values;
-	vector<double> new_d_values;
+	vector<double> new_sa_values;
+	vector<double> new_sj_values;
+	vector<vector<double>> new_xy_values;
+	vector<double> new_x_values;
+	vector<double> new_y_values;
+	vector<double> new_theta_values;
 	double d = 0.0;
-	vector<vector<double>> xy_values;
 	
 	// initialize outputs
 	bool is_valid = true;
@@ -551,28 +559,58 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	// apply gain if necessary
 	if (gain < NEUTRAL_GAIN) {
 		
+		// determine length of previous trajectory segment
+		previous_trajectory_steps = this->Get_previous_trajectory_steps();
+		
 		// select new segment only
-		for (count = this->Get_previous_trajectory_steps(); count < this->Get_sv().size(); count++) {
+		for (count = previous_trajectory_steps; count < this->Get_sv().size(); count++) {
 			
 			// save current step
-			new_sv_values.push_back(this->Get_sv()[count]);
-			new_d_values.push_back(this->Get_d()[count]);
+			sv_values.push_back(this->Get_sv()[count]);
+			d_values.push_back(this->Get_d()[count]);
 			
 		}
 		
-		// adjust speed
-		this->sv_values = Multiply(sv_values, gain);
+		// adjust speed of new segment
+		new_sv_values = Multiply(sv_values, gain);
 		
-		// generate distance, acceleration and jerk
-		this->s_values = Addition(Accumulate(Multiply(this->Get_sv(), SAMPLE_TIME)), this->Get_s()[0]);
-		this->sa_values = Multiply(Differential(this->Get_sv()), (1 / SAMPLE_TIME));
-		this->sj_values = Multiply(Differential(this->Get_sa()), (1 / SAMPLE_TIME));
+		// generate distance, acceleration and jerk of new segment
+		new_s_values = Addition(Accumulate(Multiply(new_sv_values, SAMPLE_TIME)), this->Get_s()[previous_trajectory_steps - 1]);
+		new_sa_values = Multiply(Differential(new_sv_values), (1 / SAMPLE_TIME));
+		new_sj_values = Multiply(Differential(new_sa_values), (1 / SAMPLE_TIME));
 		
-		// regenerate xy values including theta
-		xy_values = map.Frenet2Xy(this->Get_s(), new_d_values);
-		this->x_values = xy_values[0];
-		this->y_values = xy_values[1];
-		this->theta_values = Angle(Differential(this->Get_x()), Differential(this->Get_y()));
+		// regenerate xy values including theta of new segment
+		new_xy_values = map.Frenet2Xy(new_s_values, d_values);
+		new_x_values = new_xy_values[0];
+		new_y_values = new_xy_values[1];
+		new_theta_values = Angle(Differential(new_x_values), Differential(new_y_values));
+		
+		// update new segment only
+		for (count = previous_trajectory_steps; count < this->Get_sv().size(); count++) {
+			
+			// make sure to not use first values that came from Differential and are ZERO_DIFFERENTIAL_VALUE
+			if (count == previous_trajectory_steps) {
+				
+				// update only valid values of current step
+				this->s_values[count] = new_s_values[count - previous_trajectory_steps];
+				this->sv_values[count] = new_sv_values[count - previous_trajectory_steps];
+				this->x_values[count] = new_x_values[count - previous_trajectory_steps];
+				this->y_values[count] = new_y_values[count - previous_trajectory_steps];
+				
+			} else {
+				
+				// update current step
+				this->s_values[count] = new_s_values[count - previous_trajectory_steps];
+				this->sv_values[count] = new_sv_values[count - previous_trajectory_steps];
+				this->sa_values[count] = new_sa_values[count - previous_trajectory_steps];
+				this->sj_values[count] = new_sj_values[count - previous_trajectory_steps];
+				this->x_values[count] = new_x_values[count - previous_trajectory_steps];
+				this->y_values[count] = new_y_values[count - previous_trajectory_steps];
+				this->theta_values[count] = new_theta_values[count - previous_trajectory_steps];
+				
+			}
+			
+		}
 		
 	}
 	
@@ -630,7 +668,9 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 		cout << "  gain_v: " << gain_v << endl;
 		cout << "  gain_a: " << gain_a << endl;
 		cout << "  gain: " << gain << endl;
-		cout << "  new_sv_values, new_d_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){new_sv_values, new_d_values});
+		cout << "  sv_values, d_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){sv_values, d_values});
+		cout << "  new_s_values, new_sv_values, new_sa_values, new_sj_values, new_x_values, new_y_values, new_theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){new_s_values, new_sv_values, new_sa_values, new_sj_values, new_x_values, new_y_values, new_theta_values});
+		cout << "  d: " << d << endl;
 		cout << "  this: " << endl << this->CreateString();
 		cout << "  is_valid: " << is_valid << endl;
 		cout << "--- TRAJECTORY: Valid - End" << endl;

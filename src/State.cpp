@@ -230,7 +230,6 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 	double d_target = 0.0;
 	double dv_target = 0.0;
 	double da_target = 0.0;
-	double speed_factor = 1.0;
 	unsigned int current_lane = ego.Get_lane();
 	
 	// initialize outputs
@@ -313,7 +312,6 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajector
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  current_lane: " << current_lane << endl;
-		cout << "  speed_factor: " << speed_factor << endl;
 		cout << "  s_target: " << s_target << endl;
 		cout << "  sv_target: " << sv_target << endl;
 		cout << "  sa_target: " << sa_target << endl;
