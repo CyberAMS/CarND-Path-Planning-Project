@@ -47,11 +47,11 @@ void Driver::PlanBehavior() {
 	behavior_state best_behavior = this->Get_state().Get_behavior();
 	Trajectory best_trajectory = this->Get_ego().Get_trajectory();
 	
-	finished_steps = this->Get_ego_ptr()->Get_trajectory_ptr()->Init(this->Get_map(), this->Get_ego().Get_s(), EGO_CAR_SV_INIT, this->Get_ego().Get_d(), EGO_CAR_DV_INIT, EGO_CAR_DA_INIT, EGO_CAR_DJ_INIT, this->Get_ego().Get_theta(), this->Get_previous_path());
+	finished_steps = this->Get_ego_ptr()->Get_trajectory_ptr()->Init(this->Get_map(), this->Get_ego().Get_s(), EGO_CAR_SV_INIT, this->Get_ego().Get_d(), EGO_CAR_DV_INIT, EGO_CAR_DA_INIT, EGO_CAR_DJ_INIT, this->Get_ego().Get_theta(), this->Get_ego().GetLaneD(this->Get_ego().Get_d()), this->Get_previous_path());
 	this->Get_state_ptr()->Init(finished_steps);
 	
 	// get next possible states
-	next_possible_behaviors = this->Get_state().GetNextPossibleBehaviors(this->Get_ego().Get_lane());
+	next_possible_behaviors = this->Get_state().GetNextPossibleBehaviors(this->Get_ego());
 	
 	// generate trajectories for all states
 	for (count = 0; count < next_possible_behaviors.size(); count++) {
@@ -81,7 +81,7 @@ void Driver::PlanBehavior() {
 	
 	// select behavior for lowest cost trajectory and update trajectory accordingly
 	this->Get_state_ptr()->SetBehavior(best_behavior, NO_STEP_INCREASE);
-	this->Get_ego_ptr()->SetTrajectory(best_trajectory);
+	this->Get_ego_ptr()->Set_trajectory(best_trajectory);
 	
 	// save next xy values
 	this->next_x_vals = this->Get_ego().Get_trajectory().Get_x();
@@ -94,7 +94,11 @@ void Driver::PlanBehavior() {
 		cout << "  finished_steps: " << finished_steps << endl;
 		cout << "  next_possible_behaviors: " << endl << this->Get_state().CreateBehaviorVectorString(next_possible_behaviors);
 		cout << "  best_behavior: " << endl << this->Get_state().CreateBehaviorString(best_behavior);
-		cout << "  best_trajectory: " << endl << best_trajectory.CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  best_trajectory: " << endl << best_trajectory.CreateString();
+			
+		}
 		cout << "  next_x_vals, next_y_vals: " << endl << CreateDoubleVectorsString((vector<vector<double>>){next_x_vals, next_y_vals});
 		cout << "--- DRIVER: PlanBehavior - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;

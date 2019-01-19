@@ -33,14 +33,18 @@ const double STANDARD_VEHICLE_LENGTH = 4.0;
 const double SAFETY_BOX_DISTANCE = 0.5; // must have 0.5 m distance to all vehicles around own vehicle
 
 // cost parameters
-const double STEPS_TO_COLLISION_THRESHOLD = 30.0;
-const double DISTANCE_VEHICLE_AHEAD_THRESHOLD = 50.0;
-const double MAX_TRAVEL_THRESHOLD = MAX_SPEED * STEP_TIME_INTERVAL;
+const double DESIRED_LONGITUDINAL_TIME_DISTANCE = 1.0; // keep a distance of 1 s
+const double NO_HARMFUL_COLLISION_STEPS = DESIRED_LONGITUDINAL_TIME_DISTANCE / SAMPLE_TIME;
+const double COST_STEPS_TO_COLLISION_SHAPE_FACTOR = 10.0;
+const double VEHICLE_AHEAD_WITHIN_DISTANCE = 50.0;
+const double COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR = 10.0;
+const double MAX_TRAVEL_DISTANCE = MAX_SPEED * STEP_TIME_INTERVAL;
+const double COST_TRAVEL_DISTANCE_SHAPE_FACTOR = 10.0;
 
 // cost weights
 const double ZERO_COST = 0.0;
-const double COST_COLLISON_WEIGHT = 10.0;
-const double COST_DISTANCEVEHICLEAHEAD_WEIGHT = 1.0;
+const double COST_COLLISON_WEIGHT = 1.0;
+const double COST_SPEEDININTENDEDLANE_WEIGHT = 1.0;
 const double COST_TRAVELDISTANCE_WEIGHT = 1.0;
 
 class Vehicle {
@@ -88,8 +92,8 @@ public:
 	// determine collison cost
 	double CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
 	
-	// determine cost for getting close to vehicle in front
-	double CostDistanceVehicleAhead(vector<Vehicle> vehicles, const double &weight);
+	// determine cost for speed in intended lane
+	double CostSpeedInIntendedLane(vector<Vehicle> vehicles, const double &weight);
 	
 	// determine cost for travel distance
 	double CostTravelDistance(Trajectory trajectory, const double &weight);
@@ -98,7 +102,7 @@ public:
 	double TrajectoryCost(Trajectory trajectory, vector<Vehicle> vehicles);
 	
 	// set trajectory
-	void SetTrajectory(Trajectory trajectory);
+	void Set_trajectory(Trajectory trajectory);
 	
 	// get id number
 	unsigned int Get_id();

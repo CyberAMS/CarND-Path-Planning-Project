@@ -82,7 +82,7 @@ public:
 	void SetBehavior(behavior_state behavior, unsigned long add_step);
 	
 	// get next possible states
-	vector<behavior_state> GetNextPossibleBehaviors(unsigned int current_lane);
+	vector<behavior_state> GetNextPossibleBehaviors(Vehicle ego);
 	
 	// generate new trajectory from behavior
 	Trajectory GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_state behavior);

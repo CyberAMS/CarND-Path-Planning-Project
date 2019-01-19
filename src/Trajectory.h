@@ -59,10 +59,10 @@ public:
 	~Trajectory() {}
 	
 	// initialize trajectory
-	unsigned long Init(Map map, double s_start, double sv_start, double d_start, double dv_start, double da_start, double dj_start, double theta_start, Path previous_path);
+	unsigned long Init(Map map, double s_start, double sv_start, double d_start, double dv_start, double da_start, double dj_start, double theta_start, double intended_lane, Path previous_path);
 	
 	// start trajectory
-	void Start(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
+	void Start(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta, unsigned int intended_lane);
 	
 	// add segment to trajectory
 	void Add(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
@@ -77,6 +77,9 @@ public:
 	
 	// check trajectory for being valid
 	bool Valid(Map map);
+	
+	// set intended lane
+	void Set_intended_lane(unsigned int intended_lane);
 	
 	// set initialization status
 	void Set_is_initialized(bool is_initialized);
@@ -125,6 +128,10 @@ public:
 	vector<double> Get_theta();
 	vector<double>* Get_theta_ptr();
 	
+	// get intended lane
+	unsigned int Get_intended_lane();
+	unsigned int* Get_intended_lane_ptr();
+	
 	// get initialization status
 	bool Get_is_initialized();
 	bool* Get_is_initialized_ptr();
@@ -162,6 +169,9 @@ private:
 	
 	// trajectory orientation angles
 	vector<double> theta_values;
+	
+	// final lane intended by behavior that generated this trajectory
+	unsigned int intended_lane;
 	
 	// remember whether and how trajectory has been initialized before
 	bool is_initialized = false;

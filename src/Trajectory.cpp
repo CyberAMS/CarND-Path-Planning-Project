@@ -28,7 +28,7 @@ using std::min;
 using std::pow;
 
 // init trajectory
-unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double d_start, double dv_start, double da_start, double dj_start, double theta_start, Path previous_path) {
+unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double d_start, double dv_start, double da_start, double dj_start, double theta_start, double intended_lane, Path previous_path) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_INIT) {
@@ -43,6 +43,7 @@ unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double 
 		cout << "  da_start: " << da_start << endl;
 		cout << "  dj_start: " << dj_start << endl;
 		cout << "  theta_start: " << theta_start << endl;
+		cout << "  intended_lane: " << intended_lane << endl;
 		cout << "  previous_path: " << endl << previous_path.CreateString();
 		
 	}
@@ -75,7 +76,7 @@ unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double 
 		xy_next = map.Frenet2Xy(s_next, d_next);
 		x_next = xy_next[0];
 		y_next = xy_next[1];
-		this->Start(x_next, y_next, s_next, sv_next, sa_next, sj_next, d_next, dv_start, da_start, dj_start, theta_start);
+		this->Start(x_next, y_next, s_next, sv_next, sa_next, sj_next, d_next, dv_start, da_start, dj_start, theta_start, intended_lane);
 		
 		// initialization done
 		this->is_initialized = true;
@@ -109,7 +110,7 @@ unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double 
 }
 
 // start trajectory
-void Trajectory::Start(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta) {
+void Trajectory::Start(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta, unsigned int intended_lane) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_START) {
@@ -127,6 +128,7 @@ void Trajectory::Start(double x, double y, double s, double sv, double sa, doubl
 		cout << "  da: " << da << endl;
 		cout << "  dj: " << dj << endl;
 		cout << "  theta: " << theta << endl;
+		cout << "  intended_lane: " << intended_lane << endl;
 		
 	}
 	
@@ -143,11 +145,15 @@ void Trajectory::Start(double x, double y, double s, double sv, double sa, doubl
 	this->dj_values = vector<double>{dj};
 	this->theta_values = vector<double>{theta};
 	
+	// set intended lane
+	this->Set_intended_lane(intended_lane);
+	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_START) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->Get_x(), this->Get_y(), this->Get_s(), this->Get_sv(), this->Get_sa(), this->Get_sj(), this->Get_d(), this->Get_dv(), this->Get_da(), this->Get_dj(), this->Get_theta()});
+		cout << "  this->intended_lane: " << this->Get_intended_lane() << endl;
 		cout << "--- TRAJECTORY: Start - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -208,7 +214,11 @@ void Trajectory::Add(Trajectory trajectory, unsigned long max_num_steps) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: Add - Start" << endl;
-		cout << "  trajectory: " << endl << trajectory.CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  trajectory: " << endl << trajectory.CreateString();
+			
+		}
 		cout << "  max_num_steps: " << max_num_steps << endl;
 		
 	}
@@ -242,7 +252,11 @@ void Trajectory::Add(Trajectory trajectory) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: Add - Start" << endl;
-		cout << "  trajectory: " << endl << trajectory.CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  trajectory: " << endl << trajectory.CreateString();
+			
+		}
 		
 	}
 	
@@ -402,7 +416,11 @@ void Trajectory::Generate(Map map, Trajectory trajectory, double s_target, doubl
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: Generate - Start" << endl;
 		// cout << "  map: " << endl << map.CreateString();
-		cout << "  trajectory: " << endl << trajectory.CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  trajectory: " << endl << trajectory.CreateString();
+			
+		}
 		cout << "  s_target: " << s_target << endl;
 		cout << "  sv_target: " << sv_target << endl;
 		cout << "  sa_target: " << sa_target << endl;
@@ -747,6 +765,13 @@ bool Trajectory::Valid(Map map) {
 	
 }
 
+// set intended lane
+void Trajectory::Set_intended_lane(unsigned int intended_lane) {
+	
+	this->intended_lane = intended_lane;
+	
+}
+
 // set initialization status
 void Trajectory::Set_is_initialized(bool is_initialized) {
 	
@@ -886,6 +911,18 @@ vector<double>* Trajectory::Get_theta_ptr() {
 	
 }
 
+// get intended lane
+unsigned int Trajectory::Get_intended_lane(){
+	
+	return this->intended_lane;
+	
+}
+unsigned int* Trajectory::Get_intended_lane_ptr(){
+	
+	return &this->intended_lane;
+	
+}
+
 // get initialization status
 bool Trajectory::Get_is_initialized() {
 	
@@ -919,6 +956,7 @@ string Trajectory::CreateString() {
 	// add information about path to string
 	text += DISPLAY_PREFIX + "this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values =\n" + CreateDoubleVectorsString((vector<vector<double>>){this->Get_x(), this->Get_y(), this->Get_s(), this->Get_sv(), this->Get_sa(), this->Get_sj(), this->Get_d(), this->Get_dv(), this->Get_da(), this->Get_dj(), this->Get_theta()});
 	text += DISPLAY_PREFIX;
+	text += "intended_lane = " + to_string(this->Get_intended_lane()) + " ";
 	text += "is_initialized = " + to_string(this->Get_is_initialized()) + " ";
 	text += "previous_trajectory_steps = " + to_string(this->Get_previous_trajectory_steps()) + "\n";
 	

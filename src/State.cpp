@@ -79,7 +79,6 @@ void State::SetBehavior(behavior_state new_behavior, unsigned long add_step) {
 	
 	// define variables
 	unsigned long current_step;
-	unsigned long no_change_before_step;
 	
 	// determine next step
 	current_step = this->Get_current_step() + add_step;
@@ -87,20 +86,14 @@ void State::SetBehavior(behavior_state new_behavior, unsigned long add_step) {
 	// check whether transitions must be locked to ensure complete state change
 	if (((this->Get_behavior().lateral_state == PREPARE_LANE_CHANGE_LEFT) && (new_behavior.lateral_state == CHANGE_LANE_LEFT)) || ((this->Get_behavior().lateral_state == PREPARE_LANE_CHANGE_RIGHT) && (new_behavior.lateral_state == CHANGE_LANE_RIGHT))) {
 		
-		// determine step when transition will be finished
-		no_change_before_step = current_step + LANE_CHANGE_TRANSITION_TIME;
-		
-	} else {
-		
-		// allow change in current step
-		no_change_before_step = current_step;
+		// determine and set step when transition will be finished
+		this->no_change_before_step = current_step + LANE_CHANGE_TRANSITION_TIME;
 		
 	}
 	
 	// set behavior state
 	this->behavior = new_behavior;
 	this->current_step = current_step;
-	this->no_change_before_step = no_change_before_step;
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_SETBEHAVIOR) {
@@ -115,23 +108,25 @@ void State::SetBehavior(behavior_state new_behavior, unsigned long add_step) {
 }
 
 // get next possible states
-vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane) {
+vector<behavior_state> State::GetNextPossibleBehaviors(Vehicle ego) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_STATE_GETNEXTPOSSIBLEBEHAVIORS) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "STATE: GetNextPossibleBehaviors - Start" << endl;
-		cout << "  current_lane: " << current_lane << endl;
+		cout << "  ego: " << endl << ego.CreateString();
 		
 	}
 	
 	// define variables
+	unsigned int current_lane = ego.Get_lane();
 	bool can_move_left = false;
 	bool can_move_right = false;
 	unsigned int count_t = 0;
 	vector<behavior_state> next_potential_behaviors;
 	unsigned int count_b = 0;
+	LONGITUDINALSTATE potential_longitudinal_state;
 	LATERALSTATE potential_lateral_state;
 	
 	// initialize outputs
@@ -170,14 +165,20 @@ vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane
 				for (count_b = 0; count_b < next_potential_behaviors.size(); count_b++) {
 					
 					// get potential lateral state
+					potential_longitudinal_state = next_potential_behaviors[count_b].longitudinal_state;
 					potential_lateral_state = next_potential_behaviors[count_b].lateral_state;
 					
-					// only include lateral changes if there are valid lanes for it or no lane change necessary
-					if ((((potential_lateral_state == PREPARE_LANE_CHANGE_LEFT) || (potential_lateral_state == CHANGE_LANE_LEFT)) && can_move_left) || 
-					    (((potential_lateral_state == PREPARE_LANE_CHANGE_RIGHT) || (potential_lateral_state == CHANGE_LANE_RIGHT)) && can_move_right) ||
-							(potential_lateral_state == KEEP_LANE)) {
-						
-						next_possible_behaviors.push_back(next_potential_behaviors[count_b]);
+					// avoid behavior that makes the vehicle drive backwards
+					if (!((ego.Get_v() <= 0) && (potential_longitudinal_state == DECELERATE))) {
+					
+						// only include lateral changes if there are valid lanes for it or no lane change necessary
+						if ((((potential_lateral_state == PREPARE_LANE_CHANGE_LEFT) || (potential_lateral_state == CHANGE_LANE_LEFT)) && can_move_left) || 
+								(((potential_lateral_state == PREPARE_LANE_CHANGE_RIGHT) || (potential_lateral_state == CHANGE_LANE_RIGHT)) && can_move_right) ||
+								(potential_lateral_state == KEEP_LANE)) {
+							
+							next_possible_behaviors.push_back(next_potential_behaviors[count_b]);
+							
+						}
 						
 					}
 					
@@ -228,6 +229,7 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_
 	double dv_target = 0.0;
 	double da_target = 0.0;
 	unsigned int current_lane = ego.Get_lane();
+	unsigned int intended_lane = 0;
 	
 	// initialize outputs
 	Trajectory new_trajectory;
@@ -276,31 +278,40 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_
 	
 		case KEEP_LANE:
 			
+			intended_lane = current_lane;
 			d_target = ego.GetLaneD(current_lane);
 			break; // switch
 			
 		case PREPARE_LANE_CHANGE_LEFT:
 			
+			intended_lane = current_lane - 1;
 			d_target = ego.GetLaneD(current_lane);
 			break; // switch
 			
 		case PREPARE_LANE_CHANGE_RIGHT:
 			
+			intended_lane = current_lane + 1;
 			d_target = ego.GetLaneD(current_lane);
 			break; // switch
 			
 		case CHANGE_LANE_LEFT:
 			
-			d_target = ego.GetLaneD(current_lane - 1);
+			intended_lane = current_lane - 1;
+			d_target = ego.GetLaneD(intended_lane);
 			break; // switch
 			
 		case CHANGE_LANE_RIGHT:
 			
-			d_target = ego.GetLaneD(current_lane + 1);
+			intended_lane = current_lane + 1;
+			d_target = ego.GetLaneD(intended_lane);
 			break; // switch
 			
 	}
 	
+	// save final lane intended by behavior
+	new_trajectory.Set_intended_lane(intended_lane);
+	
+	// generate trajectory steps
 	new_trajectory.Generate(map, ego.Get_trajectory(), s_target, sv_target, sa_target, d_target, dv_target, da_target);
 	
 	// display message if required
@@ -314,7 +325,11 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_
 		cout << "  d_target: " << d_target << endl;
 		cout << "  dv_target: " << dv_target << endl;
 		cout << "  da_target: " << da_target << endl;
-		cout << "  new_trajectory: " << endl << new_trajectory.CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  new_trajectory: " << endl << new_trajectory.CreateString();
+			
+		}
 		cout << "--- STATE: GenerateTrajectoryFromBehavior - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
