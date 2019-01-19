@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 #include "Map.h"
-#include "Vehicle.h"
 #include "Path.h"
 #include "helper_functions.h"
 
@@ -60,7 +59,7 @@ public:
 	~Trajectory() {}
 	
 	// initialize trajectory
-	unsigned long Init(Map map, Vehicle ego, Path previous_path);
+	unsigned long Init(Map map, double s_start, double sv_start, double d_start, double dv_start, double da_start, double dj_start, double theta_start, Path previous_path);
 	
 	// start trajectory
 	void Start(double x, double y, double s, double sv, double sa, double sj, double d, double dv, double da, double dj, double theta);
@@ -77,49 +76,62 @@ public:
 	void Generate(Map map, Trajectory trajectory, double s_target, double sv_target, double sa_target, double d_target, double dv_target, double da_target);
 	
 	// check trajectory for being valid
-	bool Valid(Map map, Vehicle ego);
+	bool Valid(Map map);
 	
 	// determine cost of trajectory
 	double Cost();
 	
 	// get trajectory x values
 	vector<double> Get_x();
+	vector<double>* Get_x_ptr();
 	
 	// get trajectory y values
 	vector<double> Get_y();
+	vector<double>* Get_y_ptr();
 	
 	// get trajectory s values
 	vector<double> Get_s();
+	vector<double>* Get_s_ptr();
 	
 	// get trajectory s velocity values
 	vector<double> Get_sv();
+	vector<double>* Get_sv_ptr();
 	
 	// get trajectory s acceleration values
 	vector<double> Get_sa();
+	vector<double>* Get_sa_ptr();
 	
 	// get trajectory s jerk values
 	vector<double> Get_sj();
+	vector<double>* Get_sj_ptr();
 	
 	// get trajectory d values
 	vector<double> Get_d();
+	vector<double>* Get_d_ptr();
 	
 	// get trajectory d velocity values
 	vector<double> Get_dv();
+	vector<double>* Get_dv_ptr();
 	
 	// get trajectory d accerleration values
 	vector<double> Get_da();
+	vector<double>* Get_da_ptr();
 	
 	// get trajectory d jerk values
 	vector<double> Get_dj();
+	vector<double>* Get_dj_ptr();
 	
 	// get trajectory orientation angles
 	vector<double> Get_theta();
+	vector<double>* Get_theta_ptr();
 	
 	// get initialization status
 	bool Get_is_initialized();
+	bool* Get_is_initialized_ptr();
 	
 	// get number of initialization steps
 	unsigned long Get_previous_trajectory_steps();
+	unsigned long* Get_previous_trajectory_steps_ptr();
 	
 	// display Trajectory object as string
 	string CreateString();

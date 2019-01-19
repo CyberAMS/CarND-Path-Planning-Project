@@ -33,9 +33,19 @@ public:
 	
 	// get path_x value
 	vector<double> Get_x();
+	vector<double>* Get_x_ptr();
 	
 	// get path_y value
 	vector<double> Get_y();
+	vector<double>* Get_y_ptr();
+	
+	// get end_path_s value
+	double Get_end_path_s();
+	double* Get_end_path_s_ptr();
+	
+	// get end_path_d value
+	double Get_end_path_d();
+	double* Get_end_path_d_ptr();
 	
 	// display Path object as string
 	string CreateString();

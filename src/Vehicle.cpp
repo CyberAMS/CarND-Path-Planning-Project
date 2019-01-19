@@ -319,10 +319,10 @@ bool Vehicle::CheckInsideLane(const double &d, const unsigned int &lane) {
 	bool is_inside_lane = false;
 	
 	// get lane center d value of vehicle's lane
-	lane_center = GetLaneD(this->lane);
+	lane_center = GetLaneD(lane);
 	
 	// check whether vehicle is within lane center range
-	if (fabs(this->d - lane_center) <= (LANE_CENTER_WIDTH / 2)) {
+	if (fabs(d - lane_center) <= (LANE_CENTER_WIDTH / 2)) {
 		
 		is_inside_lane = true;
 		
@@ -457,10 +457,34 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned 
 	return vehicles_behind;
 }
 
+// set trajectory
+void Vehicle::SetTrajectory(Trajectory trajectory) {
+	
+	this->trajectory = trajectory;
+	
+}
+
+// get id number
+unsigned int Vehicle::Get_id() {
+	
+	return this->id;
+	
+}
+unsigned int* Vehicle::Get_id_ptr() {
+	
+	return &this->id;
+	
+}
+
 // get x value
 double Vehicle::Get_x() {
 	
 	return this->x;
+	
+}
+double* Vehicle::Get_x_ptr() {
+	
+	return &this->x;
 	
 }
 
@@ -470,11 +494,21 @@ double Vehicle::Get_y() {
 	return this->y;
 	
 }
+double* Vehicle::Get_y_ptr() {
+	
+	return &this->y;
+	
+}
 
 // get vx value
 double Vehicle::Get_vx() {
 	
 	return this->vx;
+	
+}
+double* Vehicle::Get_vx_ptr() {
+	
+	return &this->vx;
 	
 }
 
@@ -484,11 +518,21 @@ double Vehicle::Get_vy() {
 	return this->vy;
 	
 }
+double* Vehicle::Get_vy_ptr() {
+	
+	return &this->vy;
+	
+}
 
 // get s value
 double Vehicle::Get_s() {
 	
 	return this->s;
+	
+}
+double* Vehicle::Get_s_ptr() {
+	
+	return &this->s;
 	
 }
 
@@ -498,11 +542,21 @@ double Vehicle::Get_d() {
 	return this->d;
 	
 }
+double* Vehicle::Get_d_ptr() {
+	
+	return &this->d;
+	
+}
 
 // get yaw angle
 double Vehicle::Get_theta() {
 	
 	return this->theta;
+	
+}
+double* Vehicle::Get_theta_ptr() {
+	
+	return &this->theta;
 	
 }
 
@@ -512,11 +566,21 @@ double Vehicle::Get_v() {
 	return this->v;
 	
 }
+double* Vehicle::Get_v_ptr() {
+	
+	return &this->v;
+	
+}
 
 // get lane value
 unsigned int Vehicle::Get_lane() {
 	
 	return this->lane;
+	
+}
+unsigned int* Vehicle::Get_lane_ptr() {
+	
+	return &this->lane;
 	
 }
 
@@ -526,6 +590,11 @@ bool Vehicle::Get_is_inside_lane() {
 	return this->is_inside_lane;
 	
 }
+bool* Vehicle::Get_is_inside_lane_ptr() {
+	
+	return &this->is_inside_lane;
+	
+}
 
 // get trajectory
 Trajectory Vehicle::Get_trajectory() {
@@ -533,7 +602,7 @@ Trajectory Vehicle::Get_trajectory() {
 	return this->trajectory;
 	
 }
-Trajectory* Vehicle::Get_trajectory() {
+Trajectory* Vehicle::Get_trajectory_ptr() {
 	
 	return &this->trajectory;
 	
@@ -547,18 +616,18 @@ string Vehicle::CreateString() {
 	
 	// add information about car to string
 	text += DISPLAY_PREFIX;
-	text += "id = " + to_string(this->id) + " ";
-	text += "x = " + to_string(this->x) + " ";
-	text += "y = " + to_string(this->y) + " ";
-	text += "vx = " + to_string(this->vx) + " ";
-	text += "vy = " + to_string(this->vy) + " ";
-	text += "s = " + to_string(this->s) + " ";
-	text += "d = " + to_string(this->d) + " ";
-	text += "theta = " + to_string(this->theta) + " ";
-	text += "v = " + to_string(this->v) + " ";
-	text += "lane = " + to_string(this->lane) + " ";
-	text += "is_inside_lane = " + to_string(this->is_inside_lane) + "\n";
-	text += DISPLAY_PREFIX + "this->trajectory =\n" + this->trajectory.CreateString();
+	text += "id = " + to_string(this->Get_id()) + " ";
+	text += "x = " + to_string(this->Get_x()) + " ";
+	text += "y = " + to_string(this->Get_y()) + " ";
+	text += "vx = " + to_string(this->Get_vx()) + " ";
+	text += "vy = " + to_string(this->Get_vy()) + " ";
+	text += "s = " + to_string(this->Get_s()) + " ";
+	text += "d = " + to_string(this->Get_d()) + " ";
+	text += "theta = " + to_string(this->Get_theta()) + " ";
+	text += "v = " + to_string(this->Get_v()) + " ";
+	text += "lane = " + to_string(this->Get_lane()) + " ";
+	text += "is_inside_lane = " + to_string(this->Get_is_inside_lane()) + "\n";
+	text += DISPLAY_PREFIX + "this->trajectory =\n" + this->Get_trajectory().CreateString();
 	
 	// return output
 	return text;

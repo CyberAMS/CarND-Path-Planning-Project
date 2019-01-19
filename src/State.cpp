@@ -34,7 +34,6 @@ void State::Init(unsigned long add_step) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "STATE: Init - Start" << endl;
-		cout << "  ego: " << endl << ego.CreateString();
 		
 	}
 	
@@ -49,7 +48,7 @@ void State::Init(unsigned long add_step) {
 	} else {
 		
 		// set state (update executed steps and increase step by one)
-		this->SetBehavior(this->behavior, add_step);
+		this->SetBehavior(this->Get_behavior(), add_step);
 		
 	}
 	
@@ -83,10 +82,10 @@ void State::SetBehavior(behavior_state new_behavior, unsigned long add_step) {
 	unsigned long no_change_before_step;
 	
 	// determine next step
-	current_step = this->current_step + add_step;
+	current_step = this->Get_current_step() + add_step;
 	
 	// check whether transitions must be locked to ensure complete state change
-	if (((this->behavior.lateral_state == PREPARE_LANE_CHANGE_LEFT) && (new_behavior.lateral_state == CHANGE_LANE_LEFT)) || ((this->behavior.lateral_state == PREPARE_LANE_CHANGE_RIGHT) && (new_behavior.lateral_state == CHANGE_LANE_RIGHT))) {
+	if (((this->Get_behavior().lateral_state == PREPARE_LANE_CHANGE_LEFT) && (new_behavior.lateral_state == CHANGE_LANE_LEFT)) || ((this->Get_behavior().lateral_state == PREPARE_LANE_CHANGE_RIGHT) && (new_behavior.lateral_state == CHANGE_LANE_RIGHT))) {
 		
 		// determine step when transition will be finished
 		no_change_before_step = current_step + LANE_CHANGE_TRANSITION_TIME;
@@ -139,10 +138,10 @@ vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane
 	vector<behavior_state> next_possible_behaviors;
 	
 	// check whether we still execute a transition and no behavior change is allowed
-	if (this->current_step < this->no_change_before_step) {
+	if (this->Get_current_step() < this->Get_no_change_before_step()) {
 		
 		// only return current behavior state
-		next_possible_behaviors = (vector<behavior_state>){this->behavior};
+		next_possible_behaviors = (vector<behavior_state>){this->Get_behavior()};
 		
 	} else {
 		
@@ -162,7 +161,7 @@ vector<behavior_state> State::GetNextPossibleBehaviors(unsigned int current_lane
 		for (count_t = 0; count_t < TRANSITIONS.size(); count_t++) {
 			
 			// check whether current transition defines next states for current behavior state
-			if (this->behavior.lateral_state == TRANSITIONS[count_t].name) {
+			if (this->Get_behavior().lateral_state == TRANSITIONS[count_t].name) {
 				
 				// get list of possible next behaviors
 				next_potential_behaviors = TRANSITIONS[count_t].next;
@@ -221,7 +220,7 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_
 	}
 	
 	// define variables
-	double sv_continue = ego.Get_trajectory().Get_sv()[trajectory.Get_sv().size() - 1];
+	double sv_continue = ego.Get_trajectory().Get_sv()[ego.Get_trajectory().Get_sv().size() - 1];
 	double s_target = 0.0;
 	double sv_target = 0.0;
 	double sa_target = 0.0;
@@ -332,6 +331,47 @@ behavior_state State::Get_behavior() {
 	return this->behavior;
 	
 }
+behavior_state* State::Get_behavior_ptr() {
+	
+	return &this->behavior;
+	
+}
+
+// get current step
+unsigned long State::Get_current_step() {
+	
+	return this->current_step;
+	
+}
+unsigned long* State::Get_current_step_ptr() {
+	
+	return &this->current_step;
+	
+}
+
+// get no_change_before_step value
+unsigned long State::Get_no_change_before_step() {
+	
+	return this->no_change_before_step;
+	
+}
+unsigned long* State::Get_no_change_before_step_ptr() {
+	
+	return &this->no_change_before_step;
+	
+}
+
+// // get is_initialized value
+bool State::Get_is_initialized() {
+	
+	return this->is_initialized;
+	
+}
+bool* State::Get_is_initialized_ptr() {
+	
+	return &this->is_initialized;
+	
+}
 
 // display State object as string
 string State::CreateString() {
@@ -340,11 +380,11 @@ string State::CreateString() {
 	string text = "";
 	
 	// add information about car to string
-	text += DISPLAY_PREFIX + "behavior =\n" + this->CreateBehaviorString(this->behavior);
+	text += DISPLAY_PREFIX + "behavior =\n" + this->CreateBehaviorString(this->Get_behavior());
 	text += DISPLAY_PREFIX;
-	text += "current_step = " + to_string(this->current_step) + " ";
-	text += "no_change_before_step = " + to_string(this->no_change_before_step) + " ";
-	text += "is_initialized = " + to_string(this->is_initialized) + "\n";
+	text += "current_step = " + to_string(this->Get_current_step()) + " ";
+	text += "no_change_before_step = " + to_string(this->Get_no_change_before_step()) + " ";
+	text += "is_initialized = " + to_string(this->Get_is_initialized()) + "\n";
 	
 	// return output
 	return text;

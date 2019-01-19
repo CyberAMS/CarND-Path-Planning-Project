@@ -44,10 +44,10 @@ void Driver::PlanBehavior() {
 	Trajectory next_possible_trajectory;
 	double cost;
 	double minimal_cost = std::numeric_limits<double>::max();
-	behavior_state best_behavior = this->state->Get_behavior();
-	Trajectory best_trajectory = this->Get_ego()->Get_trajectory();
+	behavior_state best_behavior = this->Get_state().Get_behavior();
+	Trajectory best_trajectory = this->Get_ego().Get_trajectory();
 	
-	finished_steps = this->Get_ego_ptr()->Get_trajectory_ptr()->Init(this->Get_map(), this->Get_ego(), this->previous_path);
+	finished_steps = this->Get_ego_ptr()->Get_trajectory_ptr()->Init(this->Get_map(), this->Get_ego().Get_s(), EGO_CAR_SV_INIT, this->Get_ego().Get_d(), EGO_CAR_DV_INIT, EGO_CAR_DA_INIT, EGO_CAR_DJ_INIT, this->Get_ego().Get_theta(), this->Get_previous_path());
 	this->Get_state_ptr()->Init(finished_steps);
 	
 	// get next possible states
@@ -60,7 +60,7 @@ void Driver::PlanBehavior() {
 		next_possible_trajectory = this->Get_state().GenerateTrajectoryFromBehavior(this->Get_map(), this->Get_ego(), next_possible_behaviors[count]);
 		
 		// check whether trajectory is valid
-		if (next_possible_trajectory.Valid(this->Get_map(), this->Get_ego())) {
+		if (next_possible_trajectory.Valid(this->Get_map())) {
 			
 			// determine cost of trajectory
 			cost = next_possible_trajectory.Cost();
@@ -81,19 +81,19 @@ void Driver::PlanBehavior() {
 	
 	// select behavior for lowest cost trajectory and update trajectory accordingly
 	this->Get_state_ptr()->SetBehavior(best_behavior, NO_STEP_INCREASE);
-	this->Get_ego_ptr()->trajectory = best_trajectory;
+	this->Get_ego_ptr()->SetTrajectory(best_trajectory);
 	
 	// save next xy values
-	this->next_x_vals = this->Get_ego().Get_Trajectory().Get_x();
-	this->next_y_vals = this->Get_ego().Get_Trajectory().Get_y();
+	this->next_x_vals = this->Get_ego().Get_trajectory().Get_x();
+	this->next_y_vals = this->Get_ego().Get_trajectory().Get_y();
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_DRIVER_PLANBEHAVIOR) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  finished_steps: " << finished_steps << endl;
-		cout << "  next_possible_behaviors: " << endl << this->state.CreateBehaviorVectorString(next_possible_behaviors);
-		cout << "  best_behavior: " << endl << this->state.CreateBehaviorString(best_behavior);
+		cout << "  next_possible_behaviors: " << endl << this->Get_state().CreateBehaviorVectorString(next_possible_behaviors);
+		cout << "  best_behavior: " << endl << this->Get_state().CreateBehaviorString(best_behavior);
 		cout << "  best_trajectory: " << endl << best_trajectory.CreateString();
 		cout << "  next_x_vals, next_y_vals: " << endl << CreateDoubleVectorsString((vector<vector<double>>){next_x_vals, next_y_vals});
 		cout << "--- DRIVER: PlanBehavior - End" << endl;
@@ -121,7 +121,7 @@ void Driver::Set_vehicles(vector<Vehicle> vehicles) {
 	if (bDISPLAY && bDISPLAY_DRIVER_SETVEHICLES) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this->vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(this->vehicles);
+		cout << "  this->vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(this->Get_vehicles());
 		cout << "--- DRIVER: Set_vehicles - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

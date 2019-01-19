@@ -85,10 +85,23 @@ public:
 	vector<behavior_state> GetNextPossibleBehaviors(unsigned int current_lane);
 	
 	// generate new trajectory from behavior
-	Trajectory GenerateTrajectoryFromBehavior(Map map, Vehicle ego, Trajectory trajectory, behavior_state behavior);
+	Trajectory GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_state behavior);
 	
 	// get behavior state
 	behavior_state Get_behavior();
+	behavior_state* Get_behavior_ptr();
+	
+	// get current step
+	unsigned long Get_current_step();
+	unsigned long* Get_current_step_ptr();
+	
+	// get no_change_before_step value
+	unsigned long Get_no_change_before_step();
+	unsigned long* Get_no_change_before_step_ptr();
+	
+	// get is_initialized value
+	bool Get_is_initialized();
+	bool* Get_is_initialized_ptr();
 	
 	// display State object as string
 	string CreateString();

@@ -57,11 +57,45 @@ vector<double> Path::Get_x() {
 	return this->path_x;
 	
 }
+vector<double>* Path::Get_x_ptr() {
+	
+	return &this->path_x;
+	
+}
 
 // get path_y value
 vector<double> Path::Get_y() {
 	
 	return this->path_y;
+	
+}
+vector<double>* Path::Get_y_ptr() {
+	
+	return &this->path_y;
+	
+}
+
+// get end_path_s value
+double Path::Get_end_path_s() {
+	
+	return this->end_path_s;
+	
+}
+double* Path::Get_end_path_s_ptr() {
+	
+	return &this->end_path_s;
+	
+}
+
+// get end_path_d value
+double Path::Get_end_path_d() {
+	
+	return this->end_path_d;
+	
+}
+double* Path::Get_end_path_d_ptr() {
+	
+	return &this->end_path_d;
 	
 }
 
@@ -72,10 +106,10 @@ string Path::CreateString() {
 	string text = "";
 	
 	// add information about path to string
-	text += DISPLAY_PREFIX + "path_x, path_y =\n" + CreateDoubleVectorsString(vector<vector<double>>{this->path_x, this->path_y});
+	text += DISPLAY_PREFIX + "path_x, path_y =\n" + CreateDoubleVectorsString(vector<vector<double>>{this->Get_x(), this->Get_y()});
 	text += DISPLAY_PREFIX;
-	text += "end_path_s = " + to_string(this->end_path_s) + " ";
-	text += "end_path_d = " + to_string(this->end_path_d) + "\n";
+	text += "end_path_s = " + to_string(this->Get_end_path_s()) + " ";
+	text += "end_path_d = " + to_string(this->Get_end_path_d()) + "\n";
 	
 	// return output
 	return text;

@@ -28,7 +28,7 @@ using std::min;
 using std::pow;
 
 // init trajectory
-unsigned long Trajectory::Init(Map map, Vehicle ego, Path previous_path) {
+unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double d_start, double dv_start, double da_start, double dj_start, double theta_start, Path previous_path) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_INIT) {
@@ -36,7 +36,13 @@ unsigned long Trajectory::Init(Map map, Vehicle ego, Path previous_path) {
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: Init - Start" << endl;
 		// cout << "  map: " << endl << map.CreateString();
-		cout << "  ego: " << endl << ego.CreateString();
+		cout << "  s_start: " << s_start << endl;
+		cout << "  sv_start: " << sv_start << endl;
+		cout << "  d_start: " << d_start << endl;
+		cout << "  dv_start: " << dv_start << endl;
+		cout << "  da_start: " << da_start << endl;
+		cout << "  dj_start: " << dj_start << endl;
+		cout << "  theta_start: " << theta_start << endl;
 		cout << "  previous_path: " << endl << previous_path.CreateString();
 		
 	}
@@ -53,21 +59,21 @@ unsigned long Trajectory::Init(Map map, Vehicle ego, Path previous_path) {
 	double y_next = 0.0;
 	
 	// determine how much progress was made since last call
-	finished_steps = (unsigned long)(this->x_values.size() - previous_path.Get_x().size());
+	finished_steps = (unsigned long)(this->Get_x().size() - previous_path.Get_x().size());
 		
 	// check whether this trajectory has not been initialized or whether it has not enough steps left or whether it has no unused steps left
-	if ((!this->is_initialized) || (this->Get_x().size() < MIN_PREVIOUS_PATH_STEPS) || (this->Get_x().size() <= (finished_steps + 1))) {
+	if ((!this->Get_is_initialized()) || (this->Get_x().size() < MIN_PREVIOUS_PATH_STEPS) || (this->Get_x().size() <= (finished_steps + 1))) {
 		
 		// add own vehicle position at next step to trajectory
-		s_next = ego.Get_s() + (EGO_CAR_SV_INIT * SAMPLE_TIME);
-		sv_next = EGO_CAR_SV_INIT;
+		s_next = s_start + (sv_start * SAMPLE_TIME);
+		sv_next = sv_start;
 		sa_next = (sv_next / SAMPLE_TIME);
 		sj_next = (sa_next / SAMPLE_TIME);
-		d_next = ego.Get_d();
+		d_next = d_start;
 		xy_next = map.Frenet2Xy(s_next, d_next);
 		x_next = xy_next[0];
 		y_next = xy_next[1];
-		this->Start(x_next, y_next, s_next, sv_next, sa_next, sj_next, d_next, EGO_CAR_DV_INIT, EGO_CAR_DA_INIT, EGO_CAR_DJ_INIT, ego.Get_theta());
+		this->Start(x_next, y_next, s_next, sv_next, sa_next, sj_next, d_next, dv_start, da_start, dj_start, theta_start);
 		
 		// initialization done
 		this->is_initialized = true;
@@ -139,7 +145,7 @@ void Trajectory::Start(double x, double y, double s, double sv, double sa, doubl
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_START) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values});
+		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->Get_x(), this->Get_y(), this->Get_s(), this->Get_sv(), this->Get_sa(), this->Get_sj(), this->Get_d(), this->Get_dv(), this->Get_da(), this->Get_dj(), this->Get_theta()});
 		cout << "--- TRAJECTORY: Start - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -186,7 +192,7 @@ void Trajectory::Add(double x, double y, double s, double sv, double sa, double 
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values});
+		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->Get_x(), this->Get_y(), this->Get_s(), this->Get_sv(), this->Get_sa(), this->Get_sj(), this->Get_d(), this->Get_dv(), this->Get_da(), this->Get_dj(), this->Get_theta()});
 		cout << "--- TRAJECTORY: Add - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -418,7 +424,7 @@ void Trajectory::Generate(Map map, Trajectory trajectory, double s_target, doubl
 }
 
 // check trajectory for being valid
-bool Trajectory::Valid(Map map, Vehicle ego) {
+bool Trajectory::Valid(Map map) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_VALID) {
@@ -426,7 +432,6 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "TRAJECTORY: Valid - Start" << endl;
 		// cout << "  map: " << endl << map.CreateString();
-		cout << "  ego: " << endl << ego.CreateString();
 		
 	}
 	
@@ -481,6 +486,7 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	vector<double> new_y_values;
 	vector<double> new_theta_values;
 	double d = 0.0;
+	Vehicle vehicle_to_call_fcn;
 	
 	// initialize outputs
 	bool is_valid = true;
@@ -668,7 +674,7 @@ bool Trajectory::Valid(Map map, Vehicle ego) {
 	
 	// check whether trajectory stays in lane
 	d = this->Get_d()[this->Get_d().size() - 1];
-	if (!ego.CheckInsideLane(d, ego.DetermineLane(d))) {
+	if (!vehicle_to_call_fcn.CheckInsideLane(d, vehicle_to_call_fcn.DetermineLane(d))) {
 		
 		is_valid = false;
 		
@@ -766,11 +772,21 @@ vector<double> Trajectory::Get_x() {
 	return this->x_values;
 	
 }
+vector<double>* Trajectory::Get_x_ptr() {
+	
+	return &this->x_values;
+	
+}
 
 // get trajectory y values
 vector<double> Trajectory::Get_y() {
 	
 	return this->y_values;
+	
+}
+vector<double>* Trajectory::Get_y_ptr() {
+	
+	return &this->y_values;
 	
 }
 
@@ -780,11 +796,21 @@ vector<double> Trajectory::Get_s() {
 	return this->s_values;
 	
 }
+vector<double>* Trajectory::Get_s_ptr() {
+	
+	return &this->s_values;
+	
+}
 
 // get trajectory s velocity values
 vector<double> Trajectory::Get_sv() {
 	
 	return this->sv_values;
+	
+}
+vector<double>* Trajectory::Get_sv_ptr() {
+	
+	return &this->sv_values;
 	
 }
 
@@ -794,6 +820,11 @@ vector<double> Trajectory::Get_sa() {
 	return this->sa_values;
 	
 }
+vector<double>* Trajectory::Get_sa_ptr() {
+	
+	return &this->sa_values;
+	
+}
 
 // get trajectory s jerk values
 vector<double> Trajectory::Get_sj() {
@@ -801,10 +832,21 @@ vector<double> Trajectory::Get_sj() {
 	return this->sj_values;
 	
 }
+vector<double>* Trajectory::Get_sj_ptr() {
+	
+	return &this->sj_values;
+	
+}
+
 // get trajectory d values
 vector<double> Trajectory::Get_d() {
 	
 	return this->d_values;
+	
+}
+vector<double>* Trajectory::Get_d_ptr() {
+	
+	return &this->d_values;
 	
 }
 
@@ -814,11 +856,21 @@ vector<double> Trajectory::Get_dv() {
 	return this->dv_values;
 	
 }
+vector<double>* Trajectory::Get_dv_ptr() {
+	
+	return &this->dv_values;
+	
+}
 
 // get trajectory d acceleration values
 vector<double> Trajectory::Get_da() {
 	
 	return this->da_values;
+	
+}
+vector<double>* Trajectory::Get_da_ptr() {
+	
+	return &this->da_values;
 	
 }
 
@@ -828,11 +880,21 @@ vector<double> Trajectory::Get_dj() {
 	return this->dj_values;
 	
 }
+vector<double>* Trajectory::Get_dj_ptr() {
+	
+	return &this->dj_values;
+	
+}
 
 // get trajectory orientation angles
 vector<double> Trajectory::Get_theta() {
 	
 	return this->theta_values;
+	
+}
+vector<double>* Trajectory::Get_theta_ptr() {
+	
+	return &this->theta_values;
 	
 }
 
@@ -842,11 +904,21 @@ bool Trajectory::Get_is_initialized() {
 	return this->is_initialized;
 	
 }
+bool* Trajectory::Get_is_initialized_ptr() {
+	
+	return &this->is_initialized;
+	
+}
 
 // get number of initialization steps
 unsigned long Trajectory::Get_previous_trajectory_steps() {
 	
 	return this->previous_trajectory_steps;
+	
+}
+unsigned long* Trajectory::Get_previous_trajectory_steps_ptr() {
+	
+	return &this->previous_trajectory_steps;
 	
 }
 
@@ -857,10 +929,10 @@ string Trajectory::CreateString() {
 	string text = "";
 	
 	// add information about path to string
-	text += DISPLAY_PREFIX + "this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values =\n" + CreateDoubleVectorsString((vector<vector<double>>){this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values});
+	text += DISPLAY_PREFIX + "this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values =\n" + CreateDoubleVectorsString((vector<vector<double>>){this->Get_x(), this->Get_y(), this->Get_s(), this->Get_sv(), this->Get_sa(), this->Get_sj(), this->Get_d(), this->Get_dv(), this->Get_da(), this->Get_dj(), this->Get_theta()});
 	text += DISPLAY_PREFIX;
-	text += "is_initialized = " + to_string(this->is_initialized) + " ";
-	text += "previous_trajectory_steps = " + to_string(this->previous_trajectory_steps) + "\n";
+	text += "is_initialized = " + to_string(this->Get_is_initialized()) + " ";
+	text += "previous_trajectory_steps = " + to_string(this->Get_previous_trajectory_steps()) + "\n";
 	
 	// return output
 	return text;
@@ -896,7 +968,7 @@ void Trajectory::RemoveFirstSteps(const unsigned long &steps) {
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_REMOVEFIRSTSTEPS) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values});
+		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->Get_x(), this->Get_y(), this->Get_s(), this->Get_sv(), this->Get_sa(), this->Get_sj(), this->Get_d(), this->Get_dv(), this->Get_da(), this->Get_dj(), this->Get_theta()});
 		cout << "--- TRAJECTORY: RemoveFirstSteps - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -933,7 +1005,7 @@ void Trajectory::KeepFirstSteps(const unsigned long &steps) {
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_KEEPFIRSTSTEPS) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values});
+		cout << "  this->x_values, this->y_values, this->s_values, this->sv_values, this->sa_values, this->sj_values, this->d_values, this->dv_values, this->da_values, this->dj_values, this->theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){this->Get_x(), this->Get_y(), this->Get_s(), this->Get_sv(), this->Get_sa(), this->Get_sj(), this->Get_d(), this->Get_dv(), this->Get_da(), this->Get_dj(), this->Get_theta()});
 		cout << "--- TRAJECTORY: KeepFirstSteps - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

@@ -64,39 +64,56 @@ public:
 	// get vehicles behind own vehicle
 	vector<Vehicle> Behind(const vector<Vehicle> &vehicles, const unsigned int &lane);
 	
+	// set trajectory
+	void SetTrajectory(Trajectory trajectory);
+	
+	// get id number
+	unsigned int Get_id();
+	unsigned int* Get_id_ptr();
+	
 	// get x value
 	double Get_x();
+	double* Get_x_ptr();
 	
 	// get y value
 	double Get_y();
+	double* Get_y_ptr();
 	
 	// get vx value
 	double Get_vx();
+	double* Get_vx_ptr();
 	
 	// get vy value
 	double Get_vy();
+	double* Get_vy_ptr();
 	
 	// get s value
 	double Get_s();
+	double* Get_s_ptr();
 	
 	// get d value
 	double Get_d();
+	double* Get_d_ptr();
 	
 	// get yaw angle
 	double Get_theta();
+	double* Get_theta_ptr();
 	
 	// get speed
 	double Get_v();
+	double* Get_v_ptr();
 	
 	// get lane value
 	unsigned int Get_lane();
+	unsigned int* Get_lane_ptr();
 	
 	// get is_inside_lane value
 	bool Get_is_inside_lane();
+	bool* Get_is_inside_lane_ptr();
 	
 	// get trajectory
 	Trajectory Get_trajectory();
-	Trajectory* Get_trajectory();
+	Trajectory* Get_trajectory_ptr();
 	
 	// display Vehicle object as string
 	string CreateString();
@@ -107,7 +124,7 @@ public:
 private:
 	
 	// state values
-	double id = 0;
+	unsigned int id = 0;
 	double x = 0;
 	double y = 0;
 	double vx = 0;
