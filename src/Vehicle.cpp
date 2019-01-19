@@ -855,15 +855,15 @@ double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) 
 	
 	// add collision costs
 	cost_steps_to_collision = this->CostStepsToCollision(trajectory, vehicles, COST_COLLISON_WEIGHT);
-	cost =+ cost_steps_to_collision;
+	cost += cost_steps_to_collision;
 	
 	// add cost for distance to vehicle ahead
 	cost_distance_vehicle_ahead = this->CostDistanceVehicleAhead(vehicles, COST_DISTANCEVEHICLEAHEAD_WEIGHT);
-	cost =+ cost_distance_vehicle_ahead;
+	cost += cost_distance_vehicle_ahead;
 	
 	// add travel distance cost
 	cost_travel_distance = this->CostTravelDistance(trajectory, COST_TRAVELDISTANCE_WEIGHT);
-	cost =+ cost_travel_distance;
+	cost += cost_travel_distance;
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_TRAJECTORYCOST) {
