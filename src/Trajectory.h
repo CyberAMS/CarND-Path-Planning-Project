@@ -48,6 +48,10 @@ const double TARGET_SPEED_FROM_ZERO = (MAX_ACCELERATION_S / 2) * STEP_TIME_INTER
 // lateral definitions
 const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
 
+// cost weights
+const double ZERO_COST = 0.0;
+const double COST_COLLISON_WEIGHT = 1.0;
+
 class Trajectory {
 
 public:
@@ -78,8 +82,14 @@ public:
 	// check trajectory for being valid
 	bool Valid(Map map);
 	
+	// detect collision between trajectory of own vehicle and trajectories of other vehicles
+	bool DetectCollision(Vehicle ego, vector<Vehicle> vehicles);
+	
+	// determine collison cost
+	double CostCollision(Vehicle ego, vector<Vehicle> vehicles, const double *weight);
+	
 	// determine cost of trajectory
-	double Cost();
+	double Cost(Vehicle ego, vector<Vehicle> vehicles);
 	
 	// set initialization status
 	void Set_is_initialized(bool is_initialized);

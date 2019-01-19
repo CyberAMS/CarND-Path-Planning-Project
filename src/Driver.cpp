@@ -54,7 +54,7 @@ void Driver::PlanBehavior() {
 	next_possible_behaviors = this->Get_state().GetNextPossibleBehaviors(this->Get_ego().Get_lane());
 	
 	// generate trajectories for all states
-	for (count = 0; count < min(1, (int)next_possible_behaviors.size()); count++) {
+	for (count = 0; count < next_possible_behaviors.size(); count++) {
 		
 		// generate trajectory for current state
 		next_possible_trajectory = this->Get_state().GenerateTrajectoryFromBehavior(this->Get_map(), this->Get_ego(), next_possible_behaviors[count]);
@@ -63,7 +63,7 @@ void Driver::PlanBehavior() {
 		if (next_possible_trajectory.Valid(this->Get_map())) {
 			
 			// determine cost of trajectory
-			cost = next_possible_trajectory.Cost();
+			cost = next_possible_trajectory.Cost(this->Get_ego(), this->Get_vehicles());
 			
 			// found better trajectory
 			if (cost < minimal_cost) {
