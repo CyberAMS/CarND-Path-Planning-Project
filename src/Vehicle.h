@@ -28,8 +28,8 @@ const double EGO_CAR_SJ_INIT = 0.0;
 const double EGO_CAR_DV_INIT = 0.0;
 const double EGO_CAR_DA_INIT = 0.0;
 const double EGO_CAR_DJ_INIT = 0.0;
-const double STANDARD_VEHICLE_WIDTH = 2.5;
-const double STANDARD_VEHICLE_LENGTH = 5.0;
+const double STANDARD_VEHICLE_WIDTH = 2.0;
+const double STANDARD_VEHICLE_LENGTH = 4.0;
 const double SAFETY_BOX_DISTANCE = 0.5; // must have 0.5 m distance to all vehicles around own vehicle
 
 // cost weights

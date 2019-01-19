@@ -25,6 +25,7 @@ using std::cout;
 using std::endl;
 using std::ostringstream;
 using std::fabs;
+using std::min;
 
 // constructor
 Vehicle::Vehicle() {}
@@ -576,23 +577,62 @@ bool Vehicle::DetectCollision(vector<Vehicle> vehicles) {
 	}
 	
 	// define variables
-	unsigned int count = 0;
-	double ego_front_left_x;
-	double vehicle_front_left_x;
+	unsigned int count_t = 0;
+	double ego_front_left_s = 0.0;
+	double ego_front_left_d = 0.0;
+	double ego_front_right_s = 0.0;
+	double ego_front_right_d = 0.0;
+	double ego_rear_right_s = 0.0;
+	double ego_rear_right_d = 0.0;
+	double ego_rear_left_s = 0.0;
+	double ego_rear_left_d = 0.0;
+	unsigned int count_v = 0;
+	double vehicle_front_left_s = 0.0;
+	double vehicle_front_left_d = 0.0;
+	double vehicle_front_right_s = 0.0;
+	double vehicle_front_right_d = 0.0;
+	double vehicle_rear_right_s = 0.0;
+	double vehicle_rear_right_d = 0.0;
+	double vehicle_rear_left_s = 0.0;
+	double vehicle_rear_left_d = 0.0;
 	
 	// initialize outputs
 	bool collision = false;
 	
-	// get corners of safety box around own vehicle
-	ego_front_left_x = this->Get_x() + SAFETY_BOX_DISTANCE; // TODO !!!
-	
-	// check all vehicles
-	for (count = 0; count < vehicles.size(); count++) {
+	// investigate all trajectory steps
+	for (count_t = 0; count_t < min(this->Get_trajectory().Get_s().size(), trajectory.Get_s().size()); count_t++) {
 		
-		// get corners of current vehicle
-		vehicle_front_left_x = vehicles[count].Get_x();
+		// get corners of safety box around own vehicle
+		ego_front_left_s = this->Get_trajectory().Get_s()[count_t] + SAFETY_BOX_DISTANCE;
+		ego_front_left_d = this->Get_trajectory().Get_d()[count_t] - (STANDARD_VEHICLE_WIDTH / 2) - SAFETY_BOX_DISTANCE;
+		ego_front_right_s = ego_front_left_s;
+		ego_front_right_d = this->Get_trajectory().Get_d()[count_t] + (STANDARD_VEHICLE_WIDTH / 2) + SAFETY_BOX_DISTANCE;
+		ego_rear_right_s = this->Get_trajectory().Get_s()[count_t] - STANDARD_VEHICLE_LENGTH - SAFETY_BOX_DISTANCE;
+		ego_rear_right_d = ego_front_right_d;
+		ego_rear_left_s = ego_rear_right_s;
+		ego_rear_left_d = ego_front_left_d;
 		
-		// check whether any corner of the current vehicle is inside the box around our vehicle
+		// check all vehicles
+		for (count_v = 0; count_v < vehicles.size(); count_v++) {
+			
+			// get corners of current vehicle
+			vehicle_front_left_s = vehicles[count_v].Get_trajectory().Get_s()[count_t];
+			vehicle_front_left_d = vehicles[count_v].Get_trajectory().Get_d()[count_t] - (STANDARD_VEHICLE_WIDTH / 2);
+			vehicle_front_right_s = vehicle_front_left_s;
+			vehicle_front_right_d = vehicles[count_v].Get_trajectory().Get_d()[count_t] + (STANDARD_VEHICLE_WIDTH / 2);
+			vehicle_rear_right_s = vehicles[count_v].Get_trajectory().Get_s()[count_t] - STANDARD_VEHICLE_LENGTH;
+			vehicle_rear_right_d = vehicle_front_right_d;
+			vehicle_rear_left_s = vehicle_rear_right_s;
+			vehicle_rear_left_d = vehicle_front_left_d;
+			
+			// check whether both rectangles overlap
+			if (((ego_front_left_s >= vehicle_rear_right_s) && (vehicle_front_left_s >= ego_rear_right_s)) && ((ego_front_left_d >= vehicle_rear_right_d) && (vehicle_front_left_d >= ego_rear_right_d))) {
+				
+				collision = true;
+				
+			}
+			
+		}
 		
 	}
 	
