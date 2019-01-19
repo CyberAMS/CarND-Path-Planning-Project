@@ -93,7 +93,7 @@ public:
 	double CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
 	
 	// determine cost for speed in intended lane
-	double CostSpeedInIntendedLane(vector<Vehicle> vehicles, const double &weight);
+	double CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
 	
 	// determine cost for travel distance
 	double CostTravelDistance(Trajectory trajectory, const double &weight);

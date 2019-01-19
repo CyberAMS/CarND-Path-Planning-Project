@@ -36,7 +36,7 @@ const long NUM_PREVIOUS_PATH_STEPS = 10;
 const long MIN_PREVIOUS_PATH_STEPS = 0;
 
 // longitudinal definitions
-const double SAFETY_DELTA_SPEED = 2 * MPH2MS; // travel 2 mph below maximum speed
+const double SAFETY_DELTA_SPEED = 0.25 * MPH2MS; // travel 0.25 mph below maximum speed
 const double MAX_SPEED = (50 * MPH2MS) - SAFETY_DELTA_SPEED; // 50 mph minus safety delta in m/s
 const double SAFETY_DELTA_ACCELERATION = 1.0; // keep maximum acceleration 1 m/s below limit
 const double MAX_ACCELERATION_S = 10.0 - SAFETY_DELTA_ACCELERATION; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
