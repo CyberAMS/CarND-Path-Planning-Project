@@ -133,12 +133,7 @@ vector<behavior_state> State::GetNextPossibleBehaviors(Vehicle ego) {
 	vector<behavior_state> next_possible_behaviors;
 	
 	// check whether we still execute a transition and no behavior change is allowed
-	if (this->Get_current_step() < this->Get_no_change_before_step()) {
-		
-		// only return current behavior state
-		next_possible_behaviors = (vector<behavior_state>){this->Get_behavior()};
-		
-	} else {
+	if (this->Get_current_step() >= this->Get_no_change_before_step()) {
 		
 		// check possible lane changes
 		if (current_lane > LANES[0]) {
@@ -187,6 +182,11 @@ vector<behavior_state> State::GetNextPossibleBehaviors(Vehicle ego) {
 			}
 			
 		}
+		
+	} else {
+		
+		// keep previous behavior
+		next_possible_behaviors = (vector<behavior_state>){this->Get_behavior()};
 		
 	}
 	

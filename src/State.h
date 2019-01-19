@@ -62,7 +62,7 @@ const vector<transition> TRANSITIONS
 	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE}}},
 	 {.name = CHANGE_LANE_RIGHT,
 	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE}}}};
-const long LANE_CHANGE_TRANSITION_TIME = 25; // in steps
+const long LANE_CHANGE_TRANSITION_TIME = 0.7 * STEP_TIME_INTERVAL / SAMPLE_TIME; // in steps
 const long NO_STEP_INCREASE = 0;
 
 class State {

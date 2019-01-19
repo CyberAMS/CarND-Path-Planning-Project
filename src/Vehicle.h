@@ -36,6 +36,8 @@ const double SAFETY_BOX_DISTANCE = 0.5; // must have 0.5 m distance to all vehic
 const double DESIRED_LONGITUDINAL_TIME_DISTANCE = 1.0; // keep a distance of 1 s
 const double NO_HARMFUL_COLLISION_STEPS = DESIRED_LONGITUDINAL_TIME_DISTANCE / SAMPLE_TIME;
 const double COST_STEPS_TO_COLLISION_SHAPE_FACTOR = 10.0;
+const double AHEAD_SPACE_FACTOR = 2.0;
+const double BEHIND_SPACE_FACTOR = 4.0;
 const double VEHICLE_AHEAD_WITHIN_DISTANCE = 50.0;
 const double COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR = 10.0;
 const double MAX_TRAVEL_DISTANCE = MAX_SPEED * STEP_TIME_INTERVAL;
@@ -43,7 +45,9 @@ const double COST_TRAVEL_DISTANCE_SHAPE_FACTOR = 10.0;
 
 // cost weights
 const double ZERO_COST = 0.0;
+const double MAX_NORMALIZED_COST = 1.0;
 const double COST_COLLISON_WEIGHT = 1.0;
+const double COST_SPACEININTENDEDLANE_WEIGHT = 1.0;
 const double COST_SPEEDININTENDEDLANE_WEIGHT = 1.0;
 const double COST_TRAVELDISTANCE_WEIGHT = 1.0;
 
@@ -91,6 +95,9 @@ public:
 	
 	// determine collison cost
 	double CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
+	
+	// determine whether there is enough space in the intended lane
+	double CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
 	
 	// determine cost for speed in intended lane
 	double CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
