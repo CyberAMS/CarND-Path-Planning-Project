@@ -36,7 +36,7 @@ public:
 	// constructor
 	Vehicle();
 	Vehicle(Map map, unsigned int id, double x, double y, double vx, double vy, double s, double d);
-	Vehicle(Map map, double x, double y, double s, double d, double theta, double v);
+	Vehicle(double x, double y, double s, double d, double theta, double v);
 	
 	// destructor
 	~Vehicle() {}

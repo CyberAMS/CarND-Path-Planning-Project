@@ -33,9 +33,9 @@ Vehicle::Vehicle(Map map, unsigned int id, double x, double y, double vx, double
 	this->Update(map, id, x, y, vx, vy, s, d);
 	
 }
-Vehicle::Vehicle(Map map, double x, double y, double s, double d, double theta, double v) {
+Vehicle::Vehicle(double x, double y, double s, double d, double theta, double v) {
 	
-	this->Update(map, x, y, s, d, theta, v);
+	this->Update(x, y, s, d, theta, v);
 	
 }
 
