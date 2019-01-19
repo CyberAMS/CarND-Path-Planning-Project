@@ -815,8 +815,6 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 	// get vehicles in front and behind of own vehicle in intended lane
 	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
 	vehicles_behind = this->Behind(vehicles, trajectory.Get_intended_lane());
-	cout << "  vehicles_ahead: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_ahead);
-	cout << "  vehicles_behind: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_behind);
 	
 	// determine vehicle directly in front of own vehicle
 	for (count = 0; count < vehicles_ahead.size(); count++) {

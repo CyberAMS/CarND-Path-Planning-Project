@@ -543,12 +543,13 @@ bool Trajectory::Valid(Map map) {
 	average_dj = AbsAverage(this->Get_dj());
 	
 	// calculate speed, acceleration and jerk values based on xy values
+	// TODO: Sometimes the v and a values don't make sense and jump
 	v_values = Multiply(Magnitude(Differential(this->Get_x()), Differential(this->Get_y())), (1 / SAMPLE_TIME));
 	v_values.erase(v_values.begin(), v_values.begin() + 1); // make sure to not use first values that came from Differential and are ZERO_DIFFERENTIAL_VALUE
 	max_v = Maximum(v_values);
 	min_v = Minimum(v_values);
 	average_v = AbsAverage(v_values);
-	a_values = Multiply(Differential(v_values), (1 / SAMPLE_TIME)); // TODO: Sometimes the a values don't make sense and are higher than sa values for unknown reason - v values seem to be OK!
+	a_values = Multiply(Differential(v_values), (1 / SAMPLE_TIME));
 	a_values.erase(a_values.begin(), a_values.begin() + 1); // make sure to not use first values that came from Differential and are ZERO_DIFFERENTIAL_VALUE
 	max_a = Maximum(a_values);
 	min_a = Minimum(a_values);
