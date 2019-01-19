@@ -845,18 +845,33 @@ double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) 
 		
 	}
 	
+	// define variables
+	double cost_steps_to_collision = ZERO_COST;
+	double cost_distance_vehicle_ahead = ZERO_COST;
+	double cost_travel_distance = ZERO_COST;
+	
 	// initialize outputs
 	double cost = ZERO_COST;
 	
 	// add collision costs
-	cost =+ this->CostStepsToCollision(trajectory, vehicles, COST_COLLISON_WEIGHT);
-	//cost =+ this->CostDistanceVehicleAhead(vehicles, COST_DISTANCEVEHICLEAHEAD_WEIGHT);
-	cost =+ this->CostTravelDistance(trajectory, COST_TRAVELDISTANCE_WEIGHT);
+	cost_steps_to_collision = this->CostStepsToCollision(trajectory, vehicles, COST_COLLISON_WEIGHT)
+	cost =+ cost_steps_to_collision;
+	
+	// add cost for distance to vehicle ahead
+	cost_distance_vehicle_ahead = this->CostDistanceVehicleAhead(vehicles, COST_DISTANCEVEHICLEAHEAD_WEIGHT);
+	cost =+ cost_distance_vehicle_ahead;
+	
+	// add travel distance cost
+	cost_travel_distance = this->CostTravelDistance(trajectory, COST_TRAVELDISTANCE_WEIGHT);
+	cost =+ cost_travel_distance;
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_TRAJECTORYCOST) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  cost_steps_to_collision: " << cost_steps_to_collision << endl;
+		cout << "  cost_distance_vehicle_ahead: " << cost_distance_vehicle_ahead << endl;
+		cout << "  cost_travel_distance: " << cost_travel_distance << endl;
 		cout << "  cost: " << cost << endl;
 		cout << "--- VEHICLE: TrajectoryCost - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
