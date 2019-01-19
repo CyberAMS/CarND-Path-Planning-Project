@@ -20,7 +20,7 @@
 using std::vector;
 using std::string;
 
-// define constants
+// vehicle parameters
 const unsigned int EGO_CAR_ID = 0;
 const double EGO_CAR_SV_INIT = 0.0;
 const double EGO_CAR_SA_INIT = 0.0;
@@ -28,6 +28,13 @@ const double EGO_CAR_SJ_INIT = 0.0;
 const double EGO_CAR_DV_INIT = 0.0;
 const double EGO_CAR_DA_INIT = 0.0;
 const double EGO_CAR_DJ_INIT = 0.0;
+const double STANDARD_VEHICLE_WIDTH = 2.5;
+const double STANDARD_VEHICLE_LENGTH = 5.0;
+const double SAFETY_BOX_DISTANCE = 0.5; // must have 0.5 m distance to all vehicles around own vehicle
+
+// cost weights
+const double ZERO_COST = 0.0;
+const double COST_COLLISON_WEIGHT = 1.0;
 
 class Vehicle {
 
@@ -66,6 +73,15 @@ public:
 	
 	// get vehicles behind own vehicle
 	vector<Vehicle> Behind(const vector<Vehicle> &vehicles, const unsigned int &lane);
+	
+	// detect collision between trajectory of own vehicle and trajectories of other vehicles
+	bool DetectCollision(vector<Vehicle> vehicles);
+	
+	// determine collison cost
+	double CostCollision(vector<Vehicle> vehicles, const double &weight);
+	
+	// determine cost of trajectory for own vehicle
+	double TrajectoryCost(Trajectory trajectory, vector<Vehicle> vehicles);
 	
 	// set trajectory
 	void SetTrajectory(Trajectory trajectory);
@@ -118,6 +134,14 @@ public:
 	Trajectory Get_trajectory();
 	Trajectory* Get_trajectory_ptr();
 	
+	// get width
+	double Get_width();
+	double* Get_width_ptr();
+	
+	// get length
+	double Get_length();
+	double* Get_length_ptr();
+	
 	// display Vehicle object as string
 	string CreateString();
 	
@@ -143,6 +167,10 @@ private:
 	
 	// own trajectory
 	Trajectory trajectory;
+	
+	// vehicle dimensions
+	double width = STANDARD_VEHICLE_WIDTH;
+	double length = STANDARD_VEHICLE_LENGTH;
 
 };
 

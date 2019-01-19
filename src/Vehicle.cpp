@@ -563,6 +563,131 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned 
 	return vehicles_behind;
 }
 
+// detect collision between trajectory of own vehicle and trajectories of other vehicles
+bool Vehicle::DetectCollision(vector<Vehicle> vehicles) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETECTCOLLISION) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: DetectCollision - Start" << endl;
+		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		
+	}
+	
+	// define variables
+	unsigned int count = 0;
+	double ego_front_left_x;
+	double vehicle_front_left_x;
+	
+	// initialize outputs
+	bool collision = false;
+	
+	// get corners of safety box around own vehicle
+	ego_front_left_x = this->Get_x() + SAFETY_BOX_DISTANCE; // TODO !!!
+	
+	// check all vehicles
+	for (count = 0; count < vehicles.size(); count++) {
+		
+		// get corners of current vehicle
+		vehicle_front_left_x = vehicles[count].Get_x();
+		
+		// check whether any corner of the current vehicle is inside the box around our vehicle
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETECTCOLLISION) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  collision: " << collision << endl;
+		cout << "--- VEHICLE: DetectCollision - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return collision;
+	
+}
+
+// determine collision cost
+double Vehicle::CostCollision(vector<Vehicle> vehicles, const double &weight) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_COSTCOLLISION) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: CostCollision - Start" << endl;
+		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		cout << "  weight: " << weight << endl;
+		
+	}
+	
+	// define variables
+	double cost = std::numeric_limits<double>::max();
+	
+	// check for collision and adjust cost
+	if (this->DetectCollision(vehicles)) {
+		
+		// add cost
+		cost = weight;
+		
+	} else {
+		
+		// no cost
+		cost = ZERO_COST;
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_COSTCOLLISION) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  cost: " << cost << endl;
+		cout << "--- VEHICLE: CostCollision - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return cost;
+	
+}
+
+// // determine cost of trajectory for own vehicle
+	double Vehicle::TrajectoryCost(Trajectory trajectory, vector<Vehicle> vehicles) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_TRAJECTORYCOST) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: TrajectoryCost - Start" << endl;
+		cout << "  trajectory: " << endl << trajectory.CreateString();
+		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		
+	}
+	
+	// define variables
+	double cost = std::numeric_limits<double>::max();
+	
+	// add collision costs
+	cost =+ this->CostCollision(vehicles, COST_COLLISON_WEIGHT);
+	
+	
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_TRAJECTORYCOST) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  cost: " << cost << endl;
+		cout << "--- VEHICLE: TrajectoryCost - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return cost;
+	
+}
+
 // set trajectory
 void Vehicle::SetTrajectory(Trajectory trajectory) {
 	
@@ -711,6 +836,30 @@ Trajectory Vehicle::Get_trajectory() {
 Trajectory* Vehicle::Get_trajectory_ptr() {
 	
 	return &this->trajectory;
+	
+}
+
+// get width
+double Vehicle::Get_width() {
+	
+	return this->width;
+	
+}
+double* Vehicle::Get_width_ptr() {
+	
+	return &this->width;
+	
+}
+
+// get length
+double Vehicle::Get_length() {
+	
+	return this->length;
+	
+}
+double* Vehicle::Get_length_ptr() {
+	
+	return &this->length;
 	
 }
 
