@@ -315,14 +315,23 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 	trajectory_length = this->Get_x().size();
 	
 	// use last trajectory values as starting point for new trajectory segment if available
-	x_last = this->Get_x()[trajectory_length - 1];
-	y_last = this->Get_y()[trajectory_length - 1];
-	s_last = this->Get_s()[trajectory_length - 1];
-	sv_last = this->Get_sv()[trajectory_length - 1];
-	sa_last = this->Get_sa()[trajectory_length - 1];
-	d_last = this->Get_d()[trajectory_length - 1];
-	dv_last = this->Get_dv()[trajectory_length - 1];
-	da_last = this->Get_da()[trajectory_length - 1];
+	if (trajectory_length > 0) {
+		
+		x_last = this->Get_x()[trajectory_length - 1];
+		y_last = this->Get_y()[trajectory_length - 1];
+		s_last = this->Get_s()[trajectory_length - 1];
+		sv_last = this->Get_sv()[trajectory_length - 1];
+		sa_last = this->Get_sa()[trajectory_length - 1];
+		d_last = this->Get_d()[trajectory_length - 1];
+		dv_last = this->Get_dv()[trajectory_length - 1];
+		da_last = this->Get_da()[trajectory_length - 1];
+		
+	} else {
+		
+		// display error message
+		cout << "TRAJECTORY: AddJerkMinimizingTrajectory - Error: trajectory_length must be > 0 and is " << trajectory_length << endl;
+		
+	}
 	
 	// determine coefficients for jerk minimizing trajectory
 	s_start_vector = (vector<double>){s_last, sv_last, sa_last};
@@ -763,6 +772,13 @@ double Trajectory::Cost() {
 	}
 	
 	return cost;
+	
+}
+
+// set initialization status
+void Trajectory::Set_is_initialized(bool is_initialized) {
+	
+	this->is_initialized = is_initialized;
 	
 }
 

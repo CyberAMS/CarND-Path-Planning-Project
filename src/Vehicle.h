@@ -35,16 +35,19 @@ public:
 	
 	// constructor
 	Vehicle();
-	Vehicle(unsigned int id, double x, double y, double vx, double vy, double s, double d);
-	Vehicle(double x, double y, double s, double d, double theta, double v);
+	Vehicle(Map map, unsigned int id, double x, double y, double vx, double vy, double s, double d);
+	Vehicle(Map map, double x, double y, double s, double d, double theta, double v);
 	
 	// destructor
 	~Vehicle() {}
 	
 	// set state of car
-	void Update(unsigned int id, double x, double y, double vx, double vy, double s, double d);
-	void Update(double x, double y, double s, double d, double theta, double v);
-	void Update();
+	void Update(Map map, unsigned int id, double x, double y, double vx, double vy, double s, double d);
+	void Update(Map map, double x, double y, double s, double d, double theta, double v);
+	void Update(Map map);
+	
+	// predict future trajectory
+	void PredictTrajectory(Map map, const double &s_start, const double &sv_start, const double &d_start, const double &dv_start);
 	
 	// get d values for lanes
 	double GetLaneD(const unsigned int &lane);

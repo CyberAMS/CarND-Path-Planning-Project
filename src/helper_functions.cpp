@@ -138,6 +138,30 @@ double GetY(const double &theta, const double &magnitude) {
 }
 
 // calculate average of double vector
+double Average(const vector<double> &vector_data) {
+	
+	// define variables
+	unsigned long count = 0;
+	double sum = 0.0;
+	
+	// initialize outputs
+	double average = 0.0;
+	
+	// calculate sum
+	for (count = 0; count < vector_data.size(); count++) {
+		
+		sum += vector_data[count];
+		
+	}
+	
+	// calculate average
+	average = (sum / vector_data.size());
+	
+	return average;
+	
+}
+
+// calculate average of absolute values of double vector
 double AbsAverage(const vector<double> &vector_data) {
 	
 	// define variables

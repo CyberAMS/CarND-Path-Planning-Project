@@ -245,7 +245,6 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_
 			} else {
 				
 				// set target speed
-				//sv_target = sv_continue * ACCELERATION_FACTOR;
 				sv_target = sv_continue + (NORMAL_ACCELERATION_S * STEP_TIME_INTERVAL);
 				
 			}
@@ -260,7 +259,6 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_
 		case DECELERATE:
 			
 			// set target speed
-			//sv_target = sv_continue * DECELERATION_FACTOR;
 			sv_target = sv_continue + (NORMAL_DECELERATION_S * STEP_TIME_INTERVAL);
 			break; // switch
 			
@@ -270,7 +268,8 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_
 	sv_target = min(sv_target, MAX_SPEED);
 	
 	// determine position after next time interval
-	s_target = (ego.Get_trajectory().Get_s()[ego.Get_trajectory().Get_s().size() - 1] + sv_target * STEP_TIME_INTERVAL);
+	// s_target = (ego.Get_trajectory().Get_s()[ego.Get_trajectory().Get_s().size() - 1] + sv_target * STEP_TIME_INTERVAL);
+	s_target = (ego.Get_trajectory().Get_s()[ego.Get_trajectory().Get_s().size() - 1] + Average((vector<double>){sv_target, sv_continue}) * STEP_TIME_INTERVAL);
 	
 	// determine target values based on lateral behavior
 	switch (behavior.lateral_state) {
@@ -361,7 +360,7 @@ unsigned long* State::Get_no_change_before_step_ptr() {
 	
 }
 
-// // get is_initialized value
+// get initialization status
 bool State::Get_is_initialized() {
 	
 	return this->is_initialized;

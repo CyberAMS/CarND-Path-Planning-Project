@@ -81,6 +81,9 @@ public:
 	// determine cost of trajectory
 	double Cost();
 	
+	// set initialization status
+	void Set_is_initialized(bool is_initialized);
+	
 	// get trajectory x values
 	vector<double> Get_x();
 	vector<double>* Get_x_ptr();

@@ -30,9 +30,10 @@ const bool bDISPLAY_MAP_XY2FRENET = false;
 const bool bDISPLAY_MAP_FRENET2XY = false;
 const bool bDISPLAY_MAP_CLOSESTWAYPOINT = false;
 const bool bDISPLAY_MAP_NEXTWAYPOINT = false;
-const bool bDISPLAY_VEHICLE_UPDATE = false;
+const bool bDISPLAY_VEHICLE_UPDATE = true;
 const bool bDISPLAY_VEHICLE_AHEAD = false;
 const bool bDISPLAY_VEHICLE_BEHIND = false;
+const bool bDISPLAY_VEHICLE_PREDICTTRAJECTORY = true;
 const bool bDISPLAY_VEHICLE_GETLANED = false;
 const bool bDISPLAY_VEHICLE_DETERMINELANE = false;
 const bool bDISPLAY_VEHICLE_CHECKINSIDELANE = false;
@@ -40,7 +41,7 @@ const bool bDISPLAY_PATH_SET = false;
 const bool bDISPLAY_TRAJECTORY_INIT = true;
 const bool bDISPLAY_TRAJECTORY_START = false;
 const bool bDISPLAY_TRAJECTORY_ADD = false;
-const bool bDISPLAY_TRAJECTORY_ADDJERKMINIMIZINGTRAJECTORY = false;
+const bool bDISPLAY_TRAJECTORY_ADDJERKMINIMIZINGTRAJECTORY = true;
 const bool bDISPLAY_TRAJECTORY_GENERATE = false;
 const bool bDISPLAY_TRAJECTORY_VALID = true;
 const bool bDISPLAY_TRAJECTORY_COST = false;
@@ -87,6 +88,9 @@ double GetX(const double &theta, const double &magnitude);
 double GetY(const double &theta, const double &magnitude);
 
 // calculate average of double vector
+double Average(const vector<double> &vector_data);
+
+// calculate average of absolute values of double vector
 double AbsAverage(const vector<double> &vector_data);
 
 // calculate maximum of double vector

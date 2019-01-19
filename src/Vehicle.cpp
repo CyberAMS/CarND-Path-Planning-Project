@@ -28,25 +28,26 @@ using std::fabs;
 
 // constructor
 Vehicle::Vehicle() {}
-Vehicle::Vehicle(unsigned int id, double x, double y, double vx, double vy, double s, double d) {
+Vehicle::Vehicle(Map map, unsigned int id, double x, double y, double vx, double vy, double s, double d) {
 	
-	this->Update(id, x, y, vx, vy, s, d);
+	this->Update(map, id, x, y, vx, vy, s, d);
 	
 }
-Vehicle::Vehicle(double x, double y, double s, double d, double theta, double v) {
+Vehicle::Vehicle(Map map, double x, double y, double s, double d, double theta, double v) {
 	
-	this->Update(x, y, s, d, theta, v);
+	this->Update(map, x, y, s, d, theta, v);
 	
 }
 
 // set state of car
-void Vehicle::Update(unsigned int id, double x, double y, double vx, double vy, double s, double d) {
+void Vehicle::Update(Map map, unsigned int id, double x, double y, double vx, double vy, double s, double d) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Update - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		cout << "  id: " << id << endl;
 		cout << "  x: " << x << endl;
 		cout << "  y: " << y << endl;
@@ -71,7 +72,7 @@ void Vehicle::Update(unsigned int id, double x, double y, double vx, double vy, 
 	this->v = Magnitude(vx, vy);
 	
 	// determine values
-	this->Update();
+	this->Update(map);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
@@ -84,13 +85,14 @@ void Vehicle::Update(unsigned int id, double x, double y, double vx, double vy, 
 	}
 	
 }
-void Vehicle::Update(double x, double y, double s, double d, double theta, double v) {
+void Vehicle::Update(Map map, double x, double y, double s, double d, double theta, double v) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Update - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		cout << "  x: " << x << endl;
 		cout << "  y: " << y << endl;
 		cout << "  s: " << s << endl;
@@ -114,7 +116,7 @@ void Vehicle::Update(double x, double y, double s, double d, double theta, doubl
 	this->vy = GetY(theta, v);
 	
 	// determine values
-	this->Update();
+	this->Update(map);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
@@ -127,19 +129,41 @@ void Vehicle::Update(double x, double y, double s, double d, double theta, doubl
 	}
 	
 }
-void Vehicle::Update() {
+void Vehicle::Update(Map map) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Update - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		
 	}
+	
+	// define variables
+	vector<double> svdv_start;
+	vector<double> svdv_end;
+	double s_start = 0.0;
+	double sv_start = 0.0;
+	double d_start = 0.0;
+	double dv_start = 0.0;
 	
 	// determine values
 	this->lane = this->DetermineLane();
 	this->is_inside_lane = this->CheckInsideLane();
+	
+	// determine Frenet velocities
+	svdv_start = map.Xy2Frenet(this->Get_x(), this->Get_y(), this->Get_theta());
+	svdv_end = map.Xy2Frenet((this->Get_x() + this->Get_vx()), (this->Get_y() + this->Get_vy()), this->Get_theta());
+	sv_start = svdv_end[0] - svdv_start[0];
+	dv_start = svdv_end[1] - svdv_start[1];
+	
+	// get Frenet position
+	s_start = this->Get_s();
+	d_start = this->Get_d();
+	
+	// predict future trajectory
+	this->PredictTrajectory(map, s_start, sv_start, d_start, dv_start);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
@@ -147,6 +171,77 @@ void Vehicle::Update() {
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  this: " << endl << this->CreateString();
 		cout << "--- VEHICLE: Update - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+}
+
+// predict future trajectory
+void Vehicle::PredictTrajectory(Map map, const double &s_start, const double &sv_start, const double &d_start, const double &dv_start) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_PREDICTTRAJECTORY) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: PredictTrajectory - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
+		cout << "  s_start: " << s_start << endl;
+		cout << "  sv_start: " << sv_start << endl;
+		cout << "  d_start: " << d_start << endl;
+		cout << "  dv_start: " << dv_start << endl;
+		
+	}
+	
+	// define variables
+	double da_start = 0.0;
+	double dj_start = 0.0; 
+	double s_target = 0.0;
+	double sv_target = 0.0;
+	double sa_target = 0.0;
+	double d_target = 0.0;
+	double dv_target = 0.0;
+	double da_target = 0.0;
+	
+	// initialize outputs
+	Trajectory predicted_trajectory;
+	
+	// add current vehicle position at next step to trajectory
+	s_next = s_start + (sv_start * SAMPLE_TIME);
+	sv_next = sv_start;
+	sa_next = (sv_next / SAMPLE_TIME);
+	sj_next = (sa_next / SAMPLE_TIME);
+	d_next = d_start;
+	xy_next = map.Frenet2Xy(s_next, d_next);
+	x_next = xy_next[0];
+	y_next = xy_next[1];
+	predicted_trajectory.Start(x_next, y_next, s_next, sv_next, sa_next, sj_next, d_next, dv_start, da_start, dj_start, theta_start);
+	
+	// determine target values
+	sv_target = sv_start;
+	s_target = s_start + Average((vector<double>){sv_target, sv_start}) * STEP_TIME_INTERVAL;
+	dv_target = dv_start;
+	d_target = d_start + Average((vector<double>){dv_target, dv_start}) * STEP_TIME_INTERVAL;
+	
+	// add jerk minimizing trajectory
+	predicted_trajectory.AddJerkMinimizingTrajectory(map, s_target, sv_target, sa_target, d_target, dv_target, da_target);
+	
+	// prevent to reinitialize this trajectory
+	predicted_trajectory.Set_is_initialized(true);
+	
+	// use predicted trajectory for current vehicle
+	this->SetTrajectory(predicted_trajectory);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_PREDICTTRAJECTORY) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  s_target: " << s_target << endl;
+		cout << "  sv_target: " << sv_target << endl;
+		cout << "  d_target: " << d_target << endl;
+		cout << "  dv_target: " << dv_target << endl;
+		cout << "  this->trajectory: " << endl << this->Get_trajectory().CreateString();
+		cout << "--- VEHICLE: PredictTrajectory - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}

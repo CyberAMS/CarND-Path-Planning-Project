@@ -99,7 +99,7 @@ public:
 	unsigned long Get_no_change_before_step();
 	unsigned long* Get_no_change_before_step_ptr();
 	
-	// get is_initialized value
+	// get initialization status
 	bool Get_is_initialized();
 	bool* Get_is_initialized_ptr();
 	
