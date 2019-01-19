@@ -390,7 +390,7 @@ unsigned int Vehicle::DetermineLane() {
 	}
 	
 	// initialize outputs
-	unsigned int lane = this->DetermineLane(this->d);
+	unsigned int lane = this->DetermineLane(this->Get_d());
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_DETERMINELANE) {
@@ -466,7 +466,7 @@ bool Vehicle::CheckInsideLane() {
 	bool is_inside_lane = false;
 	
 	// check this vehicle for being inside its lane
-	is_inside_lane = this->CheckInsideLane(this->d, this->lane);
+	is_inside_lane = this->CheckInsideLane(this->Get_d(), this->Get_lane());
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_CHECKINSIDELANE) {
@@ -502,7 +502,7 @@ vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, const unsigned i
 	for (const Vehicle &vehicle : vehicles) {
 		
 		// vehicle is in given lane and in front of own vehicle
-		if ((vehicle.lane == lane) && (vehicle.s > this->s)) {
+		if ((vehicle.lane == lane) && (vehicle.s > this->Get_s())) {
 			
 			vehicles_ahead.push_back(vehicle);
 			
@@ -543,7 +543,7 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned 
 	for (const Vehicle &vehicle : vehicles) {
 		
 		// vehicle is in given lane and behind own vehicle
-		if ((vehicle.lane == lane) && (vehicle.s < this->s)) {
+		if ((vehicle.lane == lane) && (vehicle.s < this->Get_s())) {
 			
 			vehicles_behind.push_back(vehicle);
 			
@@ -565,19 +565,20 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned 
 }
 
 // detect collision between trajectory of own vehicle and trajectories of other vehicles
-bool Vehicle::DetectCollision(vector<Vehicle> vehicles) {
+unsigned long Vehicle::DetectCollision(Trajectory trajectory, vector<Vehicle> vehicles) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_DETECTCOLLISION) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: DetectCollision - Start" << endl;
+		cout << "  trajectory: " << endl << trajectory.CreateString();
 		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
 		
 	}
 	
 	// define variables
-	unsigned int count_t = 0;
+	unsigned long count_t = 0;
 	double ego_front_left_s = 0.0;
 	double ego_front_left_d = 0.0;
 	double ego_front_right_s = 0.0;
@@ -597,17 +598,17 @@ bool Vehicle::DetectCollision(vector<Vehicle> vehicles) {
 	double vehicle_rear_left_d = 0.0;
 	
 	// initialize outputs
-	bool collision = false;
+	unsigned long collision_step = std::numeric_limits<unsigned long>::max();
 	
 	// investigate all trajectory steps
-	for (count_t = 0; count_t < min(this->Get_trajectory().Get_s().size(), trajectory.Get_s().size()); count_t++) {
+	for (count_t = 0; count_t < (unsigned long)min(trajectory.Get_s().size(), vehicles[0].Get_trajectory().Get_s().size()); count_t++) {
 		
-		// get corners of safety box around own vehicle
-		ego_front_left_s = this->Get_trajectory().Get_s()[count_t] + SAFETY_BOX_DISTANCE;
-		ego_front_left_d = this->Get_trajectory().Get_d()[count_t] - (STANDARD_VEHICLE_WIDTH / 2) - SAFETY_BOX_DISTANCE;
+		// get corners of safety box around own vehicle following trajectory
+		ego_front_left_s = trajectory.Get_s()[count_t] + SAFETY_BOX_DISTANCE;
+		ego_front_left_d = trajectory.Get_d()[count_t] - (this->Get_width() / 2) - SAFETY_BOX_DISTANCE;
 		ego_front_right_s = ego_front_left_s;
-		ego_front_right_d = this->Get_trajectory().Get_d()[count_t] + (STANDARD_VEHICLE_WIDTH / 2) + SAFETY_BOX_DISTANCE;
-		ego_rear_right_s = this->Get_trajectory().Get_s()[count_t] - STANDARD_VEHICLE_LENGTH - SAFETY_BOX_DISTANCE;
+		ego_front_right_d = trajectory.Get_d()[count_t] + (this->Get_width() / 2) + SAFETY_BOX_DISTANCE;
+		ego_rear_right_s = trajectory.Get_s()[count_t] - this->Get_length() - SAFETY_BOX_DISTANCE;
 		ego_rear_right_d = ego_front_right_d;
 		ego_rear_left_s = ego_rear_right_s;
 		ego_rear_left_d = ego_front_left_d;
@@ -617,10 +618,10 @@ bool Vehicle::DetectCollision(vector<Vehicle> vehicles) {
 			
 			// get corners of current vehicle
 			vehicle_front_left_s = vehicles[count_v].Get_trajectory().Get_s()[count_t];
-			vehicle_front_left_d = vehicles[count_v].Get_trajectory().Get_d()[count_t] - (STANDARD_VEHICLE_WIDTH / 2);
+			vehicle_front_left_d = vehicles[count_v].Get_trajectory().Get_d()[count_t] - (vehicles[count_v].Get_width() / 2);
 			vehicle_front_right_s = vehicle_front_left_s;
-			vehicle_front_right_d = vehicles[count_v].Get_trajectory().Get_d()[count_t] + (STANDARD_VEHICLE_WIDTH / 2);
-			vehicle_rear_right_s = vehicles[count_v].Get_trajectory().Get_s()[count_t] - STANDARD_VEHICLE_LENGTH;
+			vehicle_front_right_d = vehicles[count_v].Get_trajectory().Get_d()[count_t] + (vehicles[count_v].Get_width() / 2);
+			vehicle_rear_right_s = vehicles[count_v].Get_trajectory().Get_s()[count_t] - vehicles[count_v].Get_length();
 			vehicle_rear_right_d = vehicle_front_right_d;
 			vehicle_rear_left_s = vehicle_rear_right_s;
 			vehicle_rear_left_d = vehicle_front_left_d;
@@ -628,9 +629,18 @@ bool Vehicle::DetectCollision(vector<Vehicle> vehicles) {
 			// check whether both rectangles overlap
 			if (((ego_front_left_s >= vehicle_rear_right_s) && (vehicle_front_left_s >= ego_rear_right_s)) && ((ego_front_left_d >= vehicle_rear_right_d) && (vehicle_front_left_d >= ego_rear_right_d))) {
 				
-				collision = true;
+				// collision detected
+				collision_step = count_t;
+				break; // for count_v loop
 				
 			}
+			
+		}
+		
+		// collision detected
+		if (collision_step = count_t) {
+			
+			break; // for count_t loop
 			
 		}
 		
@@ -640,51 +650,80 @@ bool Vehicle::DetectCollision(vector<Vehicle> vehicles) {
 	if (bDISPLAY && bDISPLAY_VEHICLE_DETECTCOLLISION) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  collision: " << collision << endl;
+		cout << "  collision_step: " << collision_step << endl;
 		cout << "--- VEHICLE: DetectCollision - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
 	
-	return collision;
+	return collision_step;
+	
+}
+unsigned long Vehicle::DetectCollision(vector<Vehicle> vehicles) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETECTCOLLISION) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: DetectCollision - Start" << endl;
+		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		
+	}
+	
+	// initialize outputs
+	unsigned long collision_step = std::numeric_limits<unsigned long>::max();
+	
+	// check collision with own vehicle's trajectory
+	collision_step = this->DetectCollision(this->Get_trajectory(), vehicles);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_DETECTCOLLISION) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  collision_step: " << collision_step << endl;
+		cout << "--- VEHICLE: DetectCollision - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return collision_step;
 	
 }
 
 // determine collision cost
-double Vehicle::CostCollision(vector<Vehicle> vehicles, const double &weight) {
+double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
 	
 	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_COSTCOLLISION) {
+	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSTEPSTOCOLLISION) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "VEHICLE: CostCollision - Start" << endl;
+		cout << "VEHICLE: CostStepsToCollision - Start" << endl;
+		cout << "  trajectory: " << endl << trajectory.CreateString();
 		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
 		cout << "  weight: " << weight << endl;
 		
 	}
 	
 	// define variables
-	double cost = std::numeric_limits<double>::max();
+	unsigned long collision_steps = 0;
+	double diff = 0.0;
+	
+	// initialize outputs
+	double cost = ZERO_COST;
 	
 	// check for collision and adjust cost
-	if (this->DetectCollision(vehicles)) {
-		
-		// add cost
-		cost = weight;
-		
-	} else {
-		
-		// no cost
-		cost = ZERO_COST;
-		
-	}
+	collision_steps = DetectCollision(trajectory, vehicles);
+	
+	// calculate cost
+	diff = (STEPS_TO_COLLISION_THRESHOLD - (double)collision_steps) / STEPS_TO_COLLISION_THRESHOLD;
+	cost = weight * (1 - exp(-fabs(diff)));
 	
 	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_COSTCOLLISION) {
+	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSTEPSTOCOLLISION) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  cost: " << cost << endl;
-		cout << "--- VEHICLE: CostCollision - End" << endl;
+		cout << "--- VEHICLE: CostStepsToCollision - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}
@@ -693,7 +732,107 @@ double Vehicle::CostCollision(vector<Vehicle> vehicles, const double &weight) {
 	
 }
 
-// // determine cost of trajectory for own vehicle
+// determine cost for getting close to vehicle in front
+double Vehicle::CostDistanceVehicleAhead(vector<Vehicle> vehicles, const double &weight) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_COSTDISTANCEVEHICLEAHEAD) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: CostDistanceVehicleAhead - Start" << endl;
+		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		cout << "  weight: " << weight << endl;
+		
+	}
+	
+	// define variables
+	vector<Vehicle> vehicles_ahead;
+	unsigned int count = 0;
+	double distance_to_vehicle = 0.0;
+	double minimum_distance = std::numeric_limits<double>::max();
+	double diff = 0.0;
+	
+	// initialize outputs
+	double cost = ZERO_COST;
+	
+	// get vehicles in front of own vehicle
+	vehicles_ahead = this->Ahead(vehicles, this->Get_lane());
+	
+	// check all vehicles that are ahead
+	for (count = 0; count < vehicles_ahead.size(); count++) {
+		
+		// calculate distance to current vehicle
+		distance_to_vehicle = vehicles_ahead[count].Get_s() - this->Get_s();
+		
+		// check whether distance is smaller than minimum distance
+		if (distance_to_vehicle < minimum_distance) {
+			
+			// remember this distance as minimum distance
+			minimum_distance = distance_to_vehicle;
+			
+		}
+		
+	}
+	
+	// calculate cost
+	diff = (DISTANCE_VEHICLE_AHEAD_THRESHOLD - minimum_distance) / DISTANCE_VEHICLE_AHEAD_THRESHOLD;
+	cost = weight * (1 - exp(-fabs(diff)));
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_COSTDISTANCEVEHICLEAHEAD) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  cost: " << cost << endl;
+		cout << "--- VEHICLE: CostDistanceVehicleAhead - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return cost;
+	
+}
+
+// determine cost for travel distance
+double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_COSTTRAVELDISTANCE) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: CostTravelDistance - Start" << endl;
+		cout << "  weight: " << weight << endl;
+		
+	}
+	
+	// define variables
+	double travel = 0.0;
+	double diff = 0.0;
+	
+	// initialize outputs
+	double cost = ZERO_COST;
+	
+	// calculate travel distance
+	travel = trajectory.Get_s()[trajectory.Get_s().size() - 1] - this->Get_s();
+	
+	// calculate cost
+	diff = (MAX_TRAVEL_THRESHOLD - travel) / MAX_TRAVEL_THRESHOLD;
+	cost = weight * (1 - exp(-fabs(diff)));
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_COSTTRAVELDISTANCE) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  cost: " << cost << endl;
+		cout << "--- VEHICLE: CostTravelDistance - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return cost;
+	
+}
+
+// determine cost of trajectory for own vehicle
 	double Vehicle::TrajectoryCost(Trajectory trajectory, vector<Vehicle> vehicles) {
 	
 	// display message if required
@@ -706,13 +845,13 @@ double Vehicle::CostCollision(vector<Vehicle> vehicles, const double &weight) {
 		
 	}
 	
-	// define variables
-	double cost = std::numeric_limits<double>::max();
+	// initialize outputs
+	double cost = ZERO_COST;
 	
 	// add collision costs
-	cost =+ this->CostCollision(vehicles, COST_COLLISON_WEIGHT);
-	
-	
+	cost =+ this->CostStepsToCollision(trajectory, vehicles, COST_COLLISON_WEIGHT);
+	//cost =+ this->CostDistanceVehicleAhead(vehicles, COST_DISTANCEVEHICLEAHEAD_WEIGHT);
+	cost =+ this->CostTravelDistance(trajectory, COST_TRAVELDISTANCE_WEIGHT);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_TRAJECTORYCOST) {

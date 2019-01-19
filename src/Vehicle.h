@@ -32,9 +32,16 @@ const double STANDARD_VEHICLE_WIDTH = 2.0;
 const double STANDARD_VEHICLE_LENGTH = 4.0;
 const double SAFETY_BOX_DISTANCE = 0.5; // must have 0.5 m distance to all vehicles around own vehicle
 
+// cost parameters
+const double STEPS_TO_COLLISION_THRESHOLD = 30.0;
+const double DISTANCE_VEHICLE_AHEAD_THRESHOLD = 50.0;
+const double MAX_TRAVEL_THRESHOLD = MAX_SPEED * STEP_TIME_INTERVAL;
+
 // cost weights
 const double ZERO_COST = 0.0;
-const double COST_COLLISON_WEIGHT = 1.0;
+const double COST_COLLISON_WEIGHT = 10.0;
+const double COST_DISTANCEVEHICLEAHEAD_WEIGHT = 1.0;
+const double COST_TRAVELDISTANCE_WEIGHT = 1.0;
 
 class Vehicle {
 
@@ -75,10 +82,17 @@ public:
 	vector<Vehicle> Behind(const vector<Vehicle> &vehicles, const unsigned int &lane);
 	
 	// detect collision between trajectory of own vehicle and trajectories of other vehicles
-	bool DetectCollision(vector<Vehicle> vehicles);
+	unsigned long DetectCollision(Trajectory trajectory, vector<Vehicle> vehicles);
+	unsigned long DetectCollision(vector<Vehicle> vehicles);
 	
 	// determine collison cost
-	double CostCollision(vector<Vehicle> vehicles, const double &weight);
+	double CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
+	
+	// determine cost for getting close to vehicle in front
+	double CostDistanceVehicleAhead(vector<Vehicle> vehicles, const double &weight);
+	
+	// determine cost for travel distance
+	double CostTravelDistance(Trajectory trajectory, const double &weight);
 	
 	// determine cost of trajectory for own vehicle
 	double TrajectoryCost(Trajectory trajectory, vector<Vehicle> vehicles);
