@@ -46,8 +46,8 @@ const double COST_TRAVEL_DISTANCE_SHAPE_FACTOR = 10.0;
 // cost weights
 const double ZERO_COST = 0.0;
 const double MAX_NORMALIZED_COST = 1.0;
-const double COST_COLLISON_WEIGHT = 1.0;
-const double COST_SPACEININTENDEDLANE_WEIGHT = 1.0;
+const double COST_COLLISON_WEIGHT = 10.0;
+const double COST_SPACEININTENDEDLANE_WEIGHT = 5.0;
 const double COST_SPEEDININTENDEDLANE_WEIGHT = 1.0;
 const double COST_TRAVELDISTANCE_WEIGHT = 1.0;
 
