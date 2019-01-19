@@ -30,6 +30,7 @@ const bool bDISPLAY_MAP_XY2FRENET = false;
 const bool bDISPLAY_MAP_FRENET2XY = false;
 const bool bDISPLAY_MAP_CLOSESTWAYPOINT = false;
 const bool bDISPLAY_MAP_NEXTWAYPOINT = false;
+const bool bDISPLAY_VEHICLES = false;
 const bool bDISPLAY_VEHICLE_UPDATE = false;
 const bool bDISPLAY_VEHICLE_AHEAD = false;
 const bool bDISPLAY_VEHICLE_BEHIND = false;

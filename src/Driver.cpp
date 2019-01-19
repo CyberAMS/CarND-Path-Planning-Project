@@ -115,7 +115,11 @@ void Driver::Set_vehicles(vector<Vehicle> vehicles) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "Driver: Set_vehicles - Start" << endl;
-		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+			
+		}
 		
 	}
 	
@@ -125,7 +129,11 @@ void Driver::Set_vehicles(vector<Vehicle> vehicles) {
 	if (bDISPLAY && bDISPLAY_DRIVER_SETVEHICLES) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this->vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(this->Get_vehicles());
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  this->vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(this->Get_vehicles());
+			
+		}
 		cout << "--- DRIVER: Set_vehicles - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

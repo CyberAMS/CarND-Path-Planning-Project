@@ -496,7 +496,11 @@ vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, const unsigned i
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Ahead - Start" << endl;
-		cout << "  vehicles: " << endl << this->CreateVehiclesVectorString(vehicles);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles: " << endl << this->CreateVehiclesVectorString(vehicles);
+			
+		}
 		cout << "  lane: " << lane << endl;
 		
 	}
@@ -520,7 +524,11 @@ vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, const unsigned i
 	if (bDISPLAY && bDISPLAY_VEHICLE_AHEAD) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  vehicles_ahead: " << endl << this->CreateVehiclesVectorString(vehicles_ahead);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles_ahead: " << endl << this->CreateVehiclesVectorString(vehicles_ahead);
+			
+		}
 		cout << "--- VEHICLE: Ahead - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -537,7 +545,11 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned 
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Behind - Start" << endl;
-		cout << "  vehicles: " << endl << this->CreateVehiclesVectorString(vehicles);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles: " << endl << this->CreateVehiclesVectorString(vehicles);
+			
+		}
 		cout << "  lane: " << lane << endl;
 		
 	}
@@ -561,7 +573,11 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned 
 	if (bDISPLAY && bDISPLAY_VEHICLE_BEHIND) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  vehicles_behind: " << endl << this->CreateVehiclesVectorString(vehicles_behind);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles_behind: " << endl << this->CreateVehiclesVectorString(vehicles_behind);
+			
+		}
 		cout << "--- VEHICLE: Behind - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -583,7 +599,11 @@ unsigned long Vehicle::DetectCollision(Trajectory trajectory, vector<Vehicle> ve
 			cout << "  trajectory: " << endl << trajectory.CreateString();
 			
 		}
-		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+			
+		}
 		
 	}
 	
@@ -636,6 +656,28 @@ unsigned long Vehicle::DetectCollision(Trajectory trajectory, vector<Vehicle> ve
 			vehicle_rear_left_s = vehicle_rear_right_s;
 			vehicle_rear_left_d = vehicle_front_left_d;
 			
+			cout << "XXX ego_front_left_s: " << ego_front_left_s << endl;
+			cout << "XXX ego_front_left_d: " << ego_front_left_d << endl;
+			cout << "XXX ego_front_right_s: " << ego_front_right_s << endl;
+			cout << "XXX ego_front_right_d: " << ego_front_right_d << endl;
+			cout << "XXX ego_rear_right_s: " << ego_rear_right_s << endl;
+			cout << "XXX ego_rear_right_d: " << ego_rear_right_d << endl;
+			cout << "XXX ego_rear_left_s: " << ego_rear_left_s << endl;
+			cout << "XXX ego_rear_left_d: " << ego_rear_left_d << endl;
+			cout << "XXX vehicle_front_left_s: " << vehicle_front_left_s << endl;
+			cout << "XXX vehicle_front_left_d: " << vehicle_front_left_d << endl;
+			cout << "XXX vehicle_front_right_s: " << vehicle_front_right_s << endl;
+			cout << "XXX vehicle_front_right_d: " << vehicle_front_right_d << endl;
+			cout << "XXX vehicle_rear_right_s: " << vehicle_rear_right_s << endl;
+			cout << "XXX vehicle_rear_right_d: " << vehicle_rear_right_d << endl;
+			cout << "XXX vehicle_rear_left_s: " << vehicle_rear_left_s << endl;
+			cout << "XXX vehicle_rear_left_d: " << vehicle_rear_left_d << endl;
+			cout << "XXX (ego_front_left_s >= vehicle_rear_right_s): " << (ego_front_left_s >= vehicle_rear_right_s) << endl;
+			cout << "XXX (vehicle_front_left_s >= ego_rear_right_s): " << (vehicle_front_left_s >= ego_rear_right_s) << endl;
+			cout << "XXX (ego_front_left_d >= vehicle_rear_right_d): " << (ego_front_left_d >= vehicle_rear_right_d) << endl;
+			cout << "XXX (vehicle_front_left_d >= ego_rear_right_d): " << (vehicle_front_left_d >= ego_rear_right_d) << endl;
+			cout << endl;
+			
 			// check whether both rectangles overlap
 			if (((ego_front_left_s >= vehicle_rear_right_s) && (vehicle_front_left_s >= ego_rear_right_s)) && ((ego_front_left_d >= vehicle_rear_right_d) && (vehicle_front_left_d >= ego_rear_right_d))) {
 				
@@ -676,7 +718,11 @@ unsigned long Vehicle::DetectCollision(vector<Vehicle> vehicles) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: DetectCollision - Start" << endl;
-		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+			
+		}
 		
 	}
 	
@@ -713,7 +759,11 @@ double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehi
 			cout << "  trajectory: " << endl << trajectory.CreateString();
 			
 		}
-		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+			
+		}
 		cout << "  weight: " << weight << endl;
 		
 	}
@@ -755,7 +805,11 @@ double Vehicle::CostSpeedInIntendedLane(vector<Vehicle> vehicles, const double &
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: CostSpeedInIntendedLane - Start" << endl;
-		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+			
+		}
 		cout << "  weight: " << weight << endl;
 		
 	}
@@ -813,7 +867,11 @@ double Vehicle::CostSpeedInIntendedLane(vector<Vehicle> vehicles, const double &
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSPEEDININTENDEDLANE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  vehicles_ahead: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_ahead);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles_ahead: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_ahead);
+			
+		}
 		cout << "  minimum_distance: " << minimum_distance << endl;
 		cout << "  lane_speed: " << lane_speed << endl;
 		cout << "  cost: " << cost << endl;
@@ -878,7 +936,11 @@ double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) 
 			cout << "  trajectory: " << endl << trajectory.CreateString();
 			
 		}
-		cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+			
+		}
 		
 	}
 	
