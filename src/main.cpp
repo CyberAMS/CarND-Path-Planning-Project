@@ -156,16 +156,9 @@ int main() {
 					vector<double> next_y_vals;
 					
 					// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
-					cout << "sensor_fusion: " << sensor_fusion << endl;
-					cout << "car_x: " << car_x << endl;
-					cout << "car_y: " << car_y << endl;
-					cout << "car_s: " << car_s << endl;
-					cout << "car_d: " << car_d << endl;
-					cout << "Deg2Rad(car_yaw): " << Deg2Rad(car_yaw) << endl;
-					cout << "Mph2Ms(car_speed): " << Mph2Ms(car_speed) << endl;
 					
 					// update objects with data from simulator
-					driver.Get_ego_ptr()->Update(driver.Get_map(), car_x, car_y, car_s, car_d, Deg2Rad(car_yaw), Mph2Ms(car_speed));
+					driver.Get_ego_ptr()->Update(car_x, car_y, car_s, car_d, Deg2Rad(car_yaw), Mph2Ms(car_speed));
 					vector<Vehicle> vehicles;
 					
 					for (auto sf : sensor_fusion) {

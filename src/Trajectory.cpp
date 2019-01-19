@@ -47,8 +47,7 @@ unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double 
 		
 	}
 	
-	// initialize outputs
-	unsigned long finished_steps = 0;
+	// define variables
 	double s_next = 0.0;
 	double sv_next = 0.0;
 	double sa_next = 0.0;
@@ -57,6 +56,9 @@ unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double 
 	vector<double> xy_next;
 	double x_next = 0.0;
 	double y_next = 0.0;
+	
+	// initialize outputs
+	unsigned long finished_steps = 0;
 	
 	// determine how much progress was made since last call
 	finished_steps = (unsigned long)(this->Get_x().size() - previous_path.Get_x().size());

@@ -58,6 +58,15 @@ void Vehicle::Update(Map map, unsigned int id, double x, double y, double vx, do
 		
 	}
 	
+	// define variables
+	vector<double> svdv_start;
+	vector<double> svdv_end;
+	double s_start = 0.0;
+	double sv_start = 0.0;
+	double d_start = 0.0;
+	double dv_start = 0.0;
+	double theta_start = 0.0;
+	
 	// set state with inputs
 	this->id = id;
 	this->x = x;
@@ -71,8 +80,22 @@ void Vehicle::Update(Map map, unsigned int id, double x, double y, double vx, do
 	this->theta = Angle(vx, vy);
 	this->v = Magnitude(vx, vy);
 	
+	// get Frenet position
+	s_start = this->Get_s();
+	d_start = this->Get_d();
+	theta_start = this->Get_theta();
+	
+	// determine Frenet velocities
+	svdv_start = map.Xy2Frenet(this->Get_x(), this->Get_y(), theta_start);
+	svdv_end = map.Xy2Frenet((this->Get_x() + this->Get_vx()), (this->Get_y() + this->Get_vy()), theta_start);
+	sv_start = svdv_end[0] - svdv_start[0];
+	dv_start = svdv_end[1] - svdv_start[1];
+	
+	// predict future trajectory
+	this->PredictTrajectory(map, s_start, sv_start, d_start, dv_start, theta_start);
+	
 	// determine values
-	this->Update(map);
+	this->Update();
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
@@ -85,14 +108,13 @@ void Vehicle::Update(Map map, unsigned int id, double x, double y, double vx, do
 	}
 	
 }
-void Vehicle::Update(Map map, double x, double y, double s, double d, double theta, double v) {
+void Vehicle::Update(double x, double y, double s, double d, double theta, double v) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Update - Start" << endl;
-		// cout << "  map: " << endl << map.CreateString();
 		cout << "  x: " << x << endl;
 		cout << "  y: " << y << endl;
 		cout << "  s: " << s << endl;
@@ -116,7 +138,7 @@ void Vehicle::Update(Map map, double x, double y, double s, double d, double the
 	this->vy = GetY(theta, v);
 	
 	// determine values
-	this->Update(map);
+	this->Update();
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
@@ -129,41 +151,19 @@ void Vehicle::Update(Map map, double x, double y, double s, double d, double the
 	}
 	
 }
-void Vehicle::Update(Map map) {
+void Vehicle::Update() {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Update - Start" << endl;
-		// cout << "  map: " << endl << map.CreateString();
 		
 	}
-	
-	// define variables
-	vector<double> svdv_start;
-	vector<double> svdv_end;
-	double s_start = 0.0;
-	double sv_start = 0.0;
-	double d_start = 0.0;
-	double dv_start = 0.0;
 	
 	// determine values
 	this->lane = this->DetermineLane();
 	this->is_inside_lane = this->CheckInsideLane();
-	
-	// determine Frenet velocities
-	svdv_start = map.Xy2Frenet(this->Get_x(), this->Get_y(), this->Get_theta());
-	svdv_end = map.Xy2Frenet((this->Get_x() + this->Get_vx()), (this->Get_y() + this->Get_vy()), this->Get_theta());
-	sv_start = svdv_end[0] - svdv_start[0];
-	dv_start = svdv_end[1] - svdv_start[1];
-	
-	// get Frenet position
-	s_start = this->Get_s();
-	d_start = this->Get_d();
-	
-	// predict future trajectory
-	this->PredictTrajectory(map, s_start, sv_start, d_start, dv_start);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
@@ -178,7 +178,7 @@ void Vehicle::Update(Map map) {
 }
 
 // predict future trajectory
-void Vehicle::PredictTrajectory(Map map, const double &s_start, const double &sv_start, const double &d_start, const double &dv_start) {
+void Vehicle::PredictTrajectory(Map map, const double &s_start, const double &sv_start, const double &d_start, const double &dv_start, const double &theta_start) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_PREDICTTRAJECTORY) {
@@ -190,10 +190,19 @@ void Vehicle::PredictTrajectory(Map map, const double &s_start, const double &sv
 		cout << "  sv_start: " << sv_start << endl;
 		cout << "  d_start: " << d_start << endl;
 		cout << "  dv_start: " << dv_start << endl;
+		cout << "  theta_start: " << theta_start << endl;
 		
 	}
 	
 	// define variables
+	double s_next = 0.0;
+	double sv_next = 0.0;
+	double sa_next = 0.0;
+	double sj_next = 0.0;
+	double d_next = 0.0;
+	vector<double> xy_next;
+	double x_next = 0.0;
+	double y_next = 0.0;
 	double da_start = 0.0;
 	double dj_start = 0.0; 
 	double s_target = 0.0;
@@ -219,9 +228,11 @@ void Vehicle::PredictTrajectory(Map map, const double &s_start, const double &sv
 	
 	// determine target values
 	sv_target = sv_start;
-	s_target = s_start + Average((vector<double>){sv_target, sv_start}) * STEP_TIME_INTERVAL;
+	//s_target = s_start + (Average((vector<double>){sv_target, sv_start}) * STEP_TIME_INTERVAL);
+	s_target = s_start + (sv_target * STEP_TIME_INTERVAL);
 	dv_target = dv_start;
-	d_target = d_start + Average((vector<double>){dv_target, dv_start}) * STEP_TIME_INTERVAL;
+	//d_target = d_start + (Average((vector<double>){dv_target, dv_start}) * STEP_TIME_INTERVAL);
+	d_target = d_start + (dv_target * STEP_TIME_INTERVAL);
 	
 	// add jerk minimizing trajectory
 	predicted_trajectory.AddJerkMinimizingTrajectory(map, s_target, sv_target, sa_target, d_target, dv_target, da_target);
