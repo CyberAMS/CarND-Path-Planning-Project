@@ -1134,7 +1134,7 @@ string Vehicle::CreateVehiclesVectorString(vector<Vehicle> vehicles_vector) {
 	// add information about all cars to string
 	for (current_element = 0; current_element < vehicles_vector.size(); current_element++) {
 		
-		text += "/n" + DISPLAY_PREFIX + "Element " + to_string(current_element) + ": " + vehicles_vector[current_element].CreateString();
+		text += DISPLAY_PREFIX + "Element " + to_string(current_element) + ": " + vehicles_vector[current_element].CreateString();
 		
 	}
 	

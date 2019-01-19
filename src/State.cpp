@@ -411,10 +411,64 @@ string State::CreateBehaviorString(const behavior_state &behavior) {
 	//define variables
 	string text = "";
 	
+	// get state values
+	LONGITUDINALSTATE longitudinal_state = behavior.longitudinal_state;
+	string longitudinal_state_text = "";
+	LATERALSTATE lateral_state = behavior.lateral_state;
+	string lateral_state_text = "";
+	
+	switch (longitudinal_state) {
+		
+		case ACCELERATE:
+			
+			longitudinal_state_text = "ACCELERATE";
+			break; // switch
+			
+		case KEEP_SPEED:
+			
+			longitudinal_state_text = "KEEP_SPEED";
+			break; // switch
+			
+		case DECELERATE:
+			
+			longitudinal_state_text = "DECELERATE";
+			break; // switch
+			
+	}
+	
+	switch (lateral_state) {
+	
+		case KEEP_LANE:
+			
+			lateral_state_text = "KEEP_LANE";
+			break; // switch
+			
+		case PREPARE_LANE_CHANGE_LEFT:
+			
+			lateral_state_text = "PREPARE_LANE_CHANGE_LEFT";
+			break; // switch
+			
+		case PREPARE_LANE_CHANGE_RIGHT:
+			
+			lateral_state_text = "PREPARE_LANE_CHANGE_RIGHT";
+			break; // switch
+			
+		case CHANGE_LANE_LEFT:
+			
+			lateral_state_text = "CHANGE_LANE_LEFT";
+			break; // switch
+			
+		case CHANGE_LANE_RIGHT:
+			
+			lateral_state_text = "CHANGE_LANE_RIGHT";
+			break; // switch
+			
+	}
+	
 	// add information about cars to string
 	text += DISPLAY_PREFIX;
-	text += "longitudinal_state = " + to_string(behavior.longitudinal_state) + " ";
-	text += "lateral_state = " + to_string(behavior.lateral_state) + "\n";
+	text += "longitudinal_state = " + longitudinal_state_text + " ";
+	text += "lateral_state = " + lateral_state_text + "\n";
 	
 	// return output
 	return text;
