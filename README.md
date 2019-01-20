@@ -120,9 +120,11 @@ The particle filter is defined as object class `ParticleFilter` in `particle_fil
 
 ## 3. Path planning implementation
 
-### 1. Primary equations
+### 1. Cost functions
 
 In this project the prediction step of the particle filter assumes a linear bicycle motion model.
+
+<img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Collision.jpg" width="30%"> <img src="190119_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg" width="30%"> <img src="190119_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg" width="30%">
 
 ```C
 // predict state with bicycle motion model - handle zero yaw rate separately
