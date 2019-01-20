@@ -98,10 +98,10 @@ The map information is loaded from the file `highway_map.csv`. It is a list of w
 
 The `Map` class is used to store the map and execute all conversions from cartesian xy coordinates to Frenet sd coordinates and back. The following list contains the most important methods of this class:
 
-| Method         | Description |
-|----------------|-|
-| `Xy2Frenet` | Convert cartesian xy coordinates to Frenet sd coordinates. |
-| `Frenet2Xy` | Convert Frenet sd coordinates to cartesian xy coordinates. |
+| Method | Description |
+|-|-|
+| `Xy2Frenet()` | Convert cartesian xy coordinates to Frenet sd coordinates. |
+| `Frenet2Xy()` | Convert Frenet sd coordinates to cartesian xy coordinates. |
 
 The behavior of this class is controlled with the following constants which define the missing information of the map:
 
@@ -148,23 +148,23 @@ The path planning program contains several objects that interact which each othe
 
 The `Driver` class is responsible for receiving feedback from the environment, determining the best next behavior and sending instructions back to the own vehicle in the simulator. A driver owns a vehicle, information about other vehicles and the environment including a map as well as a behavioral state. The following list contains the most important methods of this class:
 
-| Method         | Description |
-|----------------|-|
-| `PlanBehavior` | Update vehicle, vehicle trajectory and state with information from the simulator. Pick the next possible behaviors and calculate a trajectory for each. Select the minimum cost trajectory and send it to the simulator. |
+| Method | Description |
+|-|-|
+| `PlanBehavior()` | Update vehicle, vehicle trajectory and state with information from the simulator. Pick the next possible behaviors and calculate a trajectory for each. Select the minimum cost trajectory and send it to the simulator. |
 
 The `Vehicle` class is storing and processing all information about a single vehicle. It knows its state, dimensions and future trajectory. It can locate itself in a map. Therefore, an object of this class is also capable of determining the cost of different trajectories. The following list contains the most important methods of this class:
 
-| Method         | Description |
-|----------------|-|
-| `PredictTrajectory` | Predict a future trajectory for a vehicle based on its current location and speed. |
-| `TrajectoryCost` | Calculate the full cost of a trajectory. |
-| `CostStepsToCollision` | Calculate the cost for having a collision after the given number of steps (the more steps the lower the cost). |
-| `CostSpaceInIntendedLane` | Calculate the cost for having or not having space in the intended lane at the vehicle's longitudinal position (high cost if no space). |
-| `CostSpeedInIntendedLane` | Calculate the cost for the expected speed in the intended lane (the higher the speed the lower the cost). |
-| `CostTravelDistance` | Calculate the cost for how far a trajectory travels (the further it travels the lower the cost). |
-| `Ahead` | Identify the vehicles ahead of the own vehicle in a given lane. |
-| `Behind` | Identify the vehicles behind the own vehicle in a given lane. |
-| `DetectCollision` | Compare the own trajectory with the trajectories of other vehicles and determine at what step a collision will occur next if any. |
+| Method | Description |
+|-|-|
+| `PredictTrajectory()` | Predict a future trajectory for a vehicle based on its current location and speed. |
+| `TrajectoryCost()` | Calculate the full cost of a trajectory. |
+| `CostStepsToCollision()` | Calculate the cost for having a collision after the given number of steps (the more steps the lower the cost). |
+| `CostSpaceInIntendedLane()` | Calculate the cost for having or not having space in the intended lane at the vehicle's longitudinal position (high cost if no space). |
+| `CostSpeedInIntendedLane()` | Calculate the cost for the expected speed in the intended lane (the higher the speed the lower the cost). |
+| `CostTravelDistance()` | Calculate the cost for how far a trajectory travels (the further it travels the lower the cost). |
+| `Ahead()` | Identify the vehicles ahead of the own vehicle in a given lane. |
+| `Behind()` | Identify the vehicles behind the own vehicle in a given lane. |
+| `DetectCollision()` | Compare the own trajectory with the trajectories of other vehicles and determine at what step a collision will occur next if any. |
 
 The behavior of this class is controlled with the below mostly self explaining constants. The `COST_STEPS_TO_COLLISION_SHAPE_FACTOR`, `COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR` and `COST_TRAVEL_DISTANCE_SHAPE_FACTOR` parameters are used to influence the shape of the cost functions that are explained further below. The necessary gap in the left or right lane before a lane change is defined by multiples of the ahead and behind vehicle's length using the factors `AHEAD_SPACE_FACTOR` and `BEHIND_SPACE_FACTOR`. In order to determine the speed of a lane, the algorithm only looks for vehicles ahead that are closer than `VEHICLE_AHEAD_WITHIN_DISTANCE`. Finally, the parameter `MAX_TRAVEL_DISTANCE` defines the maximum expected travel of a trajectory to determine a balanced normalized cost function.
 
@@ -205,12 +205,12 @@ The `Path` class is only used to store the segment of the vehicle's path that ha
 
 The `Trajectory` class defines a trajectory using cartesian xy positions including the yaw angle for each position. It also contains a full state description in Frenet sd coordinates (location, velocity, acceleration and jerk). And finally it remembers in which lane of the map it is supposed to end. The following list contains the most important methods of this class:
 
-| Method         | Description |
-|----------------|-|
-| `Generate` | Generate a full trajectory. |
-| `Add` | Add a point to the trajectory. |
-| `AddJerkMinimizingTrajectory` | Add a jerk minimized segment to the trajectory. |
-| `Valid` | Check whether a trajectory is valid and adjust it accordingly if necessary and possible. |
+| Method | Description |
+|-|-|
+| `Generate()` | Generate a full trajectory. |
+| `Add()` | Add a point to the trajectory. |
+| `AddJerkMinimizingTrajectory()` | Add a jerk minimized segment to the trajectory. |
+| `Valid()` | Check whether a trajectory is valid and adjust it accordingly if necessary and possible. |
 
 The behavior of this class is controlled with the below mostly self explaining constants. The parameter using `TRAJECTORY_VALID_GAIN` defines which state values are used to validate and adjust a trajectory. The selected `SV_SA_V` option uses the velocity and acceleration in longitudinal Frenet coordinates as well as the velocity in cartesian coordinates. As the longitudinal Frenet coordinate direction curves through the cartesian coordinate system, the magnitude of longitudinal distances, velocities and accelerations in the Frenet coordinate system differ from the same values in the cartesian coordinate system. Due to the sometimes slightly inaccurate Frenet to cartesian conversion the `Valid` method offers the option to not only look at cartesian coordinates. The parameter `TARGET_SPEED_FROM_ZERO` indirectly defines a higher accerleration when starting from standstill compared to the accelerations used when crusing on the highway. This enables to get the vehicle going as quickly and comfortable as possible.
 
