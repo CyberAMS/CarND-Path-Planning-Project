@@ -35,7 +35,7 @@ The following table shows an overview of the most important files:
     1. Udacity Simulator
 1. Data objects and structures
     1. Map as well as simulator input and output
-    1. Driver, Vehicle, Path, Trajectory and State objects
+    1. Driver, Vehicle, Path, Trajectory and State classes
 1. Path planning implementation
     1. Program flow
     1. Frenet coordinates
@@ -87,36 +87,88 @@ The path planning program connects to the [Udacity Simulator](https://github.com
 
 ### 1. Map as well as simulator input and output
 
-The map information is loaded from the file `data/map_data.txt` which has the following structure:
+The map information is loaded from the file `highway_map.csv`. It is a list of waypoints with the following structure:
 
-| Column | Description |
-|--------|-------------|
-| 1      | x position  |
-| 2      | y position  |
-| 3      | landmark id |
+| Column | Description                                    |
+|--------|------------------------------------------------|
+| 1      | x position of waypoints                        |
+| 2      | y position of waypoints                        |
+| 3      | s coordinate (longitudinal distance)           |
+| 4      | x component of lateral unit normal vector (dx) |
+| 5      | y component of lateral unit normal vector (dy) |
 
-The map object class `Map` is defined in `map.h`. The only content is a vector list `landmark_list` of landmarks `single_landmark_s` with the following data structure:
+The `Map` class is used to store the map and execute all conversions from cartesian xy coordinates to Frenet sd coordinates and back. The following list contains the most important methods of this class:
 
-| Variable | Value or Description   |
-|----------|------------------------|
-| `id_i`   | landmark id as integer |
-| `x_f`    | x position as float    |
-| `y_f`    | y position as float    |
+| Method         | Description |
+|----------------|-|
+| `Xy2Frenet` | Convert cartesian xy coordinates to Frenet sd coordinates. |
+| `Frenet2Xy` | Convert Frenet sd coordinates to cartesian xy coordinates. |
 
-### 2. Driver, Vehicle, Path, Trajectory and State objects
+The simulator sends information about the own vehicle's current state in the following format:
 
-The particle filter is defined as object class `ParticleFilter` in `particle_filter.{h, cpp}`. A particle filter instance contains the number of particles in `num_particles`, whether it has been initialized in `is_initialized`, a vector list `weights` containing the weights of all particles as well as a vector list `particles` for all the particles. Each particle is defined as data structure `Particle`:
+| Variable | Value or Description                                                                  |
+|----------|---------------------------------------------------------------------------------------|
+| `x`      | x position                                                                            |
+| `y`      | y position                                                                            |
+| `s`      | s coordinate (longitudinal distance from start of map)                                |
+| `d`      | d coordinate (lateral distance from center of the road, positive values to the right) |
+| `yaw`    | yaw angle relative to cartesian xy coordinates                                        |
+| `speed`  | speed in mph                                                                          |
 
-| Variable       | Value or Description                                                                   |
-|----------------|----------------------------------------------------------------------------------------|
-| `id`           | particle id as integer                                                                 |
-| `x`            | x position as double                                                                   |
-| `y`            | y position as double                                                                   |
-| `theta`        | heading angle of particle as double                                                    |
-| `weight`       | weight showing how good it associates landmarks to the observations as double          |
-| `associations` | vector list of landmark ids (integers) associated to the observations                  |
-| `sense_x`      | vector list of x positions (double) of the observations added to the particle position |
-| `sense_y`      | vector list of y positions (double) of the observations added to the particle position |
+The simulator also sends the `sensor_fusion` message about the other vehicles on the road as perceived by the own vehicle:
+
+| Variable | Value or Description                                                                  |
+|----------|---------------------------------------------------------------------------------------|
+| `id`     | unique identification number for observed vehicle                                     |
+| `x`      | x position                                                                            |
+| `y`      | y position                                                                            |
+| `v`      | vehicle velocity in m/s                                                               |
+| `s`      | s coordinate (longitudinal distance from start of map)                                |
+| `d`      | d coordinate (lateral distance from center of the road, positive values to the right) |
+
+The simulator receives lists of x coordinates `next_x` and y coordinates `next_x` for points the own vehicle should follow. The points are spaced in 20 ms increments which is the [sampling rate](https://en.wikipedia.org/wiki/Sampling_(signal_processing)) of the simulator. All points that the simulator did not use up before sending the next message are listed in the `previous_path_x` and `previous_path_x` messages.
+
+### 2. Driver, Vehicle, Path, Trajectory and State classes
+
+The path planning program contains several objects that interact which each other. All objects that are based on these classes keep their data private and use access methods to exchange data with other objects. The access methods start with `Get` and `Set`.
+
+The `Driver` class is responsible for receiving feedback from the environment, determining the best next behavior and sending instructions back to the own vehicle in the simulator. A driver owns a vehicle, information about other vehicles and the environment including a map as well as a behavioral state. The following list contains the most important methods of this class:
+
+| Method         | Description |
+|----------------|-|
+| `PlanBehavior` | Update vehicle, vehicle trajectory and state with information from the simulator. Pick the next possible behaviors and calculate a trajectory for each. Select the minimum cost trajectory and send it to the simulator. |
+
+The `Vehicle` class is storing and processing all information about a single vehicle. It knows its state, dimensions and future trajectory. It can locate itself in a map. Therefore, an object of this class is also capable of determining the cost of different trajectories. The following list contains the most important methods of this class:
+
+| Method         | Description |
+|----------------|-|
+| `PredictTrajectory` | Predict a future trajectory for a vehicle based on its current location and speed. |
+| `TrajectoryCost` | Calculate the full cost of a trajectory. |
+| `CostStepsToCollision` | Calculate the cost for having a collision after the given number of steps (the more steps the lower the cost). |
+| `CostSpaceInIntendedLane` | Calculate the cost for having or not having space in the intended lane at the vehicle's longitudinal position (high cost if no space). |
+| `CostSpeedInIntendedLane` | Calculate the cost for the expected speed in the intended lane (the higher the speed the lower the cost). |
+| `CostTravelDistance` | Calculate the cost for how far a trajectory travels (the further it travels the lower the cost). |
+| `Ahead` | Identify the vehicles ahead of the own vehicle in a given lane. |
+| `Behind` | Identify the vehicles behind the own vehicle in a given lane. |
+| `DetectCollision` | Compare the own trajectory with the trajectories of other vehicles and determine at what step a collision will occur next if any. |
+
+The `Path` class is only used to store the segment of the vehicle's path that has not yet been executed by the simulator.
+
+The `Trajectory` class defines a trajectory using cartesian xy positions including the yaw angle for each position. It also contains a full state description in Frenet sd coordinates (location, velocity, acceleration and jerk). And finally it remembers in which lane of the map it is supposed to end. The following list contains the most important methods of this class:
+
+| Method         | Description |
+|----------------|-|
+| `Generate` | Generate a full trajectory. |
+| `Add` | Add a point to the trajectory. |
+| `AddJerkMinimizingTrajectory` | Add a jerk minimized segment to the trajectory. |
+| `Valid` | Check whether a trajectory is valid and adjust it accordingly if necessary and possible. |
+
+The `State` class contains a finite state model to manage behaviors. The following list contains the most important methods of this class:
+
+| Method         | Description |
+|----------------|-|
+| `GetNextPossibleBehaviors` | Select the next possible behaviors based on the current behavior and given vehicle's state. |
+| `GenerateTrajectoryFromBehavior` | Determine the trajectory target values (longitudinal and lateral position, velocity and acceleration) based on the selected behavior. |
 
 ## 3. Path planning implementation
 
