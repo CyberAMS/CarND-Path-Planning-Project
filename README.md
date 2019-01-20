@@ -36,7 +36,7 @@ The following table shows an overview of the most important files:
 1. Data objects and structures
     1. Maps and landmarks
     1. Particle filter and particles
-1. Path planner implementation
+1. Path planning implementation
     1. Primary equations
     1. Implementation in C/C++
     1. Debugging environment
@@ -78,7 +78,7 @@ This project requires the following programs:
 
 ### 2. Udacity Simulator
 
-The path planner program connects to the [Udacity Simulator](https://github.com/udacity/self-driving-car-sim/releases) version [Term 3 Simulator v1.2](https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2) via [uWebSocketIO](https://github.com/uWebSockets/uWebSockets). The simulator is available for Linux, Mac and Windows.
+The path planning program connects to the [Udacity Simulator](https://github.com/udacity/self-driving-car-sim/releases) version [Term 3 Simulator v1.2](https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2) via [uWebSocketIO](https://github.com/uWebSockets/uWebSockets). The simulator is available for Linux, Mac and Windows.
 
 ## 2. Data objects and structures
 
@@ -258,26 +258,20 @@ I tested the particle filter with 5, 20 and 100 particles. The animations below 
 
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="50%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_04_small.gif" width="50%">
 
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="50%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_end.gif" width="50%">
-
 For the case with 20 particles the below picture series shows several different scenarios for vehicle versus landmark locations. It is also shown that the particle filter passes the test at the end.
-
-<img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_20 0.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_20 168.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_20 207.png" width="30%">
-
-<img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_20 264.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_20 289.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_20 341.png" width="30%">
-
-<img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_20 362.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_20 434.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_20 639.png" width="30%">
 
 The debugging output of the 20 particle run is zipped in [./out.zip](./out.zip).
 
 ## 5. Discussion
 
-Sometimes the particle filter doesn't associate the observations to the considered landmarks correctly. This is shown by a longer red line from the end of a blue line (best particle with observation) to the wrongly associated landmark. This happens, because the best particle location doesn't exactly match the vehicle position and the observations are also noisy. The particle filter looks for landmarks in the map that are exactly within the sensor range of the particle. Therefore, observations can include landmarks that are just outside of the sensor range. As they are not included in the considered landmarks, a wrong association is made. Typically, this is only the case for a few timesteps while passing a landmark just about in sensor range.
+Connecting to the simulator that executes a varying amount of time steps per iteration can be very challenging at the beginning. It is important to provide a first trajectory that gets the vehicle going. After this the executed number of time steps needs to be carefully subtracted from the intended trajectory. And finally a continuous smooth extension and update of the intended trajectory is key. I implemented an object based framework for the path planning that manages this very well and is easily extendable.
 
-Below are two examples to visualize the issue. The center image shows the step when the observation is associated to the wrong landmark. The left and right images show the situation slightly before and after this. It is clear that this only happens for a very short time.
+The originally provided [Frenet](https://en.wikipedia.org/wiki/Frenet%E2%80%93Serret_formulas) conversion routines are very poor. They look for the next waypoint and then convert from Frenet to [cartesian coordinates](https://en.wikipedia.org/wiki/Cartesian_coordinate_system) using a linear approach. When applied to full trajectories this can lead to jumps in the cartesian coordinates when switching from one waypoint to the next. You can smoothen the final trajectory in cartesian coordinates, but all previous calculations and validations of the trajectory will not be valid anymore. Therefore, I applied [Eddie Forson's solution](https://towardsdatascience.com/teaching-cars-to-drive-highway-path-planning-109c49f9f86c) to smoothen the conversion from Frenet to carthesian coordinates instead of smoothening the final trajectory.
 
-<img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_5 9.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_5 10.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_5 11.png" width="30%">
+When the track widens in sharper corners, I sometimes get an out of lane warning in the most outer lane. It actually doesn't look like the vehicle left the lane. My assumption is that the detection of the vehicle position inside the simulator is also based on the poor Frenet conversion and therefore issues the warning by mistake.
 
-<img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_5 58.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_5 59.png" width="30%"> <img src="docu_images/181221_StAn_Udacity_SDC_Kidnapped_Vehicle_Project_5 60.png" width="30%">
+The parameters are set for a very aggressive driver that looks for small gaps between vehicles to advance as fast as possible. Sometimes the driver gets very close to the vehicle in front before being able to start a lane change to pass it. After starting the lane change, the own vehicle can be faster than the vehicle in front. In this case the cost for collision spikes and the driver immediately makes another lane change further to the side to avoid a collision.
 
-Easy solutions are to consider more particles which leads to a more precise estimation of the actual vehicle's position as well as considering landmarks that are outside of the actual sensor range. I propose to extend the distance by 10 percent, i.e. the used range is 1.1 times the sensor range. This will eliminate most of the wrong landmark associations.
+At the end of the track the path planning program terminates with a core dump, because several distances and velocities are calculated using longitudinal Frenet coordinates. These switch from the maximal value back to zero which leads to errors.
+
+<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="50%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_end.gif" width="50%">
