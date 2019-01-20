@@ -85,7 +85,7 @@ The path planning program connects to the [Udacity Simulator](https://github.com
 
 ## 2. Data objects and structures
 
-### 1. Maps and landmarks
+### 1. Map as well as simulator input and output
 
 The map information is loaded from the file `data/map_data.txt` which has the following structure:
 
@@ -103,7 +103,7 @@ The map object class `Map` is defined in `map.h`. The only content is a vector l
 | `x_f`    | x position as float    |
 | `y_f`    | y position as float    |
 
-### 2. Particle filter and particles
+### 2. Driver, Vehicle, Path, Trajectory and State objects
 
 The particle filter is defined as object class `ParticleFilter` in `particle_filter.{h, cpp}`. A particle filter instance contains the number of particles in `num_particles`, whether it has been initialized in `is_initialized`, a vector list `weights` containing the weights of all particles as well as a vector list `particles` for all the particles. Each particle is defined as data structure `Particle`:
 
@@ -120,11 +120,29 @@ The particle filter is defined as object class `ParticleFilter` in `particle_fil
 
 ## 3. Path planning implementation
 
-### 1. Cost functions
+### 1. Program flow
+
+Test
+
+### 2. Frenet coordinates
+
+Test
+
+### 3. Finite state model
+
+Test
+
+### 4. Jerk minimizing trajectories
+
+Test
+
+### 5. Cost functions
 
 In this project the prediction step of the particle filter assumes a linear bicycle motion model.
 
 <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Collision.jpg" width="30%"> <img src="190119_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg" width="30%"> <img src="190119_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg" width="30%">
+
+### 6. Debugging environment
 
 ```C
 // predict state with bicycle motion model - handle zero yaw rate separately
@@ -177,10 +195,6 @@ inline double mvg(double x_value, double y_value, double mu_x, double mu_y, doub
 	return (1 / (2 * M_PI * s_x * s_y)) * exp(-((pow(x_value - mu_x, 2) / (2 * pow(s_x, 2))) + (pow(y_value - mu_y, 2) / (2 * pow(s_y, 2)))));
 }
 ```
-
-### 2. Implementation in C/C++
-
-At the beginning the map data is loaded in the `main.cpp` function. The `main.cpp` function connects to the simulator via [uWebSocketIO](https://github.com/uWebSockets/uWebSockets) and receives the current observations in each step. In each step it determines the best particle by picking the one with the highest weight. It then sends the best particle's position with attached observations and associated landmark ids back to the simulator for visualization and error calculation.
 
 The flow of the particle filter in each step is defined by the following sequence of methods:
 
