@@ -242,10 +242,10 @@ const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^
 
 The `State` class contains a finite state model to manage behaviors. The following list contains the most important methods of this class:
 
-| Method         | Description |
-|----------------|-|
-| `GetNextPossibleBehaviors` | Select the next possible behaviors based on the current behavior and given vehicle's state. |
-| `GenerateTrajectoryFromBehavior` | Determine the trajectory target values (longitudinal and lateral position, velocity and acceleration) based on the selected behavior. |
+| Method | Description |
+|-|-|
+| `GetNextPossibleBehaviors()` | Select the next possible behaviors based on the current behavior and given vehicle's state. |
+| `GenerateTrajectoryFromBehavior()` | Determine the trajectory target values (longitudinal and lateral position, velocity and acceleration) based on the selected behavior. |
 
 The behavior of this class is controlled with the below mostly self explaining constants. It is important to mention that the complete behavior of the finite state model is defined with these paramneters. The parameter `LANE_CHANGE_TRANSITION_TIME` defines the number of steps needed for a lane change. The lane change maneuver must be fully executed before another behavior can be selected.
 
