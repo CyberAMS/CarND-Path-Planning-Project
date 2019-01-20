@@ -277,7 +277,7 @@ Passing other vehicles in traffic are the most exciting situations. The driver a
 
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_01_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_02_small.gif" width="48%">
 
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_04_small.gif" width="48%">
+<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="48%">
 
 The debugging output of this run can be found in [./out.txt](./out.txt).
 
@@ -291,7 +291,7 @@ When the track widens in sharper corners, the simulator sometimes issues an "Out
 
 The parameters are set for a very aggressive driver that looks for small gaps between vehicles to advance as fast as possible. Sometimes the driver gets very close to the vehicle in front before being able to start a lane change to pass it. After starting the lane change, the own vehicle can be faster than the vehicle in front. In this case the cost for collision spikes and the driver immediately makes another lane change further to the side to avoid a collision.
 
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="48%">
+<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_04_small.gif" width="48%">
 
 At the end of the track the path planning program terminates with a [core dump](https://en.wikipedia.org/wiki/Core_dump), because several distances and velocities are calculated using longitudinal Frenet coordinates. These switch from the maximal value back to zero which leads to errors.
 
