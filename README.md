@@ -298,117 +298,301 @@ const long NO_STEP_INCREASE = 0;
 
 ### 1. Program flow
 
-Test
+The flow of the path planning program is defined by the interactions of its objects. The following chart visualizes on a very high level how the individual objects work together. The core of the program is the `PlanBehavior()` method of the `driver` object inside the `main()` function. It initializes and updates the state and trajectory object, determines the next possible behaviors (using the state object), calculates trajectories for all of these behaviors (using the state object which generates new trajectory objects) including their costs (using the individual trajectory objects as well as the objects for the own vehicle and other vehicles) and finally selects the lowest cost behavior.
 
 ![alt text][image1]
 
 ### 3. Finite state model
 
-Test
+The below finite state model is used to determine the next possible behavior. Longitudinal states (ACCELERATE, KEEP SPEED and DECELERATE) thermselves allow every possible transition inbetween them. But these transitions get limited by the selection of the lateral state (KEEP LANE, PREPARE LANE CHANGE LEFT, PREPARE LANE CHANGE RIGHT, CHANGE LANE LEFT and CHANGE LANE RIGHT) as indicated by the colors.
 
 ![alt text][image2]
 
 ### 4. Jerk minimizing trajectories
 
-Test
+The jerk minimizing trajectory formulas are implemented in the `helper_functions.cpp` file. The first step is to determine the coefficients for the polynomial. This is done using the matrix and vector functions below. The inputs are the state vector at the start `start` and end `end` of the trajectory as well as the duration `T` of the trajectory segment.
+
+```C
+// determine polynomial coefficients for jerk minimizing trajectory
+vector<double> JerkMinimizingTrajectoryCoefficients(vector<double> start, vector<double> end, double T) {
+	
+	// define variables
+	double T2 = 0.0;
+	double T3 = 0.0;
+	double T4 = 0.0;
+	double T5 = 0.0;
+	MatrixXd T_matrix(3, 3);
+	VectorXd diff_vector(3);
+	VectorXd poly_vector;
+	vector<double> poly;
+	
+	// determine time values
+	T2 = pow(T, 2);
+	T3 = pow(T, 3);
+	T4 = pow(T, 4);
+	T5 = pow(T, 5);
+	
+	// determine time matrix
+	T_matrix <<     T3,      T4,      T5,
+	            3 * T2,  4 * T3,  5 * T4,
+	             6 * T, 12 * T2, 20 * T3;
+	
+	// determine difference based on start and end
+	diff_vector << end[0] - (start[0] + start[1] * T + 0.5 * start[2] * T2),
+	               end[1] - (start[1] + start[2] * T),
+	               end[2] - (start[2]);
+	
+	// calculate polynomial coefficients vector
+	poly_vector = T_matrix.inverse() * diff_vector;
+	
+	// determine polynomial coefficients
+	poly = (vector<double>){start[0], start[1], (0.5 * start[2]), poly_vector[0], poly_vector[1], poly_vector[2]};
+	
+	return poly;
+	
+}
+```
+
+The final step is to calculate the state at any given time `t` within the trajectory segment. This is also implemented in the `helper_functions.cpp` file as follows:
+
+```C
+// determine states with jerk minimizing trajectory
+vector<double> JerkMinimizingTrajectoryState(vector<double> poly, vector<double> start, double t) {
+	
+	// define variables
+	double t2 = 0.0;
+	double t3 = 0.0;
+	double t4 = 0.0;
+	double t5 = 0.0;
+	double state = 0.0;
+	double state_d = 0.0;
+	double state_dd = 0.0;
+	double state_ddd = 0.0;
+	
+	//initialize outputs
+	vector<double> states;
+	
+	// determine time values
+	t2 = pow(t, 2);
+	t3 = pow(t, 3);
+	t4 = pow(t, 4);
+	t5 = pow(t, 5);
+		
+	// determine states
+	state     =      (start[0]) +       (start[1]) * t + (0.5 * start[2]) * t2 +        (poly[3]) * t3 +       (poly[4]) * t4 + (poly[5]) * t5;
+	state_d   =      (start[1]) +       (start[2]) * t +  (3.0 * poly[3]) * t2 +  (4.0 * poly[4]) * t3 + (5.0 * poly[5]) * t4;
+	state_dd  =      (start[2]) +  (6.0 * poly[3]) * t + (12.0 * poly[4]) * t2 + (20.0 * poly[5]) * t3;
+	state_ddd = (6.0 * poly[3]) + (24.0 * poly[4]) * t + (60.0 * poly[5]) * t2;
+	
+	return (vector<double>){state, state_d, state_dd, state_ddd};
+	
+}
+```
 
 ### 5. Cost functions
 
-In this project the prediction step of the particle filter assumes a linear bicycle motion model.
+The absolute core of a path planning algorithm is the tuning of cost functions to ensure expected and safe behavior of the artificial driver. Only 4 cost functions are needed to safely and efficiently drive in the simulator environment.
+
+First we need to always ensure that there is no collision. The `CostStepsToCollision()` method withing the `Vehicle` class calculates a cost based on the number of steps before a collision. 50 steps have been identified to be a good value for an average normalized cost of 0.5. Lower steps lead to higher cost and larger steps lead to lower cost as shown in the first diagram further below.
+
+```C
+// determine collision cost
+double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+	
+	// define variables
+	unsigned long collision_steps = 0;
+	double cost_exp = 0.0;
+	
+	// initialize outputs
+	double cost = ZERO_COST;
+	
+	// check for collision and adjust cost
+	collision_steps = DetectCollision(trajectory, vehicles);
+	
+	// calculate cost
+	cost_exp = exp((NO_HARMFUL_COLLISION_STEPS - collision_steps) / COST_STEPS_TO_COLLISION_SHAPE_FACTOR);
+	cost = cost_exp / (cost_exp + 1);
+	
+	return cost;
+	
+}
+```
+
+Second we need ensure that there is always enough space on the left or right side of the own vehicle before making a lane change. The `CostSpaceInIntendedLane()` method withing the `Vehicle` class calculates either zero or maximum normalized cost based on whether there is space or there is not.
+
+```C
+// determine whether there is enough space in the intended lane
+double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+	
+	// define variables
+	vector<Vehicle> vehicles_ahead;
+	vector<Vehicle> vehicles_behind;
+	unsigned int count = 0;
+	Vehicle current_vehicle;
+	double distance_to_current_vehicle = 0.0;
+	double minimum_distance_ahead = std::numeric_limits<double>::max();
+	Vehicle vehicle_ahead;
+	double minimum_distance_behind = std::numeric_limits<double>::max();
+	Vehicle vehicle_behind;
+	bool enough_space = false;
+	
+	// initialize outputs
+	double cost = ZERO_COST;
+	
+	// get vehicles in front and behind of own vehicle in intended lane
+	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
+	vehicles_behind = this->Behind(vehicles, trajectory.Get_intended_lane());
+	
+	// determine vehicle directly in front of own vehicle
+	...
+	
+	// determine vehicle directly behind of own vehicle
+	...
+	
+	// determine space needed
+	enough_space = ((minimum_distance_ahead >= (AHEAD_SPACE_FACTOR * vehicle_ahead.Get_length())) && (minimum_distance_behind >= (BEHIND_SPACE_FACTOR * vehicle_behind.Get_length())));
+	
+	// calculate cost
+	if (enough_space) {
+		
+		cost = ZERO_COST;
+		
+	} else {
+		
+		cost = weight * MAX_NORMALIZED_COST;
+		
+	}
+	
+	return cost;
+	
+}
+```
+
+Third we need to ensure that we always pick the fastest feasible lane to advance as quickly as possible. The `CostSpeedInIntendedLane()` method withing the `Vehicle` class calculates a cost based on the speed of the vehicle in the intended lane in front of our own vehicle. The cost is 0 at the maximum allowable speed and increases to 1 during a standstill as shown in the second diagram further below.
+
+```C
+// determine cost for speed in intended lane
+double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+	
+	// define variables
+	vector<Vehicle> vehicles_ahead;
+	unsigned int count = 0;
+	Vehicle current_vehicle;
+	double distance_to_current_vehicle = 0.0;
+	double minimum_distance = std::numeric_limits<double>::max();
+	Vehicle vehicle_ahead;
+	double lane_speed = 0.0;
+	
+	// initialize outputs
+	double cost = ZERO_COST;
+	
+	// get vehicles in front of own vehicle in intended lane
+	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
+	
+	// determine vehicle directly in front of own vehicle
+	...
+	
+	// get speed of intended lane
+	if (minimum_distance > VEHICLE_AHEAD_WITHIN_DISTANCE) {
+		
+		lane_speed = MAX_SPEED;
+		
+	} else {
+		
+		lane_speed = min(vehicle_ahead.Get_v(), MAX_SPEED);
+		
+	}
+	
+	// calculate cost
+	cost = weight * (-(lane_speed - MAX_SPEED) / ((COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR * lane_speed) + MAX_SPEED));
+	
+	return cost;
+	
+}
+```
+
+Forth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method withing the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the third diagram further below.
+
+```C
+// determine cost for travel distance
+double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) {
+	
+	// define variables
+	double travel_distance = 0.0;
+	
+	// initialize outputs
+	double cost = ZERO_COST;
+	
+	// calculate travel distance
+	travel_distance = trajectory.Get_s()[trajectory.Get_s().size() - 1] - this->Get_s();
+	
+	// calculate cost
+	cost = weight * (-(travel_distance - MAX_TRAVEL_DISTANCE) / ((COST_TRAVEL_DISTANCE_SHAPE_FACTOR * travel_distance) + MAX_TRAVEL_DISTANCE));
+	
+	return cost;
+	
+}
+```
 
 <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Collision.jpg" width="32%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg" width="32%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg" width="32%">
 
+It is important to note that the absolute cost is actually not that important. The important characteristic is the relative cost difference between the individual trajectories. Therefore, areas in the cost function with large changes lead to larger changes between trajectories with different input values to the cost function. This is important to consider when tuning and balancing cost functions to pick one trajectory over the other. For example a less aggressive driver that stays further away from other vehicles would need a `CostStepsToCollision()` method that has larger changes at lower number of steps before a collision (above diagram on the left). The current setting uses high, but also very flat cost and hence leads to an aggressive driving behavior.
+
 ### 6. Debugging environment
 
+In order to debug the path planning program efficiently, several functions have been added to display the content of all the input and output variables of each relevant object method.
 
-
-The distance between two points is calculated with the following function:
+The debug options are controlled by the following constants within the `helper_functions.h()` file. If `bFILEOUTPUT` is `true`, the standard output is redirected into the file `out.txt` (inside the `build` folder). If `bDISPLAY` is `true`, more information about input and output variables is displayed to the standard output. There is a constant boolean for each relevant method to turn debugging of its inputs and outputs on or off. As vehicle and trajectory objects can have a lot of content, there are two global parameters that control whether the content of these objects is displayed or not (`bDISPLAY_VEHICLES`, `bDISPLAY_TRAJECTORIES`).
 
 ```C
-inline double dist(double x1, double y1, double x2, double y2) {
-	return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-}
+const bool bFILEOUTPUT = true;
+const string OUTPUT_FILENAME = "out.txt";
+const bool bDISPLAY = true;
+const bool bDISPLAY_DRIVER_PLANBEHAVIOR = true;
+const bool bDISPLAY_DRIVER_SETVEHICLES = false;
+const bool bDISPLAY_MAP_INIT = false;
+const bool bDISPLAY_MAP_XY2FRENET = false;
+const bool bDISPLAY_MAP_FRENET2XY = false;
+const bool bDISPLAY_MAP_CLOSESTWAYPOINT = false;
+const bool bDISPLAY_MAP_NEXTWAYPOINT = false;
+const bool bDISPLAY_VEHICLES = false;
+const bool bDISPLAY_VEHICLE_UPDATE = false;
+const bool bDISPLAY_VEHICLE_AHEAD = false;
+const bool bDISPLAY_VEHICLE_BEHIND = false;
+const bool bDISPLAY_VEHICLE_PREDICTTRAJECTORY = false;
+const bool bDISPLAY_VEHICLE_GETLANED = false;
+const bool bDISPLAY_VEHICLE_DETERMINELANE = false;
+const bool bDISPLAY_VEHICLE_CHECKINSIDELANE = false;
+const bool bDISPLAY_VEHICLE_DETECTCOLLISION = false;
+const bool bDISPLAY_VEHICLE_COSTSTEPSTOCOLLISION = false;
+const bool bDISPLAY_VEHICLE_COSTSPACEININTENDEDLANE = false;
+const bool bDISPLAY_VEHICLE_COSTSPEEDININTENDEDLANE = false;
+const bool bDISPLAY_VEHICLE_COSTTRAVELDISTANCE = false;
+const bool bDISPLAY_VEHICLE_TRAJECTORYCOST = true;
+const bool bDISPLAY_PATH_SET = false;
+const bool bDISPLAY_TRAJECTORIES = false;
+const bool bDISPLAY_TRAJECTORY_INIT = false;
+const bool bDISPLAY_TRAJECTORY_START = false;
+const bool bDISPLAY_TRAJECTORY_ADD = false;
+const bool bDISPLAY_TRAJECTORY_ADDJERKMINIMIZINGTRAJECTORY = false;
+const bool bDISPLAY_TRAJECTORY_GENERATE = false;
+const bool bDISPLAY_TRAJECTORY_VALID = false;
+const bool bDISPLAY_TRAJECTORY_REMOVEFIRSTSTEPS = false;
+const bool bDISPLAY_TRAJECTORY_KEEPFIRSTSTEPS = false;
+const bool bDISPLAY_STATE_INIT = true;
+const bool bDISPLAY_STATE_SETBEHAVIOR = false;
+const bool bDISPLAY_STATE_GETNEXTPOSSIBLEBEHAVIORS = true;
+const bool bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR = false;
+const string DISPLAY_PREFIX = "    ";
+const unsigned int DISPLAY_COLUMN_WIDTH = 15;
 ```
 
-The transformation between vehicle coordinates (observations with change/distance relative to the vehicle) and global map coordinates (particles with position as offset and heading angle alpha) is calculated with the following equations:
+The below functions inside the `helper_functions.cpp` file are used to convert the variable contents into a single string that can be displayed. Also, each object contains a `CreateString()` method to convert its content into a single string.
 
 ```C
-	// transformations
-	x_map = x_offset_map + (cos(alpha) * x_change_relative) - (sin(alpha) * y_change_relative);
-	y_map = y_offset_map + (sin(alpha) * x_change_relative) + (cos(alpha) * y_change_relative);
-```
-
-The [multi-variate Gaussian distribution](https://en.wikipedia.org/wiki/Multivariate_normal_distribution) is calculated with the following function:
-
-```C
-inline double mvg(double x_value, double y_value, double mu_x, double mu_y, double s_x, double s_y) {
-	return (1 / (2 * M_PI * s_x * s_y)) * exp(-((pow(x_value - mu_x, 2) / (2 * pow(s_x, 2))) + (pow(y_value - mu_y, 2) / (2 * pow(s_y, 2)))));
-}
-```
-
-The flow of the particle filter in each step is defined by the following sequence of methods:
-
-```C
-ParticleFilter pf;
-...
-in each step do {
-	if (!pf.initialized()) {
-		pf.init(...);
-	}
-	else {
-		pf.prediction(...);
-	}
-	pf.UpdateWeights(...);
-	pf.resample(...);
-}
-```
-
-In the first step the `pf.init()` method initializes all particles with a random distribution around a first estimate for the location. The random noise is added to each particle's location with the method `addNoise()`.
-
-The `pf.prediction()` method uses the above described linear bicycle motion model to calculate the location of all particles after the duration `delta_t`. It also adds random noise to each particle's location with the method `addNoise()`. This ensures that we consider new and potentially better particle locations in each step.
-
-The `pf.UpdateWeights()` method executes a sequence of steps for all particles to update their weights based on the new observations (i.e. measurements). First it determines the map landmarks within the sensor range of the particle's location. Then it uses the above mentioned equations to transform the vehicle observations into global map coordinates for the particle. After this it uses the [nearest neighbor method](https://en.wikipedia.org/wiki/Nearest_neighbor_search) to associate the observations in global map coordinates to the map landmarks within the sensor range. And finally it calculates the new weight for the particle as multiplication of the probabilities that each observation is close to the associated landmark. The [multi-variate Gaussian distribution](https://en.wikipedia.org/wiki/Multivariate_normal_distribution) function from above is used to determine the probability that the observation in global map coordinates is equal to the associated landmark.
-
-The `pf.resample()` method is then used to draw a new list of particles from the existing list of particles. The weight of each particle is used as probability during this drawing process. This ensures that more likely and therefore more accurate particle locations get drawn more often into the new list of particles. The new list of particles contains the same number of particles as before.
-
-### 3. Debugging environment
-
-In order to debug the particle filter efficiently, several methods have been added to display the content of all the input and output variables of each relevant function.
-
-The debug options of the `main()` function are selected with the below parameters. If `bFILEOUTPUT` is `true`, the standard output is redirected into the file `out.txt`. If `bDISPLAY` is `true`, more information about input and output variables is displayed to the standard output. If `bTest` is `true`, a predefined set of inputs is used to run and check the particle filter instead of connecting it to the simulator environment.
-
-```C
-const bool bFILEOUTPUT = false;
-const bool bDISPLAY = false;
-const bool bTEST = false;
-```
-
-Inside the particle filter object, all methods can display their input and output variables to the standard output. The parameter `bDISPLAY` must be `true` to enable any of these features. The debugging feature of each particle filter method can be turned on by setting the parameter `bDISPLAY_<name of method>` to `true`. The available method names are listed below.
-
-```C
-const bool bDISPLAY = false;
-const bool bDISPLAY_init = true;
-const bool bDISPLAY_prediction = true;
-const bool bDISPLAY_dataAssociation = false;
-const bool bDISPLAY_updateWeights = true;
-const bool bDISPLAY_resample = true;
-const bool bDISPLAY_SetAssociations = false;
-const bool bDISPLAY_addNoise = false;
-const bool bDISPLAY_getMapLandmark = false;
-const bool bDISPLAY_transformVehicle2Map = false;
-```
-
-The following methods are used to convert the variable contents into a single string that can be displayed:
-
-```C
-std::string createDoubleVectorString(std::vector<double> double_vector);
-std::string createIntegerVectorString(std::vector<int> int_vector);
-std::string createArrayString(double array[], unsigned int num_elements);
-std::string createParticleString(Particle particle);
-std::string createParticlesString(std::vector<Particle> particles);
-std::string createLandmarkString(LandmarkObs landmark);
-std::string createLandmarksString(std::vector<LandmarkObs> landmarks);
-std::string createMapString(Map map);
+string CreateDoubleVectorString(const vector<double> &double_vector);
+string CreateDoubleVectorsString(const vector<vector<double>> &double_vectors);
+string CreateUnsignedIntegerVectorString(const vector<unsigned int> &int_vector);
 ```
 
 ## 4. Execution
