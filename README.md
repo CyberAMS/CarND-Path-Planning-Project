@@ -14,7 +14,7 @@ The following table shows an overview of the most important files:
 | build.sh                      | Script to build the path planning executable                                                         |
 | run.sh                        | Script to run the path planning executable                                                           |
 | data/highway_map.csv          | Provided map data inlcuding data for Frenet conversion                                               |
-| src/main.cpp                  | Source code of the main function of the particle filter project                                      |
+| src/main.cpp                  | Source code of the main function of the path planning program                                        |
 | src/json.hpp                  | Source code for reading and writing [JAVAScript Object Notation](https://en.wikipedia.org/wiki/JSON) |
 | src/Map.{h, cpp}              | Source code of the map object                                                                        |
 | src/Driver.{h, cpp}           | Source code of the driver object                                                                     |
@@ -23,7 +23,7 @@ The following table shows an overview of the most important files:
 | src/Trajectory.{h, cpp}       | Source code of the trajectory object                                                                 |
 | src/State.{h, cpp}            | Source code of the state object                                                                      |
 | src/spline.{h, cpp}           | Source code of the [spline object](https://kluge.in-chemnitz.de/opensource/spline/)                  |
-| src/helper_functions.{h, cpp} | Source code of helper functions for the particle filter                                              |
+| src/helper_functions.{h, cpp} | Source code of helper functions for the path planning program                                        |
 | out.txt                       | Contains an example debugging output for a full run                                                  |
 
 ---
@@ -140,7 +140,7 @@ The simulator also sends the `sensor_fusion` message about the other vehicles on
 | `s`      | s coordinate (longitudinal distance from start of map)                                |
 | `d`      | d coordinate (lateral distance from center of the road, positive values to the right) |
 
-The simulator receives lists of x coordinates `next_x` and y coordinates `next_x` for points the own vehicle should follow. The points are spaced in 20 ms increments which is the [sampling rate](https://en.wikipedia.org/wiki/Sampling_(signal_processing)) of the simulator. All points that the simulator did not use up before sending the next message are listed in the `previous_path_x` and `previous_path_x` messages.
+The simulator receives lists of x coordinates `next_x` and y coordinates `next_y` for points the own vehicle should follow. The points are spaced in 20 ms increments which is the [sampling rate](https://en.wikipedia.org/wiki/Sampling_(signal_processing)) of the simulator. All points that the simulator did not use up before sending the next message are listed in the `previous_path_x` and `previous_path_x` messages.
 
 ### 2. Driver, Vehicle, Path, Trajectory and State classes
 
