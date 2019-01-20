@@ -274,4 +274,4 @@ The parameters are set for a very aggressive driver that looks for small gaps be
 
 At the end of the track the path planning program terminates with a core dump, because several distances and velocities are calculated using longitudinal Frenet coordinates. These switch from the maximal value back to zero which leads to errors.
 
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="50%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_end.gif" width="50%">
+<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="40%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_end_small.gif" width="40%">
