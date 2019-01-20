@@ -140,7 +140,7 @@ The simulator also sends the `sensor_fusion` message about the other vehicles on
 | `s`      | s coordinate (longitudinal distance from start of map)                                |
 | `d`      | d coordinate (lateral distance from center of the road, positive values to the right) |
 
-The simulator receives lists of x coordinates `next_x` and y coordinates `next_y` for points the own vehicle should follow. The points are spaced in 20 ms increments which is the [sampling rate](https://en.wikipedia.org/wiki/Sampling_(signal_processing)) of the simulator. All points that the simulator did not use up before sending the next message are listed in the `previous_path_x` and `previous_path_x` messages.
+The simulator receives lists of x coordinates `next_x` and y coordinates `next_y` for points the own vehicle should follow. The points are spaced in 20 ms increments which is the [sampling rate](https://en.wikipedia.org/wiki/Sampling_(signal_processing)) of the simulator. All points that the simulator did not use up before sending the next message are listed in the `previous_path_x` and `previous_path_y` messages.
 
 ### 2. Driver, Vehicle, Path, Trajectory and State classes
 
