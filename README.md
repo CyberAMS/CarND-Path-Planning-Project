@@ -393,7 +393,7 @@ vector<double> JerkMinimizingTrajectoryState(vector<double> poly, vector<double>
 
 The absolute core of a path planning algorithm is the tuning of cost functions to ensure expected and safe behavior of the artificial driver. Only 4 cost functions are needed to safely and efficiently drive in the simulator environment.
 
-First we need to always ensure that there is no collision. The `CostStepsToCollision()` method withing the `Vehicle` class calculates a cost based on the number of steps before a collision. 50 steps have been identified to be a good value for an average normalized cost of 0.5. Lower steps lead to higher cost and larger steps lead to lower cost as shown in the first diagram further below.
+First we need to always ensure that there is no collision. The `CostStepsToCollision()` method within the `Vehicle` class calculates a cost based on the number of steps before a collision. 50 steps have been identified to be a good value for an average normalized cost of 0.5. Less steps lead to higher cost and more steps lead to lower cost as shown in the first diagram further below.
 
 ```C
 // determine collision cost
@@ -418,7 +418,7 @@ double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehi
 }
 ```
 
-Second we need ensure that there is always enough space on the left or right side of the own vehicle before making a lane change. The `CostSpaceInIntendedLane()` method withing the `Vehicle` class calculates either zero or maximum normalized cost based on whether there is space or there is not.
+Second we need ensure that there is always enough space on the left or right side of the own vehicle before making a lane change. The `CostSpaceInIntendedLane()` method within the `Vehicle` class calculates either zero or maximum normalized cost based on whether there is space or there is not.
 
 ```C
 // determine whether there is enough space in the intended lane
@@ -468,7 +468,7 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 }
 ```
 
-Third we need to ensure that we always pick the fastest feasible lane to advance as quickly as possible. The `CostSpeedInIntendedLane()` method withing the `Vehicle` class calculates a cost based on the speed of the vehicle in the intended lane in front of our own vehicle. The cost is 0 at the maximum allowable speed and increases to 1 during a standstill as shown in the second diagram further below.
+Third we need to ensure that we always pick the fastest feasible lane to advance as quickly as possible. The `CostSpeedInIntendedLane()` method within the `Vehicle` class calculates a cost based on the speed of the vehicle in the intended lane in front of our own vehicle. The cost is 0 at the maximum allowable speed and increases to 1 during a standstill as shown in the second diagram further below.
 
 ```C
 // determine cost for speed in intended lane
@@ -511,7 +511,7 @@ double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 }
 ```
 
-Forth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method withing the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the third diagram further below.
+Forth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method within the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the third diagram further below.
 
 ```C
 // determine cost for travel distance
