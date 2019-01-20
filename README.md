@@ -115,7 +115,7 @@ The particle filter is defined as object class `ParticleFilter` in `particle_fil
 | `sense_x`      | vector list of x positions (double) of the observations added to the particle position |
 | `sense_y`      | vector list of y positions (double) of the observations added to the particle position |
 
-## 3. Particle filter implementation
+## 3. Path planning implementation
 
 ### 1. Primary equations
 
@@ -242,7 +242,7 @@ std::string createLandmarksString(std::vector<LandmarkObs> landmarks);
 std::string createMapString(Map map);
 ```
 
-## 4. Execution with given input data
+## 4. Execution
 
 ### 1. Commands to start the simulation
 
@@ -250,17 +250,17 @@ The program is compiled using the `.\build.sh` command. After this it can be sta
 
 ### 2. Simulation results
 
-I tested the particle filter with 5, 20 and 100 particles. The animations below show the simulator output for each variant from left to right. Due to the very good first estimate, the particle filter works great with either setting. I settled on 20 particles to balance efficiency and potentially more complicated scenarios than the given example.
+The vehicle starts very smooth from standstill without violating any of the jerk and acceleration criteria. It also stays below the speed limit at all times. During straight driving the trajectory follows the center of the lane.
 
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_start_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_straight_01_small.gif" width="48%">
+
+Passing other vehicles in traffic are the most exciting situations. The driver always picks the fastest lane and uses gaps between vehicles to change lanes and advance.
 
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_01_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_02_small.gif" width="48%">
 
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_04_small.gif" width="48%">
 
-For the case with 20 particles the below picture series shows several different scenarios for vehicle versus landmark locations. It is also shown that the particle filter passes the test at the end.
-
-The debugging output of the 20 particle run is zipped in [./out.zip](./out.zip).
+The debugging output of this run can be found in [./out.txt](./out.txt).
 
 ## 5. Discussion
 
