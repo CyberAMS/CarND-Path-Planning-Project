@@ -34,11 +34,14 @@ The following table shows an overview of the most important files:
     1. Gcc, Cmake, Make and uWebSocketIO
     1. Udacity Simulator
 1. Data objects and structures
-    1. Maps and landmarks
-    1. Particle filter and particles
+    1. Map as well as simulator input and output
+    1. Driver, Vehicle, Path, Trajectory and State objects
 1. Path planning implementation
-    1. Primary equations
-    1. Implementation in C/C++
+    1. Program flow
+    1. Frenet coordinates
+    1. Finite state model
+    1. Jerk minimizing trajectories
+    1. Cost functions
     1. Debugging environment
 1. Execution
     1. Commands to start the simulation
