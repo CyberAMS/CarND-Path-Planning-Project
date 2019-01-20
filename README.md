@@ -50,9 +50,7 @@ The following table shows an overview of the most important files:
 
 [//]: # (Image References)
 
-[image1]: ./docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Collision.jpg
-[image2]: ./docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg
-[image3]: ./docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg
+[image1]: ./docu_images/190120_StAn_Path_Planning_Program_Flow.jpg
 
 ---
 
@@ -104,6 +102,21 @@ The `Map` class is used to store the map and execute all conversions from cartes
 | `Xy2Frenet` | Convert cartesian xy coordinates to Frenet sd coordinates. |
 | `Frenet2Xy` | Convert Frenet sd coordinates to cartesian xy coordinates. |
 
+The behavior of this class is controlled with the following constants which define the missing information of the map:
+
+```C
+// map parameters
+const unsigned int MAX_TRACK_S = 6945.554;
+
+// lane parameters
+const double LANE_WIDTH = 4.0;
+const double LANE_CENTER_WIDTH = 3.0;
+const unsigned int LANE_1 = 1;
+const unsigned int LANE_2 = 2;
+const unsigned int LANE_3 = 3;
+const vector<unsigned int> LANES = {LANE_1, LANE_2, LANE_3};
+```
+
 The simulator sends information about the own vehicle's current state in the following format:
 
 | Variable | Value or Description                                                                  |
@@ -152,6 +165,41 @@ The `Vehicle` class is storing and processing all information about a single veh
 | `Behind` | Identify the vehicles behind the own vehicle in a given lane. |
 | `DetectCollision` | Compare the own trajectory with the trajectories of other vehicles and determine at what step a collision will occur next if any. |
 
+The behavior of this class is controlled with the below mostly self explaining constants. The `COST_STEPS_TO_COLLISION_SHAPE_FACTOR`, `COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR` and `COST_TRAVEL_DISTANCE_SHAPE_FACTOR` parameters are used to influence the shape of the cost functions that are explained further below. The necessary gap in the left or right lane before a lane change is defined by multiples of the ahead and behind vehicle's length using the factors `AHEAD_SPACE_FACTOR` and `BEHIND_SPACE_FACTOR`. In order to determine the speed of a lane, the algorithm only looks for vehicles ahead that are closer than `VEHICLE_AHEAD_WITHIN_DISTANCE`. Finally, the parameter `MAX_TRAVEL_DISTANCE` defines the maximum expected travel of a trajectory to determine a balanced normalized cost function.
+
+```C
+// vehicle parameters
+const unsigned int EGO_CAR_ID = 0;
+const double EGO_CAR_SV_INIT = 0.0;
+const double EGO_CAR_SA_INIT = 0.0;
+const double EGO_CAR_SJ_INIT = 0.0;
+const double EGO_CAR_DV_INIT = 0.0;
+const double EGO_CAR_DA_INIT = 0.0;
+const double EGO_CAR_DJ_INIT = 0.0;
+const double STANDARD_VEHICLE_WIDTH = 2.0;
+const double STANDARD_VEHICLE_LENGTH = 4.0;
+const double SAFETY_BOX_DISTANCE = 0.5; // must have 0.5 m distance to all vehicles around own vehicle
+
+// cost parameters
+const double DESIRED_LONGITUDINAL_TIME_DISTANCE = 1.0; // keep a distance of 1 s
+const double NO_HARMFUL_COLLISION_STEPS = DESIRED_LONGITUDINAL_TIME_DISTANCE / SAMPLE_TIME;
+const double COST_STEPS_TO_COLLISION_SHAPE_FACTOR = 10.0;
+const double AHEAD_SPACE_FACTOR = 2.0;
+const double BEHIND_SPACE_FACTOR = 4.0;
+const double VEHICLE_AHEAD_WITHIN_DISTANCE = 50.0;
+const double COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR = 10.0;
+const double MAX_TRAVEL_DISTANCE = MAX_SPEED * STEP_TIME_INTERVAL;
+const double COST_TRAVEL_DISTANCE_SHAPE_FACTOR = 10.0;
+
+// cost weights
+const double ZERO_COST = 0.0;
+const double MAX_NORMALIZED_COST = 1.0;
+const double COST_COLLISON_WEIGHT = 10.0;
+const double COST_SPACEININTENDEDLANE_WEIGHT = 5.0;
+const double COST_SPEEDININTENDEDLANE_WEIGHT = 1.0;
+const double COST_TRAVELDISTANCE_WEIGHT = 1.0;
+```
+
 The `Path` class is only used to store the segment of the vehicle's path that has not yet been executed by the simulator.
 
 The `Trajectory` class defines a trajectory using cartesian xy positions including the yaw angle for each position. It also contains a full state description in Frenet sd coordinates (location, velocity, acceleration and jerk). And finally it remembers in which lane of the map it is supposed to end. The following list contains the most important methods of this class:
@@ -163,6 +211,34 @@ The `Trajectory` class defines a trajectory using cartesian xy positions includi
 | `AddJerkMinimizingTrajectory` | Add a jerk minimized segment to the trajectory. |
 | `Valid` | Check whether a trajectory is valid and adjust it accordingly if necessary and possible. |
 
+The behavior of this class is controlled with the below mostly self explaining constants. The parameter using `TRAJECTORY_VALID_GAIN` defines which state values are used to validate and adjust a trajectory. The selected `SV_SA_V` option uses the velocity and acceleration in longitudinal Frenet coordinates as well as the velocity in cartesian coordinates. As the longitudinal Frenet coordinate direction curves through the cartesian coordinate system, the magnitude of longitudinal distances, velocities and accelerations in the Frenet coordinate system differ from the same values in the cartesian coordinate system. Due to the sometimes slightly inaccurate Frenet to cartesian conversion the `Valid` method offers the option to not only look at cartesian coordinates. The parameter `TARGET_SPEED_FROM_ZERO` indirectly defines a higher accerleration when starting from standstill compared to the accelerations used when crusing on the highway. This enables to get the vehicle going as quickly and comfortable as possible.
+
+```C
+// general settings
+const double SAMPLE_TIME = 0.020; // 20 ms sample time of simulator (50 Hz)
+const double STEP_TIME_INTERVAL = 1.7; // number of seconds from step to step
+const double NEUTRAL_GAIN = 1.0;
+enum TRAJECTORY_VALID_GAIN {NOTHING, SV_V, SV_SA, SV_SA_V, ALL};
+const TRAJECTORY_VALID_GAIN TRAJECTORY_VALID_GAIN_SELECTION = SV_SA_V;
+
+// trajectory definitions
+const long NUM_PREVIOUS_PATH_STEPS = 10;
+const long MIN_PREVIOUS_PATH_STEPS = 0;
+
+// longitudinal definitions
+const double SAFETY_DELTA_SPEED = 0.25 * MPH2MS; // travel 0.25 mph below maximum speed
+const double MAX_SPEED = (50 * MPH2MS) - SAFETY_DELTA_SPEED; // 50 mph minus safety delta in m/s
+const double SAFETY_DELTA_ACCELERATION = 1.0; // keep maximum acceleration 1 m/s below limit
+const double MAX_ACCELERATION_S = 10.0 - SAFETY_DELTA_ACCELERATION; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
+const double MAX_DECELERATION_S = -MAX_ACCELERATION_S;
+const double NORMAL_ACCELERATION_S = (MAX_ACCELERATION_S / 10);
+const double NORMAL_DECELERATION_S = (MAX_DECELERATION_S / 5);
+const double TARGET_SPEED_FROM_ZERO = (MAX_ACCELERATION_S / 2) * STEP_TIME_INTERVAL; // start with half of the maximum acceleration
+
+// lateral definitions
+const double MAX_ACCELERATION_D = 10.0; // maximum total acceleration is 10 m/s^2 - lateral acceleration is treated independently here
+```
+
 The `State` class contains a finite state model to manage behaviors. The following list contains the most important methods of this class:
 
 | Method         | Description |
@@ -170,11 +246,60 @@ The `State` class contains a finite state model to manage behaviors. The followi
 | `GetNextPossibleBehaviors` | Select the next possible behaviors based on the current behavior and given vehicle's state. |
 | `GenerateTrajectoryFromBehavior` | Determine the trajectory target values (longitudinal and lateral position, velocity and acceleration) based on the selected behavior. |
 
+The behavior of this class is controlled with the below mostly self explaining constants. It is important to mention that the complete behavior of the finite state model is defined with these paramneters. The parameter `LANE_CHANGE_TRANSITION_TIME` defines the number of steps needed for a lane change. The lane change maneuver must be fully executed before another behavior can be selected.
+
+```C
+// define types
+enum LONGITUDINALSTATE {ACCELERATE, KEEP_SPEED, DECELERATE};
+enum LATERALSTATE {KEEP_LANE, PREPARE_LANE_CHANGE_LEFT, PREPARE_LANE_CHANGE_RIGHT, CHANGE_LANE_LEFT, CHANGE_LANE_RIGHT};
+struct behavior_state {
+	
+	LONGITUDINALSTATE longitudinal_state;
+	LATERALSTATE lateral_state;
+	
+};
+struct transition {
+	
+	LATERALSTATE name;
+	vector<behavior_state> next;
+	
+};
+
+// define constants
+const unsigned long INITIAL_STEP = 0;
+const behavior_state INITIAL_STATE {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE};
+const vector<transition> TRANSITIONS
+	{{.name = KEEP_LANE,
+	  .next = {{.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
+	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_RIGHT},
+	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_RIGHT}}},
+	 {.name = PREPARE_LANE_CHANGE_LEFT,
+	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_LEFT},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
+	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_LEFT}}},
+	 {.name = PREPARE_LANE_CHANGE_RIGHT,
+	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_RIGHT},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_RIGHT},
+	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_RIGHT}}},
+	 {.name = CHANGE_LANE_LEFT,
+	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE}}},
+	 {.name = CHANGE_LANE_RIGHT,
+	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE}}}};
+const long LANE_CHANGE_TRANSITION_TIME = 0.5 * STEP_TIME_INTERVAL / SAMPLE_TIME; // in steps
+const long NO_STEP_INCREASE = 0;
+```
+
 ## 3. Path planning implementation
 
 ### 1. Program flow
 
 Test
+
+![alt text][image1]
 
 ### 2. Frenet coordinates
 
@@ -196,33 +321,7 @@ In this project the prediction step of the particle filter assumes a linear bicy
 
 ### 6. Debugging environment
 
-```C
-// predict state with bicycle motion model - handle zero yaw rate separately
-if (fabs(yaw_rate) < ZERO_DETECTION) {
-	
-	// precalculations
-	theta_0 = particles[current_particle].theta;
-	velocity_dot = velocity * delta_t;
-	
-	// motion step
-	particles[current_particle].x += velocity_dot * cos(theta_0);
-	particles[current_particle].y += velocity_dot * sin(theta_0);
-	
-}
-else {
-	
-	// precalculations
-	theta_0 = particles[current_particle].theta;
-	velocity_over_yaw_rate = velocity / yaw_rate;
-	theta_dot = yaw_rate * delta_t;
-	
-	// motion step
-	particles[current_particle].x += velocity_over_yaw_rate * (sin(theta_0 + theta_dot) - sin(theta_0));
-	particles[current_particle].y += velocity_over_yaw_rate * (cos(theta_0) - cos(theta_0 + theta_dot));
-	particles[current_particle].theta += theta_dot;
-	
-}
-```
+
 
 The distance between two points is calculated with the following function:
 
