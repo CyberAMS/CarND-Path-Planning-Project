@@ -298,7 +298,7 @@ const long NO_STEP_INCREASE = 0;
 
 ### 1. Program flow
 
-The flow of the path planning program is defined by the interactions of its objects. The following chart visualizes on a very high level how the individual objects work together. The core of the program is the `PlanBehavior()` method of the `driver` object inside the `main()` function. It initializes and updates the state and trajectory object, determines the next possible behaviors (using the state object), calculates trajectories for all of these behaviors (using the state object which generates new trajectory objects) including their costs (using the individual trajectory objects as well as the objects for the own vehicle and other vehicles) and finally selects the lowest cost behavior.
+The flow of the path planning program is defined by the interactions of its objects. The following chart visualizes on a very high level how the individual objects work together. The core of the program is the `PlanBehavior()` method of the `driver` object inside the `main()` function. It initializes and updates the state and trajectory objects, determines the next possible behaviors (using the state object), calculates trajectories for all of these behaviors (using the state object which generates new trajectory objects) including their costs (using the individual trajectory objects as well as the objects for the own vehicle and other vehicles) and finally selects the lowest cost behavior.
 
 ![alt text][image1]
 
