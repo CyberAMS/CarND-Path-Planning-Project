@@ -38,7 +38,6 @@ The following table shows an overview of the most important files:
     1. Driver, Vehicle, Path, Trajectory and State classes
 1. Path planning implementation
     1. Program flow
-    1. Frenet coordinates
     1. Finite state model
     1. Jerk minimizing trajectories
     1. Cost functions
@@ -51,6 +50,8 @@ The following table shows an overview of the most important files:
 [//]: # (Image References)
 
 [image1]: ./docu_images/190120_StAn_Path_Planning_Program_Flow.jpg
+[image2]: ./docu_images/190120_StAn_Finite_State_Model.jpg
+[image3]: ./docu_images/190120_StAn_Frenet_Problem.jpg
 
 ---
 
@@ -301,13 +302,11 @@ Test
 
 ![alt text][image1]
 
-### 2. Frenet coordinates
-
-Test
-
 ### 3. Finite state model
 
 Test
+
+![alt text][image2]
 
 ### 4. Jerk minimizing trajectories
 
@@ -437,6 +436,8 @@ The debugging output of this run can be found in [./out.txt](./out.txt).
 Connecting to the simulator that executes a varying amount of time steps per iteration can be very challenging at the beginning. It is important to provide a first trajectory that gets the vehicle going. After this the executed number of time steps needs to be carefully subtracted from the intended trajectory. And finally a continuous smooth extension and update of the intended trajectory is key. I implemented an object based framework for the path planning that manages this very well and is easily extendable.
 
 The originally provided [Frenet](https://en.wikipedia.org/wiki/Frenet%E2%80%93Serret_formulas) conversion routines are very poor. They look for the next waypoint and then convert from Frenet to [cartesian coordinates](https://en.wikipedia.org/wiki/Cartesian_coordinate_system) using a linear approach. When applied to full trajectories this can lead to jumps in the cartesian coordinates when switching from one waypoint to the next. You can smoothen the final trajectory in cartesian coordinates, but all previous calculations and validations of the trajectory will not be valid anymore. Therefore, I applied [Eddie Forson's solution](https://towardsdatascience.com/teaching-cars-to-drive-highway-path-planning-109c49f9f86c) to smoothen the conversion from Frenet to carthesian coordinates instead of smoothening the final trajectory.
+
+![alt text][image3]
 
 When the track widens in sharper corners, the simulator sometimes issues an "Outside of lane!" warning when being in the most outer lane. It actually doesn't look like the vehicle left the lane. My assumption is that the detection of the vehicle position inside the simulator is also based on the poor Frenet conversion and therefore issues the warning by mistake.
 
