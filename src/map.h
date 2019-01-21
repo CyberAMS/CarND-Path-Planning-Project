@@ -20,7 +20,7 @@ using std::vector;
 using std::string;
 
 // map parameters
-const unsigned int MAX_TRACK_S = 6945.554;
+const double MAX_TRACK_S = 6945.554;
 
 // lane parameters
 const double LANE_WIDTH = 4.0;

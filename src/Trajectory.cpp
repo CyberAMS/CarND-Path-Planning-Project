@@ -24,6 +24,7 @@ using std::string;
 using std::to_string;
 using std::cout;
 using std::endl;
+using std::fmod;
 using std::min;
 using std::pow;
 
@@ -68,7 +69,7 @@ unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double 
 	if ((!this->Get_is_initialized()) || (this->Get_x().size() < MIN_PREVIOUS_PATH_STEPS) || (this->Get_x().size() <= (finished_steps + 1))) {
 		
 		// add own vehicle position at next step to trajectory
-		s_next = s_start + (sv_start * SAMPLE_TIME);
+		s_next = fmod((s_start + (sv_start * SAMPLE_TIME)), MAX_TRACK_S); // FMOD added for s
 		sv_next = sv_start;
 		sa_next = (sv_next / SAMPLE_TIME);
 		sj_next = (sa_next / SAMPLE_TIME);
@@ -519,6 +520,7 @@ bool Trajectory::Valid(Map map) {
 	
 	// initialize outputs
 	bool is_valid = true;
+	return is_valid; // TODO: eliminated validation
 	
 	// calculate distance, speed, acceleration and jerk values based on s and d values
 	max_sv = Maximum(this->Get_sv());
@@ -735,9 +737,9 @@ bool Trajectory::Valid(Map map) {
 		cout << "  min_dj: " << min_dj << endl;
 		cout << "  average_dj: " << average_dj << endl;
 		//cout << "  v_values, a_values, j_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){v_values, a_values, j_values});
-		cout << "  v_values: " << endl << CreateDoubleVectorString(v_values);
-		cout << "  a_values: " << endl << CreateDoubleVectorString(a_values);
-		cout << "  j_values: " << endl << CreateDoubleVectorString(j_values);
+		//cout << "  v_values: " << endl << CreateDoubleVectorString(v_values);
+		//cout << "  a_values: " << endl << CreateDoubleVectorString(a_values);
+		//cout << "  j_values: " << endl << CreateDoubleVectorString(j_values);
 		cout << "  max_v: " << max_v << endl;
 		cout << "  min_v: " << min_v << endl;
 		cout << "  average_v: " << average_v << endl;
@@ -752,8 +754,8 @@ bool Trajectory::Valid(Map map) {
 		cout << "  gain_v: " << gain_v << endl;
 		cout << "  gain_a: " << gain_a << endl;
 		cout << "  gain: " << gain << endl;
-		cout << "  sv_values, d_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){sv_values, d_values});
-		cout << "  new_s_values, new_sv_values, new_sa_values, new_sj_values, new_x_values, new_y_values, new_theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){new_s_values, new_sv_values, new_sa_values, new_sj_values, new_x_values, new_y_values, new_theta_values});
+		//cout << "  sv_values, d_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){sv_values, d_values});
+		//cout << "  new_s_values, new_sv_values, new_sa_values, new_sj_values, new_x_values, new_y_values, new_theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){new_s_values, new_sv_values, new_sa_values, new_sj_values, new_x_values, new_y_values, new_theta_values});
 		cout << "  d: " << d << endl;
 		cout << "  this: " << endl << this->CreateString();
 		cout << "  is_valid: " << is_valid << endl;

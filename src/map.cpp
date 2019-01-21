@@ -178,7 +178,7 @@ vector<double> Map::Frenet2Xy(const double &s, const double &d) {
 	double y = 0;
 	
 	// make sure we wrap around to the beginning at the end of the map
-	clean_s = fmod(s, MAX_TRACK_S);
+	clean_s = fmod(s, MAX_TRACK_S); // FMOD added for s
 	
 	// use the splines to get a smooth path
 	x = this->spline_x_s(clean_s) + d * this->spline_dx_s(clean_s);

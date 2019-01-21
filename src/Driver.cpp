@@ -79,6 +79,8 @@ void Driver::PlanBehavior() {
 		
 	}
 	
+	// TODO: best_trajectory is invalid if no new behavior (also not updated/initialized) => must create straight driving or stopping trajectory as default!
+	
 	// select behavior for lowest cost trajectory and update trajectory accordingly
 	this->Get_state_ptr()->SetBehavior(best_behavior, NO_STEP_INCREASE);
 	this->Get_ego_ptr()->Set_trajectory(best_trajectory);

@@ -24,6 +24,7 @@ using std::to_string;
 using std::cout;
 using std::endl;
 using std::ostringstream;
+using std::max;
 using std::min;
 
 // initialize state
@@ -265,6 +266,9 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_
 			break; // switch
 			
 	}
+	
+	// ensure to neer drive backwards
+	sv_target = max(sv_target, ZERO_SPEED);
 	
 	// ensure speed limit is kept
 	sv_target = min(sv_target, MAX_SPEED);
