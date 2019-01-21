@@ -43,7 +43,7 @@ const double SAFETY_DELTA_ACCELERATION = 1.0; // keep maximum acceleration 1 m/s
 const double MAX_ACCELERATION_S = 10.0 - SAFETY_DELTA_ACCELERATION; // maximum total acceleration is 10 m/s^2 - longitudinal acceleration is treated independently here
 const double MAX_DECELERATION_S = -MAX_ACCELERATION_S;
 const double NORMAL_ACCELERATION_S = (MAX_ACCELERATION_S / 10);
-const double NORMAL_DECELERATION_S = (MAX_DECELERATION_S / 3); // TODO: changed from /5 to /3
+const double NORMAL_DECELERATION_S = (MAX_DECELERATION_S / 5);
 const double TARGET_SPEED_FROM_ZERO = (MAX_ACCELERATION_S / 2) * STEP_TIME_INTERVAL; // start with half of the maximum acceleration
 
 // lateral definitions
