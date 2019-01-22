@@ -73,6 +73,7 @@ public:
 	
 	// predict future trajectory
 	void PredictTrajectory(Map map, const double &s_start, const double &sv_start, const double &d_start, const double &dv_start, const double &theta_start);
+	Trajectory PredictTrajectory(Map map);
 	
 	// get d values for lanes
 	double GetLaneD(const unsigned int &lane);

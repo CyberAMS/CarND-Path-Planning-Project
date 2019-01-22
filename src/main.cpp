@@ -136,7 +136,7 @@ int main() {
 					// Main car's localization Data
 					double car_x = j[1]["x"];
 					double car_y = j[1]["y"];
-					double car_s = fmod(j[1]["s"], MAX_TRACK_S); // FMOD added for s
+					double car_s = driver.Get_map().AssignS(j[1]["s"]);
 					double car_d = j[1]["d"];
 					double car_yaw = j[1]["yaw"];
 					double car_speed = j[1]["speed"];

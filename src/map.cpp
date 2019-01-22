@@ -178,7 +178,7 @@ vector<double> Map::Frenet2Xy(const double &s, const double &d) {
 	double y = 0;
 	
 	// make sure we wrap around to the beginning at the end of the map
-	clean_s = fmod(s, MAX_TRACK_S); // FMOD added for s
+	clean_s = this->AssignS(s);
 	
 	// use the splines to get a smooth path
 	x = this->spline_x_s(clean_s) + d * this->spline_dx_s(clean_s);
@@ -239,6 +239,81 @@ vector<vector<double>> Map::Frenet2Xy(const vector<double> &s_values, const vect
 	}
 	
 	return (vector<vector<double>>){x_values, y_values};
+	
+}
+
+// assign correct s value considering loop track
+double Map::AssignS(const double &s) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_ASSIGNS) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "MAP: AssignS - Start" << endl;
+		cout << "  s: " << s << endl;
+		
+	}
+	
+	// initialize outputs
+	double clean_s = 0.0;
+	
+	// calculate s value considering loop track
+	clean_s = fmod(s, MAX_TRACK_S);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_ASSIGNS) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  clean_s: " << clean_s << endl;
+		cout << "--- MAP: AssignS - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return clean_s;
+	
+}
+
+// calculate absolute difference between two s values considering loop track
+double Map::DeltaS(const double &s1, const double &s2) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_DELTAS) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "MAP: DeltaS - Start" << endl;
+		cout << "  s1: " << s1 << endl;
+		cout << "  s2: " << s2 << endl;
+		
+	}
+	
+	// define variables
+	double reference_s1 = 0.0;
+	double reference_s2 = 0.0;
+	
+	// initialize outputs
+	double delta_s = 0.0;
+	
+	// calculate values relative to reference
+	reference_s1 = this->ReferenceS(s1, s2); // use s2 value as reference => this value is the delta
+	reference_s2 = this->ReferenceS(s2, s2); // use s2 value as reference => this value is 0
+	
+	// calculate delta
+	delta_s = reference_s1 - reference_s2;
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_DELTAS) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  reference_s1: " << reference_s1 < endl;
+		cout << "  reference_s2: " << reference_s2 < endl;
+		cout << "  delta_s: " << delta_s < endl;
+		cout << "--- MAP: DeltaS - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return delta_s;
 	
 }
 
@@ -356,5 +431,87 @@ vector <unsigned int> Map::NextWaypoint(const double &x, const double &y, const 
 	}
 	
 	return next_waypoints;
+	
+}
+
+// calculate s value relative to reference considering loop track
+double Map::ReferenceS(const double &s, const double &s_reference) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_REFERENCES) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "MAP: ReferenceS - Start" << endl;
+		cout << "  s: " << s << endl;
+		cout << "  s_reference: " << s_reference << endl;
+		
+	}
+	
+	// define variables
+	double clean_s = 0.0;
+	double clean_s_reference = 0.0;
+	double s_mid_point = 0.0;
+	
+	// initialize outputs
+	double reference_s = 0.0;
+	
+	// clean inputs so they are in single loop coordinates
+	clean_s = this->AssignS(s);
+	clean_s_reference = this->AssignS(s_reference);
+	
+	// calculate point on the other side of the loop track
+	s_mid_point = this->AssignS(clean_s_reference + (MAX_TRACK_S / 2));
+	
+	// check whether reference point is in first half of the loop
+	if (clean_s_reference <= s_mid_point) {
+		
+		// check which segment of the loop applies
+		if ((clean_s > clean_s_reference) && (clean_s <= s_mid_point)) {
+			
+			reference_s = clean_s - clean_s_reference;
+			
+		} else if ((clean_s > s_mid_point) && (clean_s <= MAX_TRACK_S)) {
+			
+			reference_s = (s_mid_point - MAX_TRACK_S) - clean_s_reference;
+			
+		} else if ((clean_s >= 0) && (clean_s <= clean_s_reference) {
+			
+			reference_s = clean_s - clean_s_reference;
+			
+		}
+		
+	} else {
+		
+		// check which segment of the loop applies
+		if ((clean_s > clean_s_reference) && (clean_s <= MAX_TRACK_S)) {
+			
+			reference_s = clean_s - clean_s_reference;
+			
+		} else if ((clean_s >= 0) && (clean_s <= s_mid_point)) {
+			
+			reference_s = (MAX_TRACK_S - clean_s_reference) + clean_s;
+			
+		} else if ((clean_s > s_mid_point) && (clean_s <= clean_s_reference) {
+			
+			reference_s = clean_s_reference - clean_s;
+			
+		}
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_FRENET2XY) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  clean_s: " << clean_s < endl;
+		cout << "  clean_s_reference: " << clean_s_reference < endl;
+		cout << "  s_mid_point: " << s_mid_point < endl;
+		cout << "  reference_s: " << reference_s < endl;
+		cout << "--- MAP: ReferenceS - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return reference_s;
 	
 }

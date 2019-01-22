@@ -265,6 +265,37 @@ void Vehicle::PredictTrajectory(Map map, const double &s_start, const double &sv
 	}
 	
 }
+Trajectory Vehicle::PredictTrajectory(Map map) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_PREDICTTRAJECTORY) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: PredictTrajectory - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
+		
+	}
+	
+	// generate prediction with current vehicle's trajectory
+	this->PredictTrajectory(map, this->Get_trajectory().Get_s()[0], this->Get_trajectory().Get_sv()[0], this->Get_trajectory().Get_d()[0], this->Get_trajectory().Get_dv()[0], this->Get_trajectory().Get_theta()[0]);
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_PREDICTTRAJECTORY) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  this->trajectory: " << endl << this->Get_trajectory().CreateString();
+			
+		}
+		cout << "--- VEHICLE: PredictTrajectory - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return this->Get_trajectory();
+	
+}
 
 // get d values for lanes
 double Vehicle::GetLaneD(const unsigned int &lane) {
@@ -780,6 +811,95 @@ double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehi
 	
 }
 
+// determine whether there is enough space to the vehicle in front
+double Vehicle::CostSpaceAhead(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSPACEAHEAD) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "VEHICLE: CostSpaceAhead - Start" << endl;
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  trajectory: " << endl << trajectory.CreateString();
+			
+		}
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
+			
+		}
+		cout << "  weight: " << weight << endl;
+		
+	}
+	
+	// define variables
+	vector<Vehicle> vehicles_ahead;
+	unsigned int count = 0;
+	Vehicle current_vehicle;
+	double distance_to_current_vehicle = 0.0;
+	double minimum_distance_ahead = std::numeric_limits<double>::max();
+	Vehicle vehicle_ahead;
+	double desired_distance = 0.0;
+	
+	// initialize outputs
+	double cost = ZERO_COST;
+	
+	// get vehicles in front of own vehicle in intended lane
+	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
+	
+	// determine vehicle directly in front of own vehicle
+	for (count = 0; count < vehicles_ahead.size(); count++) {
+		
+		// get current vehicle
+		current_vehicle = vehicles_ahead[count];
+		
+		// calculate distance to current vehicle
+		distance_to_current_vehicle = current_vehicle.Get_s() - this->Get_s();
+		
+		// check whether distance is smaller than minimum distance
+		if (distance_to_current_vehicle < minimum_distance_ahead) {
+			
+			// remember this distance as minimum distance
+			minimum_distance_ahead = distance_to_current_vehicle;
+			vehicle_ahead = current_vehicle;
+			
+		}
+		
+	}
+	
+	// calculate desired distance to vehicle in front of own vehicle in intended lane
+	desired_distance = this->Get_v() * AHEAD_DISTANCE_TIME;
+	
+	// calculate cost
+	cost = weight * (-(minimum_distance_ahead - desired_distance) / ((COST_SPACE_AHEAD_SHAPE_FACTOR * minimum_distance_ahead) + desired_distance));
+	
+	// display message if required
+	if (bDISPLAY_VEHICLE_COSTSPACEAHEAD) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles_ahead: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_ahead);
+			
+		}
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  vehicles_behind: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_behind);
+			
+		}
+		cout << "  minimum_distance_ahead: " << minimum_distance_ahead << endl;
+		cout << "  desired_distance: " << desired_distance << endl;
+		cout << "  cost: " << cost << endl;
+		cout << "--- VEHICLE: CostSpaceAhead - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return cost;
+	
+}
+
 // determine whether there is enough space in the intended lane
 double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
 	
@@ -894,95 +1014,6 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 		cout << "  enough_space: " << enough_space << endl;
 		cout << "  cost: " << cost << endl;
 		cout << "--- VEHICLE: CostSpaceInIntendedLane - End" << endl;
-		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
-		
-	}
-	
-	return cost;
-	
-}
-
-// determine whether there is enough space to the vehicle in front
-double Vehicle::CostSpaceAhead(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
-	
-	// display message if required
-	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSPACEAHEAD) {
-		
-		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
-		cout << "VEHICLE: CostSpaceAhead - Start" << endl;
-		if (bDISPLAY_TRAJECTORIES) {
-			
-			cout << "  trajectory: " << endl << trajectory.CreateString();
-			
-		}
-		if (bDISPLAY_VEHICLES) {
-			
-			cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
-			
-		}
-		cout << "  weight: " << weight << endl;
-		
-	}
-	
-	// define variables
-	vector<Vehicle> vehicles_ahead;
-	unsigned int count = 0;
-	Vehicle current_vehicle;
-	double distance_to_current_vehicle = 0.0;
-	double minimum_distance_ahead = std::numeric_limits<double>::max();
-	Vehicle vehicle_ahead;
-	double desired_distance = 0.0;
-	
-	// initialize outputs
-	double cost = ZERO_COST;
-	
-	// get vehicles in front of own vehicle in intended lane
-	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
-	
-	// determine vehicle directly in front of own vehicle
-	for (count = 0; count < vehicles_ahead.size(); count++) {
-		
-		// get current vehicle
-		current_vehicle = vehicles_ahead[count];
-		
-		// calculate distance to current vehicle
-		distance_to_current_vehicle = current_vehicle.Get_s() - this->Get_s();
-		
-		// check whether distance is smaller than minimum distance
-		if (distance_to_current_vehicle < minimum_distance_ahead) {
-			
-			// remember this distance as minimum distance
-			minimum_distance_ahead = distance_to_current_vehicle;
-			vehicle_ahead = current_vehicle;
-			
-		}
-		
-	}
-	
-	// calculate desired distance to vehicle in front of own vehicle in intended lane
-	desired_distance = this->Get_v() * AHEAD_DISTANCE_TIME;
-	
-	// calculate cost
-	cost = weight * (-(minimum_distance_ahead - desired_distance) / ((COST_SPACE_AHEAD_SHAPE_FACTOR * minimum_distance_ahead) + desired_distance));
-	
-	// display message if required
-	if (bDISPLAY_VEHICLE_COSTSPACEAHEAD) {
-		
-		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		if (bDISPLAY_VEHICLES) {
-			
-			cout << "  vehicles_ahead: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_ahead);
-			
-		}
-		if (bDISPLAY_VEHICLES) {
-			
-			cout << "  vehicles_behind: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_behind);
-			
-		}
-		cout << "  minimum_distance_ahead: " << minimum_distance_ahead << endl;
-		cout << "  desired_distance: " << desired_distance << endl;
-		cout << "  cost: " << cost << endl;
-		cout << "--- VEHICLE: CostSpaceAhead - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
 	}

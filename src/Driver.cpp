@@ -45,7 +45,7 @@ void Driver::PlanBehavior() {
 	double cost;
 	double minimal_cost = std::numeric_limits<double>::max();
 	behavior_state best_behavior = this->Get_state().Get_behavior();
-	Trajectory best_trajectory = this->Get_ego().Get_trajectory();
+	Trajectory best_trajectory;
 	
 	finished_steps = this->Get_ego_ptr()->Get_trajectory_ptr()->Init(this->Get_map(), this->Get_ego().Get_s(), EGO_CAR_SV_INIT, this->Get_ego().Get_d(), EGO_CAR_DV_INIT, EGO_CAR_DA_INIT, EGO_CAR_DJ_INIT, this->Get_ego().Get_theta(), this->Get_ego().GetLaneD(this->Get_ego().Get_d()), this->Get_previous_path());
 	this->Get_state_ptr()->Init(finished_steps);
@@ -79,7 +79,13 @@ void Driver::PlanBehavior() {
 		
 	}
 	
-	// TODO: best_trajectory is invalid if no new behavior (also not updated/initialized) => must create straight driving or stopping trajectory as default!
+	// check whether there is no valid best trajectory
+	if (best_trajectory.Get_x().size() == 0) {
+		
+		// select best trajectory as prediction of current state
+		best_trajectory = this->Get_ego().PredictTrajectory(this->Get_map());
+		
+	}
 	
 	// select behavior for lowest cost trajectory and update trajectory accordingly
 	this->Get_state_ptr()->SetBehavior(best_behavior, NO_STEP_INCREASE);

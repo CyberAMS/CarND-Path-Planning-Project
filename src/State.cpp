@@ -122,6 +122,7 @@ vector<behavior_state> State::GetNextPossibleBehaviors(Vehicle ego) {
 	
 	// define variables
 	unsigned int current_lane = ego.Get_lane();
+	bool is_inside_lane = ego.Get_is_inside_lane();
 	bool can_move_left = false;
 	bool can_move_right = false;
 	unsigned int count_t = 0;
@@ -137,12 +138,12 @@ vector<behavior_state> State::GetNextPossibleBehaviors(Vehicle ego) {
 	if (this->Get_current_step() >= this->Get_no_change_before_step()) {
 		
 		// check possible lane changes
-		if (current_lane > LANES[0]) {
+		if ((current_lane > LANES[0]) && is_inside_lane) {
 			
 			can_move_left = true;
 			
 		}
-		if (current_lane < LANES[LANES.size() - 1]) {
+		if ((current_lane < LANES[LANES.size() - 1]) && is_inside_lane) {
 			
 			can_move_right = true;
 			

@@ -69,7 +69,7 @@ unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double 
 	if ((!this->Get_is_initialized()) || (this->Get_x().size() < MIN_PREVIOUS_PATH_STEPS) || (this->Get_x().size() <= (finished_steps + 1))) {
 		
 		// add own vehicle position at next step to trajectory
-		s_next = fmod((s_start + (sv_start * SAMPLE_TIME)), MAX_TRACK_S); // FMOD added for s
+		s_next = map.AssignS(s_start + (sv_start * SAMPLE_TIME));
 		sv_next = sv_start;
 		sa_next = (sv_next / SAMPLE_TIME);
 		sj_next = (sa_next / SAMPLE_TIME);

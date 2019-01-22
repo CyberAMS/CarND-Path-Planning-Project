@@ -50,6 +50,12 @@ public:
 	vector<double> Frenet2Xy(const double &s, const double &d);
 	vector<vector<double>> Frenet2Xy(const vector<double> &s_values, const vector<double> &d_values);
 	
+	// assign correct s value considering loop track
+	double AssignS(const double &s);
+	
+	// calculate absolute difference between two s values considering loop track
+	double DeltaS(const double &s1, const double &s2);
+	
 	// display Map object as string
 	string CreateString();
 
@@ -60,6 +66,9 @@ private:
 	
 	// determine next waypoint
 	vector <unsigned int> NextWaypoint(const double &x, const double &y, const double &theta);
+	
+	// calculate s value relative to reference considering loop track
+	double ReferenceS(const double &s, const double &s_reference);
 	
 	// waypoint coordinates
 	vector<double> map_waypoints_x;
