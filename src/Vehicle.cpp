@@ -218,7 +218,7 @@ void Vehicle::PredictTrajectory(Map map, const double &s_start, const double &sv
 	Trajectory predicted_trajectory;
 	
 	// add current vehicle position at next step to trajectory
-	s_next = s_start + (sv_start * SAMPLE_TIME);
+	s_next = map.AssignS(s_start + (sv_start * SAMPLE_TIME));
 	sv_next = sv_start;
 	sa_next = (sv_next / SAMPLE_TIME);
 	sj_next = (sa_next / SAMPLE_TIME);
@@ -231,8 +231,8 @@ void Vehicle::PredictTrajectory(Map map, const double &s_start, const double &sv
 	
 	// determine target values
 	sv_target = sv_start;
-	//s_target = s_start + (Average((vector<double>){sv_target, sv_start}) * STEP_TIME_INTERVAL);
-	s_target = s_start + (sv_target * STEP_TIME_INTERVAL);
+	//s_target = map.AssignS(s_start + (Average((vector<double>){sv_target, sv_start})) * STEP_TIME_INTERVAL);
+	s_target = map.AssignS(s_start + (sv_target * STEP_TIME_INTERVAL));
 	dv_target = dv_start;
 	//d_target = d_start + (Average((vector<double>){dv_target, dv_start}) * STEP_TIME_INTERVAL);
 	d_target = d_start + (dv_target * STEP_TIME_INTERVAL);
@@ -520,13 +520,14 @@ bool Vehicle::CheckInsideLane() {
 }
 
 // get vehicles ahead of own vehicle
-vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, const unsigned int &lane) {
+vector<Vehicle> Vehicle::Ahead(Map map, const vector<Vehicle> &vehicles, const unsigned int &lane) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_AHEAD) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Ahead - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_VEHICLES) {
 			
 			cout << "  vehicles: " << endl << this->CreateVehiclesVectorString(vehicles);
@@ -543,7 +544,7 @@ vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, const unsigned i
 	for (const Vehicle &vehicle : vehicles) {
 		
 		// vehicle is in given lane and in front of own vehicle
-		if ((vehicle.lane == lane) && (vehicle.s > this->Get_s())) {
+		if ((vehicle.lane == lane) && (map.DeltaS(vehicle.s, this->Get_s()) > 0)) {
 			
 			vehicles_ahead.push_back(vehicle);
 			
@@ -569,13 +570,14 @@ vector<Vehicle> Vehicle::Ahead(const vector<Vehicle> &vehicles, const unsigned i
 }
 
 // get vehicles behind own vehicle
-vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned int &lane) {
+vector<Vehicle> Vehicle::Behind(Map map, const vector<Vehicle> &vehicles, const unsigned int &lane) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_BEHIND) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: Behind - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_VEHICLES) {
 			
 			cout << "  vehicles: " << endl << this->CreateVehiclesVectorString(vehicles);
@@ -592,7 +594,7 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned 
 	for (const Vehicle &vehicle : vehicles) {
 		
 		// vehicle is in given lane and behind own vehicle
-		if ((vehicle.lane == lane) && (vehicle.s < this->Get_s())) {
+		if ((vehicle.lane == lane) && (map.DeltaS(vehicle.s, this->Get_s()) < 0)) {
 			
 			vehicles_behind.push_back(vehicle);
 			
@@ -618,13 +620,14 @@ vector<Vehicle> Vehicle::Behind(const vector<Vehicle> &vehicles, const unsigned 
 }
 
 // detect collision between trajectory of own vehicle and trajectories of other vehicles
-unsigned long Vehicle::DetectCollision(Trajectory trajectory, vector<Vehicle> vehicles) {
+unsigned long Vehicle::DetectCollision(Map map, Trajectory trajectory, vector<Vehicle> vehicles) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_DETECTCOLLISION) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: DetectCollision - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_TRAJECTORIES) {
 			
 			cout << "  trajectory: " << endl << trajectory.CreateString();
@@ -688,7 +691,7 @@ unsigned long Vehicle::DetectCollision(Trajectory trajectory, vector<Vehicle> ve
 			vehicle_rear_left_d = vehicle_front_left_d;
 			
 			// check whether both rectangles overlap
-			if (((ego_front_left_s >= vehicle_rear_right_s) && (vehicle_front_left_s >= ego_rear_right_s)) && ((ego_front_left_d <= vehicle_rear_right_d) && (vehicle_front_left_d <= ego_rear_right_d))) {
+			if (((map.DeltaS(ego_front_left_s, vehicle_rear_right_s) >= 0) && (map.DeltaS(vehicle_front_left_s, ego_rear_right_s) >= 0)) && ((ego_front_left_d <= vehicle_rear_right_d) && (vehicle_front_left_d <= ego_rear_right_d))) {
 				
 				// collision detected
 				collision_step = count_t;
@@ -720,13 +723,14 @@ unsigned long Vehicle::DetectCollision(Trajectory trajectory, vector<Vehicle> ve
 	return collision_step;
 	
 }
-unsigned long Vehicle::DetectCollision(vector<Vehicle> vehicles) {
+unsigned long Vehicle::DetectCollision(Map map, vector<Vehicle> vehicles) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_DETECTCOLLISION) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: DetectCollision - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_VEHICLES) {
 			
 			cout << "  vehicles: " << endl << vehicles[0].CreateVehiclesVectorString(vehicles);
@@ -739,7 +743,7 @@ unsigned long Vehicle::DetectCollision(vector<Vehicle> vehicles) {
 	unsigned long collision_step = std::numeric_limits<unsigned long>::max();
 	
 	// check collision with own vehicle's trajectory
-	collision_step = this->DetectCollision(this->Get_trajectory(), vehicles);
+	collision_step = this->DetectCollision(map, this->Get_trajectory(), vehicles);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_DETECTCOLLISION) {
@@ -756,13 +760,14 @@ unsigned long Vehicle::DetectCollision(vector<Vehicle> vehicles) {
 }
 
 // determine collision cost
-double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+double Vehicle::CostStepsToCollision(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSTEPSTOCOLLISION) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: CostStepsToCollision - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_TRAJECTORIES) {
 			
 			cout << "  trajectory: " << endl << trajectory.CreateString();
@@ -785,7 +790,7 @@ double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehi
 	double cost = ZERO_COST;
 	
 	// check for collision and adjust cost
-	collision_steps = DetectCollision(trajectory, vehicles);
+	collision_steps = DetectCollision(map, trajectory, vehicles);
 	
 	// calculate cost
 	
@@ -812,13 +817,14 @@ double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehi
 }
 
 // determine whether there is enough space to the vehicle in front
-double Vehicle::CostSpaceAhead(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSPACEAHEAD) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: CostSpaceAhead - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_TRAJECTORIES) {
 			
 			cout << "  trajectory: " << endl << trajectory.CreateString();
@@ -846,7 +852,7 @@ double Vehicle::CostSpaceAhead(Trajectory trajectory, vector<Vehicle> vehicles, 
 	double cost = ZERO_COST;
 	
 	// get vehicles in front of own vehicle in intended lane
-	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
+	vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
 	
 	// determine vehicle directly in front of own vehicle
 	for (count = 0; count < vehicles_ahead.size(); count++) {
@@ -855,7 +861,7 @@ double Vehicle::CostSpaceAhead(Trajectory trajectory, vector<Vehicle> vehicles, 
 		current_vehicle = vehicles_ahead[count];
 		
 		// calculate distance to current vehicle
-		distance_to_current_vehicle = current_vehicle.Get_s() - this->Get_s();
+		distance_to_current_vehicle = map.DeltaS(current_vehicle.Get_s(), this->Get_s());
 		
 		// check whether distance is smaller than minimum distance
 		if (distance_to_current_vehicle < minimum_distance_ahead) {
@@ -901,13 +907,14 @@ double Vehicle::CostSpaceAhead(Trajectory trajectory, vector<Vehicle> vehicles, 
 }
 
 // determine whether there is enough space in the intended lane
-double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+double Vehicle::CostSpaceInIntendedLane(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSPACEININTENDEDLANE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: CostSpaceInIntendedLane - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_TRAJECTORIES) {
 			
 			cout << "  trajectory: " << endl << trajectory.CreateString();
@@ -938,8 +945,8 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 	double cost = ZERO_COST;
 	
 	// get vehicles in front and behind of own vehicle in intended lane
-	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
-	vehicles_behind = this->Behind(vehicles, trajectory.Get_intended_lane());
+	vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
+	vehicles_behind = this->Behind(map, vehicles, trajectory.Get_intended_lane());
 	
 	// determine vehicle directly in front of own vehicle
 	for (count = 0; count < vehicles_ahead.size(); count++) {
@@ -948,7 +955,7 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 		current_vehicle = vehicles_ahead[count];
 		
 		// calculate distance to current vehicle
-		distance_to_current_vehicle = current_vehicle.Get_s() - this->Get_s();
+		distance_to_current_vehicle = map.DeltaS(current_vehicle.Get_s(), this->Get_s());
 		
 		// check whether distance is smaller than minimum distance
 		if (distance_to_current_vehicle < minimum_distance_ahead) {
@@ -968,7 +975,7 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 		current_vehicle = vehicles_behind[count];
 		
 		// calculate distance to current vehicle
-		distance_to_current_vehicle = this->Get_s() - current_vehicle.Get_s();
+		distance_to_current_vehicle = map.DeltaS(this->Get_s(), current_vehicle.Get_s());
 		
 		// check whether distance is smaller than minimum distance
 		if (distance_to_current_vehicle < minimum_distance_behind) {
@@ -1023,13 +1030,14 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 }
 
 // determine cost for speed in intended lane
-double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+double Vehicle::CostSpeedInIntendedLane(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSPEEDININTENDEDLANE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: CostSpeedInIntendedLane - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_TRAJECTORIES) {
 			
 			cout << "  trajectory: " << endl << trajectory.CreateString();
@@ -1057,7 +1065,7 @@ double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 	double cost = ZERO_COST;
 	
 	// get vehicles in front of own vehicle in intended lane
-	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
+	vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
 	
 	// determine vehicle directly in front of own vehicle
 	for (count = 0; count < vehicles_ahead.size(); count++) {
@@ -1066,7 +1074,7 @@ double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 		current_vehicle = vehicles_ahead[count];
 		
 		// calculate distance to current vehicle
-		distance_to_current_vehicle = current_vehicle.Get_s() - this->Get_s();
+		distance_to_current_vehicle = map.DeltaS(current_vehicle.Get_s(), this->Get_s());
 		
 		// check whether distance is smaller than minimum distance
 		if (distance_to_current_vehicle < minimum_distance) {
@@ -1115,13 +1123,14 @@ double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 }
 
 // determine cost for travel distance
-double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) {
+double Vehicle::CostTravelDistance(Map map, Trajectory trajectory, const double &weight) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTTRAVELDISTANCE) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: CostTravelDistance - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_TRAJECTORIES) {
 			
 			cout << "  trajectory: " << endl << trajectory.CreateString();
@@ -1138,7 +1147,7 @@ double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) 
 	double cost = ZERO_COST;
 	
 	// calculate travel distance
-	travel_distance = trajectory.Get_s()[trajectory.Get_s().size() - 1] - this->Get_s();
+	travel_distance = map.DeltaS(trajectory.Get_s()[trajectory.Get_s().size() - 1], this->Get_s());
 	
 	// calculate cost
 	cost = weight * (-(travel_distance - MAX_TRAVEL_DISTANCE) / ((COST_TRAVEL_DISTANCE_SHAPE_FACTOR * travel_distance) + MAX_TRAVEL_DISTANCE));
@@ -1159,13 +1168,14 @@ double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) 
 }
 
 // determine cost of trajectory for own vehicle
-	double Vehicle::TrajectoryCost(Trajectory trajectory, vector<Vehicle> vehicles) {
+	double Vehicle::TrajectoryCost(Map map, Trajectory trajectory, vector<Vehicle> vehicles) {
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_TRAJECTORYCOST) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "VEHICLE: TrajectoryCost - Start" << endl;
+		// cout << "  map: " << endl << map.CreateString();
 		if (bDISPLAY_TRAJECTORIES) {
 			
 			cout << "  trajectory: " << endl << trajectory.CreateString();
@@ -1189,23 +1199,23 @@ double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) 
 	double cost = ZERO_COST;
 	
 	// add collision cost
-	cost_steps_to_collision = this->CostStepsToCollision(trajectory, vehicles, COST_COLLISON_WEIGHT);
+	cost_steps_to_collision = this->CostStepsToCollision(map, trajectory, vehicles, COST_COLLISON_WEIGHT);
 	cost += cost_steps_to_collision;
 	
 	// add space ahead cost
-	cost_space_ahead = this->CostSpaceAhead(trajectory, vehicles, COST_SPACEAHEAD_WEIGHT);
+	cost_space_ahead = this->CostSpaceAhead(map, trajectory, vehicles, COST_SPACEAHEAD_WEIGHT);
 	cost += cost_space_ahead;
 	
 	// add space in intended lane cost
-	cost_space_in_intended_lane = this->CostSpaceInIntendedLane(trajectory, vehicles, COST_SPACEININTENDEDLANE_WEIGHT);
+	cost_space_in_intended_lane = this->CostSpaceInIntendedLane(map, trajectory, vehicles, COST_SPACEININTENDEDLANE_WEIGHT);
 	cost += cost_space_in_intended_lane;
 	
 	// add speed in intended lane cost
-	cost_speed_in_intended_lane = this->CostSpeedInIntendedLane(trajectory, vehicles, COST_SPEEDININTENDEDLANE_WEIGHT);
+	cost_speed_in_intended_lane = this->CostSpeedInIntendedLane(map, trajectory, vehicles, COST_SPEEDININTENDEDLANE_WEIGHT);
 	cost += cost_speed_in_intended_lane;
 	
 	// add travel distance cost
-	cost_travel_distance = this->CostTravelDistance(trajectory, COST_TRAVELDISTANCE_WEIGHT);
+	cost_travel_distance = this->CostTravelDistance(map, trajectory, COST_TRAVELDISTANCE_WEIGHT);
 	cost += cost_travel_distance;
 	
 	// display message if required

@@ -273,6 +273,43 @@ double Map::AssignS(const double &s) {
 	return clean_s;
 	
 }
+vector<double> Map::AssignS(const vector<double> &s) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_ASSIGNS) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "MAP: AssignS - Start" << endl;
+		cout << "  s: " << endl << CreateDoubleVectorString(s);
+		
+	}
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	vector<double> clean_s;
+	
+	// execute this for all elements
+	for (count = 0; count < s.size(); count++) {
+		
+		clean_s.push_back(this->AssignS(s[count]));
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_ASSIGNS) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  clean_s: " << endl << CreateDoubleVectorString(clean_s);
+		cout << "--- MAP: AssignS - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return clean_s;
+	
+}
 
 // calculate absolute difference between two s values considering loop track
 double Map::DeltaS(const double &s1, const double &s2) {
@@ -308,6 +345,43 @@ double Map::DeltaS(const double &s1, const double &s2) {
 		cout << "  reference_s1: " << reference_s1 < endl;
 		cout << "  reference_s2: " << reference_s2 < endl;
 		cout << "  delta_s: " << delta_s < endl;
+		cout << "--- MAP: DeltaS - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return delta_s;
+	
+}
+vector<double> Map::DeltaS(const vector<double> &s1, const vector<double> &s2) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_DELTAS) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "MAP: DeltaS - Start" << endl;
+		cout << "  s1, s2: " << endl << CreateDoubleVectorsString((vector<double>){s1, s2});
+		
+	}
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	vector<double> delta_s;
+	
+	// execute this for all elements
+	for (count = 0; count < s.size(); count++) {
+		
+		delta_s.push_back(this->DeltaS(s1[count], s2[count]));
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_DELTAS) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  delta_s: " << endl << CreateDoubleVectorString(delta_s);
 		cout << "--- MAP: DeltaS - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -500,13 +574,50 @@ double Map::ReferenceS(const double &s, const double &s_reference) {
 	}
 	
 	// display message if required
-	if (bDISPLAY && bDISPLAY_MAP_FRENET2XY) {
+	if (bDISPLAY && bDISPLAY_MAP_REFERENCES) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  clean_s: " << clean_s < endl;
 		cout << "  clean_s_reference: " << clean_s_reference < endl;
 		cout << "  s_mid_point: " << s_mid_point < endl;
 		cout << "  reference_s: " << reference_s < endl;
+		cout << "--- MAP: ReferenceS - End" << endl;
+		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+		
+	}
+	
+	return reference_s;
+	
+}
+vector<double> Map::ReferenceS(const vector<double> &s, const vector<double> &s_reference) {
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_REFERENCES) {
+		
+		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
+		cout << "MAP: ReferenceS - Start" << endl;
+		cout << "  s, s_reference: " << endl << CreateDoubleVectorsString((vector<double>){s, s_reference});
+		
+	}
+	
+	// define variables
+	unsigned long count = 0;
+	
+	// initialize outputs
+	vector<double> reference_s;
+	
+	// execute this for all elements
+	for (count = 0; count < s.size(); count++) {
+		
+		reference_s.push_back(this->ReferenceS(s[count], s_reference[count]));
+		
+	}
+	
+	// display message if required
+	if (bDISPLAY && bDISPLAY_MAP_REFERENCES) {
+		
+		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
+		cout << "  reference_s: " << endl << CreateDoubleVectorString(reference_s);
 		cout << "--- MAP: ReferenceS - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		

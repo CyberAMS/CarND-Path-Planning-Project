@@ -88,32 +88,32 @@ public:
 	bool CheckInsideLane();
 	
 	// get vehicles ahead of own vehicle
-	vector<Vehicle> Ahead(const vector<Vehicle> &vehicles, const unsigned int &lane);
+	vector<Vehicle> Ahead(Map map, const vector<Vehicle> &vehicles, const unsigned int &lane);
 	
 	// get vehicles behind own vehicle
-	vector<Vehicle> Behind(const vector<Vehicle> &vehicles, const unsigned int &lane);
+	vector<Vehicle> Behind(Map map, const vector<Vehicle> &vehicles, const unsigned int &lane);
 	
 	// detect collision between trajectory of own vehicle and trajectories of other vehicles
-	unsigned long DetectCollision(Trajectory trajectory, vector<Vehicle> vehicles);
-	unsigned long DetectCollision(vector<Vehicle> vehicles);
+	unsigned long DetectCollision(Map map, Trajectory trajectory, vector<Vehicle> vehicles);
+	unsigned long DetectCollision(Map map, vector<Vehicle> vehicles);
 	
 	// determine collison cost
-	double CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
+	double CostStepsToCollision(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
 	
 	// determine whether there is enough space to the vehicle in front
-	double CostSpaceAhead(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
+	double CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
 	
 	// determine whether there is enough space in the intended lane
-	double CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
+	double CostSpaceInIntendedLane(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
 	
 	// determine cost for speed in intended lane
-	double CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
+	double CostSpeedInIntendedLane(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight);
 	
 	// determine cost for travel distance
-	double CostTravelDistance(Trajectory trajectory, const double &weight);
+	double CostTravelDistance(Map map, Trajectory trajectory, const double &weight);
 	
 	// determine cost of trajectory for own vehicle
-	double TrajectoryCost(Trajectory trajectory, vector<Vehicle> vehicles);
+	double TrajectoryCost(Map map, Trajectory trajectory, vector<Vehicle> vehicles);
 	
 	// set trajectory
 	void Set_trajectory(Trajectory trajectory);

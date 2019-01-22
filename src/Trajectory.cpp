@@ -350,6 +350,13 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 		
 	}
 	
+	// adjust for loop track
+	if (s_target < s_last) {
+		
+		s_target += MAX_TRACK_S;
+		
+	}
+	
 	// determine coefficients for jerk minimizing trajectory
 	s_start_vector = (vector<double>){s_last, sv_last, sa_last};
 	s_end_vector = (vector<double>){s_target, sv_target, sa_target};
@@ -368,7 +375,7 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 		
 		// determine states
 		s_states = JerkMinimizingTrajectoryState(s_poly, s_start_vector, t);
-		s = s_states[0];
+		s = map.AssignS(s_states[0]);
 		sv = s_states[1];
 		sa = s_states[2];
 		sj = s_states[3];
@@ -648,7 +655,7 @@ bool Trajectory::Valid(Map map) {
 		new_sv_values = Multiply(sv_values, gain);
 		
 		// generate distance, acceleration and jerk of new segment
-		new_s_values = Addition(Accumulate(Multiply(new_sv_values, SAMPLE_TIME)), this->Get_s()[previous_trajectory_steps - 1]);
+		new_s_values = map.AssignS(Addition(Accumulate(Multiply(new_sv_values, SAMPLE_TIME)), this->Get_s()[previous_trajectory_steps - 1]));
 		new_sa_values = Multiply(Differential(new_sv_values), (1 / SAMPLE_TIME));
 		new_sj_values = Multiply(Differential(new_sa_values), (1 / SAMPLE_TIME));
 		

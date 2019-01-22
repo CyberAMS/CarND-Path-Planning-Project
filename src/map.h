@@ -52,9 +52,11 @@ public:
 	
 	// assign correct s value considering loop track
 	double AssignS(const double &s);
+	vector<double> AssignS(const vector<double> &s);
 	
 	// calculate absolute difference between two s values considering loop track
 	double DeltaS(const double &s1, const double &s2);
+	vector<double> DeltaS(const vector<double> &s1, const vector<double> &s2);
 	
 	// display Map object as string
 	string CreateString();
@@ -69,6 +71,7 @@ private:
 	
 	// calculate s value relative to reference considering loop track
 	double ReferenceS(const double &s, const double &s_reference);
+	vector<double> ReferenceS(const vector<double> &s, const vector<double> &s_reference);
 	
 	// waypoint coordinates
 	vector<double> map_waypoints_x;

@@ -63,7 +63,7 @@ void Driver::PlanBehavior() {
 		if (next_possible_trajectory.Valid(this->Get_map())) {
 			
 			// determine cost of trajectory
-			cost = this->Get_ego().TrajectoryCost(next_possible_trajectory, this->Get_vehicles());
+			cost = this->Get_ego().TrajectoryCost(this->Get_map(), next_possible_trajectory, this->Get_vehicles());
 			
 			// found better trajectory
 			if (cost < minimal_cost) {

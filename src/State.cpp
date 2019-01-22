@@ -275,8 +275,8 @@ Trajectory State::GenerateTrajectoryFromBehavior(Map map, Vehicle ego, behavior_
 	sv_target = min(sv_target, MAX_SPEED);
 	
 	// determine position after next time interval
-	//s_target = (ego.Get_trajectory().Get_s()[ego.Get_trajectory().Get_s().size() - 1] + (Average((vector<double>){sv_target, sv_continue}) * STEP_TIME_INTERVAL));
-	s_target = (ego.Get_trajectory().Get_s()[ego.Get_trajectory().Get_s().size() - 1] + (sv_target * STEP_TIME_INTERVAL));
+	//s_target = map.AssignS(ego.Get_trajectory().Get_s()[ego.Get_trajectory().Get_s().size() - 1] + (Average((vector<double>){sv_target, sv_continue}) * STEP_TIME_INTERVAL));
+	s_target = map.AssignS(ego.Get_trajectory().Get_s()[ego.Get_trajectory().Get_s().size() - 1] + (sv_target * STEP_TIME_INTERVAL));
 	
 	// determine target values based on lateral behavior
 	switch (behavior.lateral_state) {
