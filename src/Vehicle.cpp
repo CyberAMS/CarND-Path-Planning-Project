@@ -795,11 +795,11 @@ double Vehicle::CostStepsToCollision(Map map, Trajectory trajectory, vector<Vehi
 	// calculate cost
 	
 	// aggressive driver
-	// cost_exp = exp((NO_HARMFUL_COLLISION_STEPS - collision_steps) / COST_STEPS_TO_COLLISION_SHAPE_FACTOR);
-	// cost = cost_exp / (cost_exp + 1);
+	cost_exp = exp((NO_HARMFUL_COLLISION_STEPS - collision_steps) / COST_STEPS_TO_COLLISION_SHAPE_FACTOR);
+	cost = cost_exp / (cost_exp + 1);
 	
 	// less aggressive driver
-	cost = weight * (-(collision_steps - NO_HARMFUL_COLLISION_STEPS) / ((COST_STEPS_TO_COLLISION_SHAPE_FACTOR * collision_steps) + NO_HARMFUL_COLLISION_STEPS));
+	// cost = weight * (-(collision_steps - NO_HARMFUL_COLLISION_STEPS) / ((COST_STEPS_TO_COLLISION_SHAPE_FACTOR * collision_steps) + NO_HARMFUL_COLLISION_STEPS));
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSTEPSTOCOLLISION) {

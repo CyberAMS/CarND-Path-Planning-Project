@@ -96,12 +96,14 @@ The map information is loaded from the file `highway_map.csv`. It is a list of w
 | 4      | x component of lateral unit normal vector (dx) |
 | 5      | y component of lateral unit normal vector (dy) |
 
-The `Map` class is used to store the map and execute all conversions from cartesian xy coordinates to Frenet sd coordinates and back. The following list contains the most important methods of this class:
+The `Map` class is used to store the map and execute all conversions from cartesian xy coordinates to Frenet sd coordinates (longitudinal and lateral distances) and back. It also manages that the track is a loop and longitudinal Frenet s coordinates must be treated accordingly. Therefore, every assignment of an s coordinate must be done using the `AssignS()` method and every difference in s coordinates must be calculated using the `DeltaS()` method. Comparing two s coordinates also uses the `DeltaS()` method by checking whether the difference is smaller, equal or larger than 0. The following list contains the most important methods of this class:
 
 | Method | Description |
 |-|-|
 | `Xy2Frenet()` | Convert cartesian xy coordinates to Frenet sd coordinates. |
 | `Frenet2Xy()` | Convert Frenet sd coordinates to cartesian xy coordinates. |
+| `AssignS()`   | Assign longitudinal Frenet s coordinates considering that the track is a loop when s values exceed the length of the track. |
+| `DeltaS()`    | Calculate the delta between two longitudinal Frenet s coordinates considering that the track is a loop when s values exceed the length of the track. |
 
 The behavior of this class is controlled with the following constants which define the missing information of the map:
 
@@ -146,7 +148,7 @@ The simulator receives lists of x coordinates `next_x` and y coordinates `next_y
 
 The path planning program contains several objects that interact which each other. All objects that are based on these classes keep their data private and use access methods to exchange data with other objects. The access methods start with `Get` and `Set`.
 
-The `Driver` class is responsible for receiving feedback from the environment, determining the best next behavior and sending instructions back to the own vehicle in the simulator. A driver owns a vehicle, information about other vehicles and the environment including a map as well as a behavioral state. The following list contains the most important methods of this class:
+The `Driver` class is responsible for receiving feedback from the environment, determining the best next behavior and sending instructions back to the own vehicle in the simulator. If no valid trajectories are found for the next possible behaviors, the driver defaults back to a predicted trajectory based on its own vehicle state, i.e. no change. A driver owns a vehicle, information about other vehicles and the environment including a map as well as a behavioral state. The following list contains the most important methods of this class:
 
 | Method | Description |
 |-|-|
@@ -159,6 +161,7 @@ The `Vehicle` class is storing and processing all information about a single veh
 | `PredictTrajectory()` | Predict a future trajectory for a vehicle based on its current location and speed. |
 | `TrajectoryCost()` | Calculate the full cost of a trajectory. |
 | `CostStepsToCollision()` | Calculate the cost for having a collision after the given number of steps (the more steps the lower the cost). |
+| `CostSpaceAhead()` | Calculate the cost for being too close to the vehicle in front in the intended lane (the farther away the lower the cost). |
 | `CostSpaceInIntendedLane()` | Calculate the cost for having or not having space in the intended lane at the vehicle's longitudinal position (high cost if no space). |
 | `CostSpeedInIntendedLane()` | Calculate the cost for the expected speed in the intended lane (the higher the speed the lower the cost). |
 | `CostTravelDistance()` | Calculate the cost for how far a trajectory travels (the further it travels the lower the cost). |
@@ -166,7 +169,7 @@ The `Vehicle` class is storing and processing all information about a single veh
 | `Behind()` | Identify the vehicles behind the own vehicle in a given lane. |
 | `DetectCollision()` | Compare the own trajectory with the trajectories of other vehicles and determine at what step a collision will occur next if any. |
 
-The behavior of this class is controlled with the below mostly self explaining constants. The `COST_STEPS_TO_COLLISION_SHAPE_FACTOR`, `COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR` and `COST_TRAVEL_DISTANCE_SHAPE_FACTOR` parameters are used to influence the shape of the cost functions that are explained further below. The necessary gap in the left or right lane before a lane change is defined by multiples of the ahead and behind vehicle's length using the factors `AHEAD_SPACE_FACTOR` and `BEHIND_SPACE_FACTOR`. In order to determine the speed of a lane, the algorithm only looks for vehicles ahead that are closer than `VEHICLE_AHEAD_WITHIN_DISTANCE`. Finally, the parameter `MAX_TRAVEL_DISTANCE` defines the maximum expected travel of a trajectory to determine a balanced normalized cost function.
+The behavior of this class is controlled with the below mostly self explaining constants. The `COST_STEPS_TO_COLLISION_SHAPE_FACTOR`, `COST_SPACE_AHEAD_SHAPE_FACTOR`, `COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR` and `COST_TRAVEL_DISTANCE_SHAPE_FACTOR` parameters are used to influence the shape of the cost functions that are explained further below. The desired distance in time to the vehicle in front in the intended lane is defined by the parameter `AHEAD_DISTANCE_TIME`. The necessary gap in the left or right lane before a lane change is defined by multiples of the ahead and behind vehicle's length using the factors `AHEAD_SPACE_FACTOR` and `BEHIND_SPACE_FACTOR`. In order to determine the speed of a lane, the algorithm only looks for vehicles ahead that are closer than `VEHICLE_AHEAD_WITHIN_DISTANCE`. Finally, the parameter `MAX_TRAVEL_DISTANCE` defines the maximum expected travel of a trajectory to determine a balanced normalized cost function.
 
 ```C
 // vehicle parameters
@@ -185,6 +188,8 @@ const double SAFETY_BOX_DISTANCE = 0.5; // must have 0.5 m distance to all vehic
 const double DESIRED_LONGITUDINAL_TIME_DISTANCE = 1.0; // keep a distance of 1 s
 const double NO_HARMFUL_COLLISION_STEPS = DESIRED_LONGITUDINAL_TIME_DISTANCE / SAMPLE_TIME;
 const double COST_STEPS_TO_COLLISION_SHAPE_FACTOR = 10.0;
+const double AHEAD_DISTANCE_TIME = 1.5; // desired time to vehicle in front 1.5 s
+const double COST_SPACE_AHEAD_SHAPE_FACTOR = 10.0;
 const double AHEAD_SPACE_FACTOR = 2.0;
 const double BEHIND_SPACE_FACTOR = 4.0;
 const double VEHICLE_AHEAD_WITHIN_DISTANCE = 50.0;
@@ -196,6 +201,7 @@ const double COST_TRAVEL_DISTANCE_SHAPE_FACTOR = 10.0;
 const double ZERO_COST = 0.0;
 const double MAX_NORMALIZED_COST = 1.0;
 const double COST_COLLISON_WEIGHT = 10.0;
+const double COST_SPACEAHEAD_WEIGHT = 5.0;
 const double COST_SPACEININTENDEDLANE_WEIGHT = 5.0;
 const double COST_SPEEDININTENDEDLANE_WEIGHT = 1.0;
 const double COST_TRAVELDISTANCE_WEIGHT = 1.0;
@@ -227,6 +233,7 @@ const long NUM_PREVIOUS_PATH_STEPS = 10;
 const long MIN_PREVIOUS_PATH_STEPS = 0;
 
 // longitudinal definitions
+const double ZERO_SPEED = 0.0;
 const double SAFETY_DELTA_SPEED = 0.25 * MPH2MS; // travel 0.25 mph below maximum speed
 const double MAX_SPEED = (50 * MPH2MS) - SAFETY_DELTA_SPEED; // 50 mph minus safety delta in m/s
 const double SAFETY_DELTA_ACCELERATION = 1.0; // keep maximum acceleration 1 m/s below limit
@@ -391,7 +398,7 @@ vector<double> JerkMinimizingTrajectoryState(vector<double> poly, vector<double>
 
 ### 5. Cost functions
 
-The absolute core of a path planning algorithm is the tuning of cost functions to ensure expected and safe behavior of the artificial driver. Only 4 cost functions are needed to safely and efficiently drive in the simulator environment.
+The absolute core of a path planning algorithm is the tuning of cost functions to ensure expected and safe behavior of the artificial driver. Only 5 cost functions are needed to safely and efficiently drive in the simulator environment.
 
 First we need to always ensure that there is no collision. The `CostStepsToCollision()` method within the `Vehicle` class calculates a cost based on the number of steps before a collision. 50 steps have been identified to be a good value for an average normalized cost of 0.5. Less steps lead to higher cost and more steps lead to lower cost as shown in the first diagram further below.
 
@@ -418,7 +425,9 @@ double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehi
 }
 ```
 
-Second we need ensure that there is always enough space on the left or right side of the own vehicle before making a lane change. The `CostSpaceInIntendedLane()` method within the `Vehicle` class calculates either zero or maximum normalized cost based on whether there is space or there is not.
+Second ...
+
+Third we need ensure that there is always enough space on the left or right side of the own vehicle before making a lane change. The `CostSpaceInIntendedLane()` method within the `Vehicle` class calculates either zero or maximum normalized cost based on whether there is space or there is not.
 
 ```C
 // determine whether there is enough space in the intended lane
@@ -468,7 +477,7 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 }
 ```
 
-Third we need to ensure that we always pick the fastest feasible lane to advance as quickly as possible. The `CostSpeedInIntendedLane()` method within the `Vehicle` class calculates a cost based on the speed of the vehicle in the intended lane in front of our own vehicle. The cost is 0 at the maximum allowable speed and increases to 1 during a standstill as shown in the second diagram further below.
+Fourth we need to ensure that we always pick the fastest feasible lane to advance as quickly as possible. The `CostSpeedInIntendedLane()` method within the `Vehicle` class calculates a cost based on the speed of the vehicle in the intended lane in front of our own vehicle. The cost is 0 at the maximum allowable speed and increases to 1 during a standstill as shown in the second diagram further below.
 
 ```C
 // determine cost for speed in intended lane
@@ -511,7 +520,7 @@ double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 }
 ```
 
-Fourth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method within the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the third diagram further below.
+Fifth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method within the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the third diagram further below.
 
 ```C
 // determine cost for travel distance
@@ -536,7 +545,9 @@ double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) 
 
 <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Collision.jpg" width="32%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg" width="32%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg" width="32%">
 
-It is important to note that the absolute cost is actually not that important. The important characteristic is the relative cost difference between the individual trajectories. Therefore, areas in the cost function with large changes lead to larger changes between trajectories with different input values to the cost function. This is important to consider when tuning and balancing cost functions to pick one trajectory over the other. For example a less aggressive driver that stays further away from other vehicles would need a `CostStepsToCollision()` method that has larger changes at lower number of steps before a collision (above diagram on the left). The current setting uses high, but also very flat cost at lower number of steps and hence leads to a more aggressive driving behavior.
+It is important to note that the absolute cost is only relevant to balance the different cost functions amongst themselves. This is what the weights of the normalized cost functions are used for. For example it is much more important to avoid a collision than travelling a longer distance per time interval.
+
+Tuning cost functions also requires to look at the relative cost difference between the individual trajectories when looking at a single cost function. Therefore, areas in the cost function with large changes lead to larger changes between trajectories with different input values to the cost function. For example a less aggressive driver that stays further away from other vehicles would need a `CostStepsToCollision()` method that has larger changes at lower number of steps before a collision (above diagram on the left). The current setting uses high, but also very flat cost at lower number of steps and hence leads to a more aggressive driving behavior.
 
 ### 6. Debugging environment
 
@@ -545,6 +556,7 @@ In order to debug the path planning program efficiently, several functions have 
 The debug options are controlled by the following constants within the `helper_functions.h()` file. If `bFILEOUTPUT` is `true`, the standard output is redirected into the file `out.txt` (inside the `build` folder). If `bDISPLAY` is `true`, more information about input and output variables is displayed to the standard output. There is a constant boolean for each relevant method to turn debugging of its inputs and outputs on or off. As vehicle and trajectory objects can have a lot of content, there are two global parameters that control whether the content of these objects is displayed or not (`bDISPLAY_VEHICLES`, `bDISPLAY_TRAJECTORIES`).
 
 ```C
+// debug settings
 const bool bFILEOUTPUT = true;
 const string OUTPUT_FILENAME = "out.txt";
 const bool bDISPLAY = true;
@@ -553,8 +565,11 @@ const bool bDISPLAY_DRIVER_SETVEHICLES = false;
 const bool bDISPLAY_MAP_INIT = false;
 const bool bDISPLAY_MAP_XY2FRENET = false;
 const bool bDISPLAY_MAP_FRENET2XY = false;
+const bool bDISPLAY_MAP_ASSIGNS = false;
+const bool bDISPLAY_MAP_DELTAS = false;
 const bool bDISPLAY_MAP_CLOSESTWAYPOINT = false;
 const bool bDISPLAY_MAP_NEXTWAYPOINT = false;
+const bool bDISPLAY_MAP_REFERENCES = false;
 const bool bDISPLAY_VEHICLES = false;
 const bool bDISPLAY_VEHICLE_UPDATE = false;
 const bool bDISPLAY_VEHICLE_AHEAD = false;
@@ -565,6 +580,7 @@ const bool bDISPLAY_VEHICLE_DETERMINELANE = false;
 const bool bDISPLAY_VEHICLE_CHECKINSIDELANE = false;
 const bool bDISPLAY_VEHICLE_DETECTCOLLISION = false;
 const bool bDISPLAY_VEHICLE_COSTSTEPSTOCOLLISION = false;
+const bool bDISPLAY_VEHICLE_COSTSPACEAHEAD = false;
 const bool bDISPLAY_VEHICLE_COSTSPACEININTENDEDLANE = false;
 const bool bDISPLAY_VEHICLE_COSTSPEEDININTENDEDLANE = false;
 const bool bDISPLAY_VEHICLE_COSTTRAVELDISTANCE = false;
