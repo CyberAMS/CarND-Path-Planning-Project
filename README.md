@@ -425,7 +425,40 @@ double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehi
 }
 ```
 
-Second ...
+Second even if there is no collision possible right now, our vehicle might follow the vehicle in front of us in very close distance with the exact same speed. Therefore, a collision is likely in the future and must be prevented by keeping a larger distance. The `CostSpaceAhead()` method within the `Vehicle` class calculates a cost based on the distance to the vehicle in front of us in the intended lane. The desired distance is calculated as distance traveled in 1.5 seconds and set as an average normalized cost of 0.5. Shorter distances lead to higher cost and longer distances lead to lower cost as shown in the second diagram further below.
+
+```C
+// determine whether there is enough space to the vehicle in front
+double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+	
+	// define variables
+	vector<Vehicle> vehicles_ahead;
+	unsigned int count = 0;
+	Vehicle current_vehicle;
+	double distance_to_current_vehicle = 0.0;
+	double minimum_distance_ahead = std::numeric_limits<double>::max();
+	Vehicle vehicle_ahead;
+	double desired_distance = 0.0;
+	
+	// initialize outputs
+	double cost = ZERO_COST;
+	
+	// get vehicles in front of own vehicle in intended lane
+	vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
+	
+	// determine vehicle directly in front of own vehicle
+	...
+	
+	// calculate desired distance to vehicle in front of own vehicle in intended lane
+	desired_distance = this->Get_v() * AHEAD_DISTANCE_TIME;
+	
+	// calculate cost
+	cost = weight * (-(minimum_distance_ahead - desired_distance) / ((COST_SPACE_AHEAD_SHAPE_FACTOR * minimum_distance_ahead) + desired_distance));
+	
+	return cost;
+	
+}
+```
 
 Third we need ensure that there is always enough space on the left or right side of the own vehicle before making a lane change. The `CostSpaceInIntendedLane()` method within the `Vehicle` class calculates either zero or maximum normalized cost based on whether there is space or there is not.
 
@@ -477,7 +510,7 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 }
 ```
 
-Fourth we need to ensure that we always pick the fastest feasible lane to advance as quickly as possible. The `CostSpeedInIntendedLane()` method within the `Vehicle` class calculates a cost based on the speed of the vehicle in the intended lane in front of our own vehicle. The cost is 0 at the maximum allowable speed and increases to 1 during a standstill as shown in the second diagram further below.
+Fourth we need to ensure that we always pick the fastest feasible lane to advance as quickly as possible. The `CostSpeedInIntendedLane()` method within the `Vehicle` class calculates a cost based on the speed of the vehicle in the intended lane in front of our own vehicle. The cost is 0 at the maximum allowable speed and increases to 1 during a standstill as shown in the third diagram further below.
 
 ```C
 // determine cost for speed in intended lane
@@ -520,7 +553,7 @@ double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 }
 ```
 
-Fifth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method within the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the third diagram further below.
+Fifth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method within the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the fourth diagram further below.
 
 ```C
 // determine cost for travel distance
@@ -543,7 +576,8 @@ double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) 
 }
 ```
 
-<img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Collision.jpg" width="32%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg" width="32%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg" width="32%">
+<img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Collision.jpg" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Distance.jpg" width="48%">
+<img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg" width="48%">
 
 It is important to note that the absolute cost is only relevant to balance the different cost functions amongst themselves. This is what the weights of the normalized cost functions are used for. For example it is much more important to avoid a collision than travelling a longer distance per time interval.
 
