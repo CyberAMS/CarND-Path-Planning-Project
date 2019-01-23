@@ -425,7 +425,7 @@ double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehi
 }
 ```
 
-Second even if there is no collision possible right now, our vehicle might follow the vehicle in front of us in very close distance with the exact same speed. Therefore, a collision is likely in the future and must be prevented by keeping a larger distance. The `CostSpaceAhead()` method within the `Vehicle` class calculates a cost based on the distance to the vehicle in front of us in the intended lane. The desired distance is calculated as distance traveled in 1.5 seconds and set as an average normalized cost of 0.5. Shorter distances lead to higher cost and longer distances lead to lower cost as shown in the second diagram further below.
+Second even if there is no collision possible right now, our vehicle might follow the vehicle in front of us in very close distance with the exact same speed. Therefore, a collision is likely in the future and must be prevented by keeping a larger distance. The `CostSpaceAhead()` method within the `Vehicle` class calculates a cost based on the distance to the vehicle in front of us in the intended lane. The desired distance is calculated as distance travelled in 1.5 seconds and set as an average normalized cost of 0.5. Shorter distances lead to higher cost and longer distances lead to lower cost as shown in the second diagram further below.
 
 ```C
 // determine whether there is enough space to the vehicle in front
