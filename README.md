@@ -446,7 +446,7 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 	// get vehicles in front of own vehicle in intended lane
 	vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
 	
-	// determine vehicle directly in front of own vehicle
+	// determine vehicle and minimum distance directly in front of own vehicle
 	...
 	
 	// calculate desired distance to vehicle in front of own vehicle in intended lane
@@ -485,10 +485,10 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
 	vehicles_behind = this->Behind(vehicles, trajectory.Get_intended_lane());
 	
-	// determine vehicle directly in front of own vehicle
+	// determine vehicle and minimum distance directly in front of own vehicle
 	...
 	
-	// determine vehicle directly behind of own vehicle
+	// determine vehicle and minimum distance directly behind of own vehicle
 	...
 	
 	// determine space needed
