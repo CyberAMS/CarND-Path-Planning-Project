@@ -309,13 +309,13 @@ The flow of the path planning program is defined by the interactions of its obje
 
 ![alt text][image1]
 
-### 3. Finite state model
+### 2. Finite state model
 
 The below finite state model is used to determine the next possible behavior. Longitudinal states (ACCELERATE, KEEP SPEED and DECELERATE) thermselves allow every possible transition inbetween them. But these transitions get limited by the selection of the lateral state (KEEP LANE, PREPARE LANE CHANGE LEFT, PREPARE LANE CHANGE RIGHT, CHANGE LANE LEFT and CHANGE LANE RIGHT) as indicated by the colors.
 
 ![alt text][image2]
 
-### 4. Jerk minimizing trajectories
+### 3. Jerk minimizing trajectories
 
 The jerk minimizing trajectory formulas are implemented in the `helper_functions.cpp` file. The first step is to determine the coefficients for the polynomial. This is done using the matrix and vector functions below. The inputs are the state vector at the start `start` and end `end` of the trajectory as well as the duration `T` of the trajectory segment.
 
@@ -396,7 +396,7 @@ vector<double> JerkMinimizingTrajectoryState(vector<double> poly, vector<double>
 }
 ```
 
-### 5. Cost functions
+### 4. Cost functions
 
 The absolute core of a path planning algorithm is the tuning of cost functions to ensure expected and safe behavior of the artificial driver. Only 5 cost functions are needed to safely and efficiently drive in the simulator environment.
 
@@ -582,7 +582,7 @@ It is important to note that the absolute cost is only relevant to balance the d
 
 Tuning cost functions also requires to look at the relative cost difference between the individual trajectories when looking at a single cost function. Therefore, areas in the cost function with large changes lead to larger changes between trajectories with different input values to the cost function. For example a less aggressive driver that stays further away from other vehicles would need a `CostStepsToCollision()` method that has larger changes at lower number of steps before a collision (above diagram on the left). The current setting uses high, but also very flat cost at lower number of steps and hence leads to a more aggressive driving behavior.
 
-### 6. Debugging environment
+### 5. Debugging environment
 
 In order to debug the path planning program efficiently, several functions have been added to display the content of all the input and output variables of each relevant object method.
 
