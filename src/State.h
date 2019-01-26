@@ -53,15 +53,27 @@ const vector<transition> TRANSITIONS
 	 {.name = PREPARE_LANE_CHANGE_LEFT,
 	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_LEFT},
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
-	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_LEFT}}},
+	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
+	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE}}},
 	 {.name = PREPARE_LANE_CHANGE_RIGHT,
 	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_RIGHT},
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_RIGHT},
-	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_RIGHT}}},
+	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_RIGHT},
+	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE}}},
 	 {.name = CHANGE_LANE_LEFT,
-	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE}}},
+	  .next = {{.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_LEFT}}},
 	 {.name = CHANGE_LANE_RIGHT,
-	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE}}}};
+	  .next = {{.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_RIGHT}}}};
 const long LANE_CHANGE_TRANSITION_TIME = 0.5 * STEP_TIME_INTERVAL / SAMPLE_TIME; // in steps
 const long NO_STEP_INCREASE = 0;
 

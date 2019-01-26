@@ -100,7 +100,11 @@ unsigned long Trajectory::Init(Map map, double s_start, double sv_start, double 
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  finished_steps: " << finished_steps << endl;
-		cout << "  this: " << endl << this->CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  this: " << endl << this->CreateString();
+			
+		}
 		cout << "--- TRAJECTORY: Init - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -239,7 +243,11 @@ void Trajectory::Add(Trajectory trajectory, unsigned long max_num_steps) {
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this: " << endl << this->CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  this: " << endl << this->CreateString();
+			
+		}
 		cout << "--- TRAJECTORY: Add - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -268,7 +276,11 @@ void Trajectory::Add(Trajectory trajectory) {
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_ADD) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this: " << endl << this->CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  this: " << endl << this->CreateString();
+			
+		}
 		cout << "--- TRAJECTORY: Add - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -407,7 +419,11 @@ void Trajectory::AddJerkMinimizingTrajectory(Map map, double s_target, double sv
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  trajectory_length: " << trajectory_length << endl;
-		cout << "  this: " << endl << this->CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  this: " << endl << this->CreateString();
+			
+		}
 		cout << "--- TRAJECTORY: AddJerkMinimizingTrajectory - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -452,7 +468,11 @@ void Trajectory::Generate(Map map, Trajectory trajectory, double s_target, doubl
 	if (bDISPLAY && bDISPLAY_TRAJECTORY_GENERATE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this: " << endl << this->CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  this: " << endl << this->CreateString();
+			
+		}
 		cout << "--- TRAJECTORY: Generate - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -527,7 +547,7 @@ bool Trajectory::Valid(Map map) {
 	
 	// initialize outputs
 	bool is_valid = true;
-	return is_valid; // TODO: eliminated validation
+	//return is_valid; // TODO: eliminated validation
 	
 	// calculate distance, speed, acceleration and jerk values based on s and d values
 	max_sv = Maximum(this->Get_sv());
@@ -764,7 +784,11 @@ bool Trajectory::Valid(Map map) {
 		//cout << "  sv_values, d_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){sv_values, d_values});
 		//cout << "  new_s_values, new_sv_values, new_sa_values, new_sj_values, new_x_values, new_y_values, new_theta_values: " << endl << CreateDoubleVectorsString((vector<vector<double>>){new_s_values, new_sv_values, new_sa_values, new_sj_values, new_x_values, new_y_values, new_theta_values});
 		cout << "  d: " << d << endl;
-		cout << "  this: " << endl << this->CreateString();
+		if (bDISPLAY_TRAJECTORIES) {
+			
+			cout << "  this: " << endl << this->CreateString();
+			
+		}
 		cout << "  is_valid: " << is_valid << endl;
 		cout << "--- TRAJECTORY: Valid - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;

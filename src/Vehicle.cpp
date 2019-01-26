@@ -60,13 +60,13 @@ void Vehicle::Update(Map map, unsigned int id, double x, double y, double vx, do
 	}
 	
 	// define variables
-	vector<double> svdv_start;
-	vector<double> svdv_end;
-	double s_start = 0.0;
-	double sv_start = 0.0;
-	double d_start = 0.0;
-	double dv_start = 0.0;
 	double theta_start = 0.0;
+	vector<double> svdv_start;
+	double s_start = 0.0;
+	double d_start = 0.0;
+	vector<double> svdv_end;
+	double sv_start = 0.0;
+	double dv_start = 0.0;
 	
 	// set state with inputs
 	this->id = id;
@@ -81,16 +81,14 @@ void Vehicle::Update(Map map, unsigned int id, double x, double y, double vx, do
 	this->theta = Angle(vx, vy);
 	this->v = Magnitude(vx, vy);
 	
-	// get Frenet position
-	s_start = this->Get_s();
-	d_start = this->Get_d();
+	// determine Frenet positions and velocities
 	theta_start = this->Get_theta();
-	
-	// determine Frenet velocities
 	svdv_start = map.Xy2Frenet(this->Get_x(), this->Get_y(), theta_start);
+	s_start = svdv_start[0];
+	d_start = svdv_start[1];
 	svdv_end = map.Xy2Frenet((this->Get_x() + this->Get_vx()), (this->Get_y() + this->Get_vy()), theta_start);
-	sv_start = svdv_end[0] - svdv_start[0];
-	dv_start = svdv_end[1] - svdv_start[1];
+	sv_start = svdv_end[0] - s_start;
+	dv_start = svdv_end[1] - d_start;
 	
 	// predict future trajectory
 	this->PredictTrajectory(map, s_start, sv_start, d_start, dv_start, theta_start);
@@ -102,7 +100,16 @@ void Vehicle::Update(Map map, unsigned int id, double x, double y, double vx, do
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this: " << endl << this->CreateString();
+		cout << "  theta_start: " << theta_start << endl;
+		cout << "  s_start: " << s_start << endl;
+		cout << "  d_start: " << d_start << endl;
+		cout << "  sv_start: " << sv_start << endl;
+		cout << "  dv_start: " << dv_start << endl;
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  this: " << endl << this->CreateString();
+			
+		}
 		cout << "--- VEHICLE: Update - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -145,7 +152,11 @@ void Vehicle::Update(double x, double y, double s, double d, double theta, doubl
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this: " << endl << this->CreateString();
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  this: " << endl << this->CreateString();
+			
+		}
 		cout << "--- VEHICLE: Update - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -170,7 +181,11 @@ void Vehicle::Update() {
 	if (bDISPLAY && bDISPLAY_VEHICLE_UPDATE) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  this: " << endl << this->CreateString();
+		if (bDISPLAY_VEHICLES) {
+			
+			cout << "  this: " << endl << this->CreateString();
+			
+		}
 		cout << "--- VEHICLE: Update - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -843,10 +858,14 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 	vector<Vehicle> vehicles_ahead;
 	unsigned int count = 0;
 	Vehicle current_vehicle;
+	double current_back_of_vehicle = 0.0;
+	double trajectory_distance_to_current_vehicle = 0.0;
+	double travel_distance = 0.0;
 	double distance_to_current_vehicle = 0.0;
 	double minimum_distance_ahead = std::numeric_limits<double>::max();
 	Vehicle vehicle_ahead;
 	double desired_distance = 0.0;
+	double cost_exp = 0.0;
 	
 	// initialize outputs
 	double cost = ZERO_COST;
@@ -860,8 +879,13 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 		// get current vehicle
 		current_vehicle = vehicles_ahead[count];
 		
-		// calculate distance to current vehicle
-		distance_to_current_vehicle = map.DeltaS(current_vehicle.Get_s(), this->Get_s());
+		// calculate distance from end of trajectory to current vehicle
+		current_back_of_vehicle = map.DeltaS(current_vehicle.Get_s(), current_vehicle.Get_length());
+		trajectory_distance_to_current_vehicle = map.DeltaS(current_back_of_vehicle, trajectory.Get_s()[trajectory.Get_s().size() - 1]);
+		
+		// project future distance on current vehicle position
+		travel_distance = this->Get_v() * STEP_TIME_INTERVAL;
+		distance_to_current_vehicle = trajectory_distance_to_current_vehicle + travel_distance;
 		
 		// check whether distance is smaller than minimum distance
 		if (distance_to_current_vehicle < minimum_distance_ahead) {
@@ -874,11 +898,12 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 		
 	}
 	
-	// calculate desired distance to vehicle in front of own vehicle in intended lane
+	// calculate desired distance of end of trajectory to vehicle in front of own vehicle in intended lane
 	desired_distance = this->Get_v() * AHEAD_DISTANCE_TIME;
 	
 	// calculate cost
-	cost = weight * (-(minimum_distance_ahead - desired_distance) / ((COST_SPACE_AHEAD_SHAPE_FACTOR * minimum_distance_ahead) + desired_distance));
+	cost_exp = exp((desired_distance - minimum_distance_ahead) / COST_SPACE_AHEAD_SHAPE_FACTOR);
+	cost = cost_exp / (cost_exp + 1);
 	
 	// display message if required
 	if (bDISPLAY_VEHICLE_COSTSPACEAHEAD) {
@@ -944,61 +969,66 @@ double Vehicle::CostSpaceInIntendedLane(Map map, Trajectory trajectory, vector<V
 	// initialize outputs
 	double cost = ZERO_COST;
 	
-	// get vehicles in front and behind of own vehicle in intended lane
-	vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
-	vehicles_behind = this->Behind(map, vehicles, trajectory.Get_intended_lane());
-	
-	// determine vehicle directly in front of own vehicle
-	for (count = 0; count < vehicles_ahead.size(); count++) {
+	// check whether there is an intended lane change
+	if (!(trajectory.Get_intended_lane() == this->Get_lane())) {
 		
-		// get current vehicle
-		current_vehicle = vehicles_ahead[count];
+		// get vehicles in front and behind of own vehicle in intended lane
+		vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
+		vehicles_behind = this->Behind(map, vehicles, trajectory.Get_intended_lane());
 		
-		// calculate distance to current vehicle
-		distance_to_current_vehicle = map.DeltaS(current_vehicle.Get_s(), this->Get_s());
-		
-		// check whether distance is smaller than minimum distance
-		if (distance_to_current_vehicle < minimum_distance_ahead) {
+		// determine vehicle directly in front of own vehicle
+		for (count = 0; count < vehicles_ahead.size(); count++) {
 			
-			// remember this distance as minimum distance
-			minimum_distance_ahead = distance_to_current_vehicle;
-			vehicle_ahead = current_vehicle;
+			// get current vehicle
+			current_vehicle = vehicles_ahead[count];
 			
-		}
-		
-	}
-	
-	// determine vehicle directly behind of own vehicle
-	for (count = 0; count < vehicles_behind.size(); count++) {
-		
-		// get current vehicle
-		current_vehicle = vehicles_behind[count];
-		
-		// calculate distance to current vehicle
-		distance_to_current_vehicle = map.DeltaS(this->Get_s(), current_vehicle.Get_s());
-		
-		// check whether distance is smaller than minimum distance
-		if (distance_to_current_vehicle < minimum_distance_behind) {
+			// calculate distance to current vehicle
+			distance_to_current_vehicle = map.DeltaS(current_vehicle.Get_s(), this->Get_s());
 			
-			// remember this distance as minimum distance
-			minimum_distance_behind = distance_to_current_vehicle;
-			vehicle_behind = current_vehicle;
+			// check whether distance is smaller than minimum distance
+			if (distance_to_current_vehicle < minimum_distance_ahead) {
+				
+				// remember this distance as minimum distance
+				minimum_distance_ahead = distance_to_current_vehicle;
+				vehicle_ahead = current_vehicle;
+				
+			}
 			
 		}
 		
-	}
-	
-	// determine space needed
-	enough_space = ((minimum_distance_ahead >= (AHEAD_SPACE_FACTOR * vehicle_ahead.Get_length())) && (minimum_distance_behind >= (BEHIND_SPACE_FACTOR * vehicle_behind.Get_length())));
-	
-	// calculate cost
-	if (enough_space) {
+		// determine vehicle directly behind of own vehicle
+		for (count = 0; count < vehicles_behind.size(); count++) {
+			
+			// get current vehicle
+			current_vehicle = vehicles_behind[count];
+			
+			// calculate distance to current vehicle
+			distance_to_current_vehicle = map.DeltaS(this->Get_s(), current_vehicle.Get_s());
+			
+			// check whether distance is smaller than minimum distance
+			if (distance_to_current_vehicle < minimum_distance_behind) {
+				
+				// remember this distance as minimum distance
+				minimum_distance_behind = distance_to_current_vehicle;
+				vehicle_behind = current_vehicle;
+				
+			}
+			
+		}
 		
-		cost = ZERO_COST;
+		// determine space needed
+		enough_space = ((minimum_distance_ahead >= (AHEAD_SPACE_FACTOR * vehicle_ahead.Get_length())) && (minimum_distance_behind >= (BEHIND_SPACE_FACTOR * vehicle_behind.Get_length())));
 		
-	} else {
-		
-		cost = weight * MAX_NORMALIZED_COST;
+		// calculate cost
+		if (enough_space) {
+			
+			cost = ZERO_COST;
+			
+		} else {
+			
+			cost = weight * MAX_NORMALIZED_COST;
+			
+		}
 		
 	}
 	
@@ -1205,7 +1235,7 @@ double Vehicle::CostTravelDistance(Map map, Trajectory trajectory, const double 
 	
 	// add space ahead cost
 	cost_space_ahead = this->CostSpaceAhead(map, trajectory, vehicles, COST_SPACEAHEAD_WEIGHT);
-	//cost += cost_space_ahead; // TODO: activate again
+	cost += cost_space_ahead;
 	
 	// add space in intended lane cost
 	cost_space_in_intended_lane = this->CostSpaceInIntendedLane(map, trajectory, vehicles, COST_SPACEININTENDEDLANE_WEIGHT);

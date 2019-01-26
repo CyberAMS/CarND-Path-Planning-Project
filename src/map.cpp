@@ -24,8 +24,6 @@ using std::fabs;
 using std::min;
 using std::fmod;
 
-// TODO: Need to fix functions that use s to calculate distances and get stuck when MAX_S of map is reached
-
 // initialize map
 void Map::Init(vector<double> map_waypoints_x, vector<double> map_waypoints_y, vector<double> map_waypoints_s, vector<double> map_waypoints_dx, vector<double> map_waypoints_dy) {
 	
@@ -325,7 +323,7 @@ double Map::DeltaS(const double &s1, const double &s2) {
 	}
 	
 	// TODO: remove this shortcut
-	return (s1 - s2);
+	//return (s1 - s2);
 	
 	// define variables
 	double reference_s1 = 0.0;
