@@ -891,7 +891,7 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 		}
 		if (bDISPLAY_VEHICLES) {
 			
-			cout << "  vehicles_behind: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_behind);
+			cout << "  vehicles_ahead: " << endl << vehicles_ahead[0].CreateVehiclesVectorString(vehicles_ahead);
 			
 		}
 		cout << "  minimum_distance_ahead: " << minimum_distance_ahead << endl;
@@ -1191,6 +1191,7 @@ double Vehicle::CostTravelDistance(Map map, Trajectory trajectory, const double 
 	
 	// define variables
 	double cost_steps_to_collision = ZERO_COST;
+	double cost_space_ahead = ZERO_COST;
 	double cost_space_in_intended_lane = ZERO_COST;
 	double cost_speed_in_intended_lane = ZERO_COST;
 	double cost_travel_distance = ZERO_COST;

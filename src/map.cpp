@@ -342,9 +342,9 @@ double Map::DeltaS(const double &s1, const double &s2) {
 	if (bDISPLAY && bDISPLAY_MAP_DELTAS) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  reference_s1: " << reference_s1 < endl;
-		cout << "  reference_s2: " << reference_s2 < endl;
-		cout << "  delta_s: " << delta_s < endl;
+		cout << "  reference_s1: " << reference_s1 << endl;
+		cout << "  reference_s2: " << reference_s2 << endl;
+		cout << "  delta_s: " << delta_s << endl;
 		cout << "--- MAP: DeltaS - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -360,7 +360,7 @@ vector<double> Map::DeltaS(const vector<double> &s1, const vector<double> &s2) {
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "MAP: DeltaS - Start" << endl;
-		cout << "  s1, s2: " << endl << CreateDoubleVectorsString((vector<double>){s1, s2});
+		cout << "  s1, s2: " << endl << CreateDoubleVectorsString((vector<vector<double>>){s1, s2});
 		
 	}
 	
@@ -371,7 +371,7 @@ vector<double> Map::DeltaS(const vector<double> &s1, const vector<double> &s2) {
 	vector<double> delta_s;
 	
 	// execute this for all elements
-	for (count = 0; count < s.size(); count++) {
+	for (count = 0; count < s1.size(); count++) {
 		
 		delta_s.push_back(this->DeltaS(s1[count], s2[count]));
 		
@@ -548,7 +548,7 @@ double Map::ReferenceS(const double &s, const double &s_reference) {
 			
 			reference_s = (s_mid_point - MAX_TRACK_S) - clean_s_reference;
 			
-		} else if ((clean_s >= 0) && (clean_s <= clean_s_reference) {
+		} else if ((clean_s >= 0) && (clean_s <= clean_s_reference)) {
 			
 			reference_s = clean_s - clean_s_reference;
 			
@@ -565,7 +565,7 @@ double Map::ReferenceS(const double &s, const double &s_reference) {
 			
 			reference_s = (MAX_TRACK_S - clean_s_reference) + clean_s;
 			
-		} else if ((clean_s > s_mid_point) && (clean_s <= clean_s_reference) {
+		} else if ((clean_s > s_mid_point) && (clean_s <= clean_s_reference)) {
 			
 			reference_s = clean_s_reference - clean_s;
 			
@@ -577,10 +577,10 @@ double Map::ReferenceS(const double &s, const double &s_reference) {
 	if (bDISPLAY && bDISPLAY_MAP_REFERENCES) {
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-		cout << "  clean_s: " << clean_s < endl;
-		cout << "  clean_s_reference: " << clean_s_reference < endl;
-		cout << "  s_mid_point: " << s_mid_point < endl;
-		cout << "  reference_s: " << reference_s < endl;
+		cout << "  clean_s: " << clean_s << endl;
+		cout << "  clean_s_reference: " << clean_s_reference << endl;
+		cout << "  s_mid_point: " << s_mid_point << endl;
+		cout << "  reference_s: " << reference_s << endl;
 		cout << "--- MAP: ReferenceS - End" << endl;
 		cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 		
@@ -596,7 +596,7 @@ vector<double> Map::ReferenceS(const vector<double> &s, const vector<double> &s_
 		
 		cout << "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" << endl;
 		cout << "MAP: ReferenceS - Start" << endl;
-		cout << "  s, s_reference: " << endl << CreateDoubleVectorsString((vector<double>){s, s_reference});
+		cout << "  s, s_reference: " << endl << CreateDoubleVectorsString((vector<vector<double>>){s, s_reference});
 		
 	}
 	
