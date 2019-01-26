@@ -1205,7 +1205,7 @@ double Vehicle::CostTravelDistance(Map map, Trajectory trajectory, const double 
 	
 	// add space ahead cost
 	cost_space_ahead = this->CostSpaceAhead(map, trajectory, vehicles, COST_SPACEAHEAD_WEIGHT);
-	cost += cost_space_ahead;
+	//cost += cost_space_ahead; // TODO: activate again
 	
 	// add space in intended lane cost
 	cost_space_in_intended_lane = this->CostSpaceInIntendedLane(map, trajectory, vehicles, COST_SPACEININTENDEDLANE_WEIGHT);
@@ -1224,6 +1224,8 @@ double Vehicle::CostTravelDistance(Map map, Trajectory trajectory, const double 
 		
 		cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
 		cout << "  cost_steps_to_collision: " << cost_steps_to_collision << endl;
+		cout << "  cost_space_ahead: " << cost_space_ahead << endl;
+		cout << "  cost_space_in_intended_lane: " << cost_space_in_intended_lane << endl;
 		cout << "  cost_speed_in_intended_lane: " << cost_speed_in_intended_lane << endl;
 		cout << "  cost_travel_distance: " << cost_travel_distance << endl;
 		cout << "  cost: " << cost << endl;

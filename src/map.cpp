@@ -324,6 +324,9 @@ double Map::DeltaS(const double &s1, const double &s2) {
 		
 	}
 	
+	// TODO: remove this shortcut
+	return (s1 - s2);
+	
 	// define variables
 	double reference_s1 = 0.0;
 	double reference_s2 = 0.0;
@@ -333,7 +336,7 @@ double Map::DeltaS(const double &s1, const double &s2) {
 	
 	// calculate values relative to reference
 	reference_s1 = this->ReferenceS(s1, s2); // use s2 value as reference => this value is the delta
-	reference_s2 = this->ReferenceS(s2, s2); // use s2 value as reference => this value is 0
+	// reference_s2 = this->ReferenceS(s2, s2); // use s2 value as reference => this value is 0
 	
 	// calculate delta
 	delta_s = reference_s1 - reference_s2;
