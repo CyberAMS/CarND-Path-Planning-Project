@@ -1,3 +1,4 @@
+
 /*
  * Vehicle.cpp
  *
@@ -26,6 +27,7 @@ using std::endl;
 using std::ostringstream;
 using std::fabs;
 using std::min;
+using std::max;
 
 // constructor
 Vehicle::Vehicle() {}
@@ -808,13 +810,8 @@ double Vehicle::CostStepsToCollision(Map map, Trajectory trajectory, vector<Vehi
 	collision_steps = DetectCollision(map, trajectory, vehicles);
 	
 	// calculate cost
-	
-	// aggressive driver
-	cost_exp = exp((NO_HARMFUL_COLLISION_STEPS - collision_steps) / COST_STEPS_TO_COLLISION_SHAPE_FACTOR);
-	cost = cost_exp / (cost_exp + 1);
-	
-	// less aggressive driver
-	// cost = weight * (-(collision_steps - NO_HARMFUL_COLLISION_STEPS) / ((COST_STEPS_TO_COLLISION_SHAPE_FACTOR * collision_steps) + NO_HARMFUL_COLLISION_STEPS));
+	cost_exp = exp(collision_steps / (COST_STEPS_TO_COLLISION_SHAPE_FACTOR * NO_HARMFUL_COLLISION_STEPS));
+	cost = 2 / (cost_exp + 1);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSTEPSTOCOLLISION) {
@@ -898,8 +895,8 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 	desired_distance = this->Get_v() * AHEAD_DISTANCE_TIME;
 	
 	// calculate cost
-	cost_exp = exp((desired_distance - minimum_distance_ahead) / COST_SPACE_AHEAD_SHAPE_FACTOR);
-	cost = cost_exp / (cost_exp + 1);
+	cost_exp = exp(minimum_distance_ahead / (COST_SPACE_AHEAD_SHAPE_FACTOR * desired_distance));
+	cost = 2 / (cost_exp + 1);
 	
 	// display message if required
 	if (bDISPLAY_VEHICLE_COSTSPACEAHEAD) {
@@ -1125,7 +1122,7 @@ double Vehicle::CostSpeedInIntendedLane(Map map, Trajectory trajectory, vector<V
 	}
 	
 	// calculate cost
-	cost = weight * (-(lane_speed - MAX_SPEED) / ((COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR * lane_speed) + MAX_SPEED));
+	cost = weight * max((-(lane_speed - MAX_SPEED) / ((COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR * lane_speed) + MAX_SPEED)), ZERO_COST);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTSPEEDININTENDEDLANE) {
@@ -1176,7 +1173,7 @@ double Vehicle::CostTravelDistance(Map map, Trajectory trajectory, const double 
 	travel_distance = map.DeltaS(trajectory.Get_s()[trajectory.Get_s().size() - 1], this->Get_s());
 	
 	// calculate cost
-	cost = weight * (-(travel_distance - MAX_TRAVEL_DISTANCE) / ((COST_TRAVEL_DISTANCE_SHAPE_FACTOR * travel_distance) + MAX_TRAVEL_DISTANCE));
+	cost = weight * max((-(travel_distance - MAX_TRAVEL_DISTANCE) / ((COST_TRAVEL_DISTANCE_SHAPE_FACTOR * travel_distance) + MAX_TRAVEL_DISTANCE)), ZERO_COST);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_VEHICLE_COSTTRAVELDISTANCE) {

@@ -20,7 +20,7 @@ using std::vector;
 using std::string;
 
 // debug settings
-const bool bFILEOUTPUT = false;
+const bool bFILEOUTPUT = true;
 const string OUTPUT_FILENAME = "out.txt";
 const bool bDISPLAY = true;
 const bool bDISPLAY_DRIVER_PLANBEHAVIOR = true;
@@ -42,8 +42,8 @@ const bool bDISPLAY_VEHICLE_GETLANED = false;
 const bool bDISPLAY_VEHICLE_DETERMINELANE = false;
 const bool bDISPLAY_VEHICLE_CHECKINSIDELANE = false;
 const bool bDISPLAY_VEHICLE_DETECTCOLLISION = false;
-const bool bDISPLAY_VEHICLE_COSTSTEPSTOCOLLISION = true;
-const bool bDISPLAY_VEHICLE_COSTSPACEAHEAD = true;
+const bool bDISPLAY_VEHICLE_COSTSTEPSTOCOLLISION = false;
+const bool bDISPLAY_VEHICLE_COSTSPACEAHEAD = false;
 const bool bDISPLAY_VEHICLE_COSTSPACEININTENDEDLANE = false;
 const bool bDISPLAY_VEHICLE_COSTSPEEDININTENDEDLANE = false;
 const bool bDISPLAY_VEHICLE_COSTTRAVELDISTANCE = false;

@@ -185,14 +185,14 @@ const double STANDARD_VEHICLE_LENGTH = 4.0;
 const double SAFETY_BOX_DISTANCE = 0.5; // must have 0.5 m distance to all vehicles around own vehicle
 
 // cost parameters
-const double DESIRED_LONGITUDINAL_TIME_DISTANCE = 1.0; // keep a distance of 1 s
+const double DESIRED_LONGITUDINAL_TIME_DISTANCE = 2.0; // no collisions within the next 2.0 s
 const double NO_HARMFUL_COLLISION_STEPS = DESIRED_LONGITUDINAL_TIME_DISTANCE / SAMPLE_TIME;
-const double COST_STEPS_TO_COLLISION_SHAPE_FACTOR = 10.0;
-const double AHEAD_DISTANCE_TIME = 1.5; // desired time to vehicle in front 1.5 s
-const double COST_SPACE_AHEAD_SHAPE_FACTOR = 10.0;
-const double AHEAD_SPACE_FACTOR = 2.0;
+const double COST_STEPS_TO_COLLISION_SHAPE_FACTOR = 0.2;
+const double AHEAD_DISTANCE_TIME = 0.5; // desired time to vehicle in front 0.5 s
+const double COST_SPACE_AHEAD_SHAPE_FACTOR = 0.5;
+const double AHEAD_SPACE_FACTOR = 3.0;
 const double BEHIND_SPACE_FACTOR = 4.0;
-const double VEHICLE_AHEAD_WITHIN_DISTANCE = 50.0;
+const double VEHICLE_AHEAD_WITHIN_DISTANCE = 100.0;
 const double COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR = 10.0;
 const double MAX_TRAVEL_DISTANCE = MAX_SPEED * STEP_TIME_INTERVAL;
 const double COST_TRAVEL_DISTANCE_SHAPE_FACTOR = 10.0;
@@ -204,7 +204,7 @@ const double COST_COLLISON_WEIGHT = 10.0;
 const double COST_SPACEAHEAD_WEIGHT = 5.0;
 const double COST_SPACEININTENDEDLANE_WEIGHT = 5.0;
 const double COST_SPEEDININTENDEDLANE_WEIGHT = 1.0;
-const double COST_TRAVELDISTANCE_WEIGHT = 1.0;
+const double COST_TRAVELDISTANCE_WEIGHT = 2.0;
 ```
 
 The `Path` class is only used to store the segment of the vehicle's path that has not yet been executed by the simulator.
@@ -225,8 +225,8 @@ The behavior of this class is controlled with the below mostly self explaining c
 const double SAMPLE_TIME = 0.020; // 20 ms sample time of simulator (50 Hz)
 const double STEP_TIME_INTERVAL = 1.7; // number of seconds from step to step
 const double NEUTRAL_GAIN = 1.0;
-enum TRAJECTORY_VALID_GAIN {NOTHING, SV_V, SV_SA, SV_SA_V, ALL};
-const TRAJECTORY_VALID_GAIN TRAJECTORY_VALID_GAIN_SELECTION = SV_SA_V;
+enum TRAJECTORY_VALID_GAIN {NOTHING, V, V_SA, SV_V, SV_SA, SV_SA_V, ALL};
+const TRAJECTORY_VALID_GAIN TRAJECTORY_VALID_GAIN_SELECTION = V_SA;
 
 // trajectory definitions
 const long NUM_PREVIOUS_PATH_STEPS = 10;
@@ -278,42 +278,42 @@ const unsigned long INITIAL_STEP = 0;
 const behavior_state INITIAL_STATE {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE};
 const vector<transition> TRANSITIONS
 	{{.name = KEEP_LANE,
-	  .next = {{.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
+	  .next = {{.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
-	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
-	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
+	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
 	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
-	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_RIGHT},
-	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_RIGHT}}},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
+	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_RIGHT},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_RIGHT}}},
 	 {.name = PREPARE_LANE_CHANGE_LEFT,
 	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_LEFT},
-	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
 	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
-	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_LEFT},
+	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
-	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE}}},
+	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE}}},
 	 {.name = PREPARE_LANE_CHANGE_RIGHT,
 	  .next = {{.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_RIGHT},
-	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_RIGHT},
 	           {.longitudinal_state = DECELERATE, .lateral_state = PREPARE_LANE_CHANGE_RIGHT},
-	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
-	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
-	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE}}},
-	 {.name = CHANGE_LANE_LEFT,
-	  .next = {{.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
-	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = PREPARE_LANE_CHANGE_RIGHT},
 	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE}}},
+	 {.name = CHANGE_LANE_LEFT,
+	  .next = {{.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_LEFT}}},
 	 {.name = CHANGE_LANE_RIGHT,
-	  .next = {{.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
+	  .next = {{.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
-	           {.longitudinal_state = DECELERATE, .lateral_state = KEEP_LANE},
+	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_RIGHT}}}};
-const long LANE_CHANGE_TRANSITION_TIME = 0.5 * STEP_TIME_INTERVAL / SAMPLE_TIME; // in steps
+const long LANE_CHANGE_TRANSITION_TIME = 0.0 * STEP_TIME_INTERVAL / SAMPLE_TIME; // in steps (deactivated with 0.0)
 const long NO_STEP_INCREASE = 0;
 ```
 
-The sequence of the next possible states above is very important, because sometimes the related trajectories have the same cost. The first states in the above lists will be selected over the later states. For example changing a lane must come before preparing a lane change. Otherwise, if there are no other vehicles blocking a lane change the artificial driver would stay in the prepare lane change state forever and never actually execute the lane change.
+The sequence of the next possible states above is very important, because sometimes the related trajectories have the same cost. The first states in the above lists will be selected over the later states. For example changing a lane must come before preparing a lane change. Otherwise, the artificial driver would stay in the prepare lane change state forever and never actually execute the lane change, because typically preparing for a lane change has the same or less cost than actually executing the lane change.
 
 ## 3. Path planning implementation
 
@@ -414,11 +414,11 @@ vector<double> JerkMinimizingTrajectoryState(vector<double> poly, vector<double>
 
 The absolute core of a path planning algorithm is the tuning of cost functions to ensure expected and safe behavior of the artificial driver. Only 5 cost functions are needed to safely and efficiently drive in the simulator environment.
 
-First we need to always ensure that there is no collision. The `CostStepsToCollision()` method within the `Vehicle` class calculates a cost based on the number of steps before a collision. 50 steps have been identified to be a good value for an average normalized cost of 0.5. Less steps lead to higher cost and more steps lead to lower cost as shown in the first diagram further below.
+First we need to always ensure that there is no collision. The `CostStepsToCollision()` method within the `Vehicle` class calculates a cost based on the number of steps before a collision. The cost starts to increase significantly if there are less than 2 seconds (100 steps) before a collision and is more than half of the maximum cost below 20 steps to a collision. Less steps lead to higher cost and more steps lead to lower cost as shown in the first diagram further below.
 
 ```C
 // determine collision cost
-double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+double Vehicle::CostStepsToCollision(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
 	
 	// define variables
 	unsigned long collision_steps = 0;
@@ -428,18 +428,18 @@ double Vehicle::CostStepsToCollision(Trajectory trajectory, vector<Vehicle> vehi
 	double cost = ZERO_COST;
 	
 	// check for collision and adjust cost
-	collision_steps = DetectCollision(trajectory, vehicles);
+	collision_steps = DetectCollision(map, trajectory, vehicles);
 	
 	// calculate cost
-	cost_exp = exp((NO_HARMFUL_COLLISION_STEPS - collision_steps) / COST_STEPS_TO_COLLISION_SHAPE_FACTOR);
-	cost = cost_exp / (cost_exp + 1);
+	cost_exp = exp(collision_steps / (COST_STEPS_TO_COLLISION_SHAPE_FACTOR * NO_HARMFUL_COLLISION_STEPS));
+	cost = 2 / (cost_exp + 1);
 	
 	return cost;
 	
 }
 ```
 
-Second even if there is no collision possible right now, our vehicle might follow the vehicle in front of us in very close distance with the exact same speed. Therefore, a collision is likely in the future and must be prevented by keeping a larger distance. The `CostSpaceAhead()` method within the `Vehicle` class calculates a cost based on the distance to the vehicle in front of us in the intended lane. The desired distance is calculated as distance travelled in 1.5 seconds at the current speed and set as an average normalized cost of 0.5. Shorter distances lead to higher cost and longer distances lead to lower cost.
+Second even if there is no collision possible right now, our vehicle might follow the vehicle in front of us in very close distance with the exact same speed. Therefore, a collision is likely in the future and must be prevented by keeping a larger distance. The `CostSpaceAhead()` method within the `Vehicle` class calculates a cost based on the distance to the vehicle in front of us in the intended lane. The desired distance is calculated as distance traveled in 0.5 seconds at the current speed. The cost starts to increase significantly if the future distance is less than 30 meters in the case of maximum speed. Shorter distances lead to higher cost and longer distances lead to lower cost as shown in the second diagram further below for the maximum speed.
 
 ```C
 // determine whether there is enough space to the vehicle in front
@@ -449,10 +449,14 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 	vector<Vehicle> vehicles_ahead;
 	unsigned int count = 0;
 	Vehicle current_vehicle;
+	double future_back_of_current_vehicle = 0.0;
+	double future_distance_to_current_vehicle = 0.0;
+	double travel_distance = 0.0;
 	double distance_to_current_vehicle = 0.0;
 	double minimum_distance_ahead = std::numeric_limits<double>::max();
 	Vehicle vehicle_ahead;
 	double desired_distance = 0.0;
+	double cost_exp = 0.0;
 	
 	// initialize outputs
 	double cost = ZERO_COST;
@@ -460,14 +464,33 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 	// get vehicles in front of own vehicle in intended lane
 	vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
 	
-	// determine vehicle and minimum distance directly in front of own vehicle
-	...
+	// determine vehicle directly in front of own vehicle
+	for (count = 0; count < vehicles_ahead.size(); count++) {
+		
+		// get current vehicle
+		current_vehicle = vehicles_ahead[count];
+		
+		// calculate distance from end of trajectory to current vehicle in the future
+		future_back_of_current_vehicle = map.AssignS(current_vehicle.Get_trajectory().Get_s()[current_vehicle.Get_trajectory().Get_s().size() - 1] - current_vehicle.Get_length());
+		future_distance_to_current_vehicle = map.DeltaS(future_back_of_current_vehicle, trajectory.Get_s()[trajectory.Get_s().size() - 1]);
+		
+		// check whether distance is smaller than minimum distance
+		if (future_distance_to_current_vehicle < minimum_distance_ahead) {
+			
+			// remember this distance as minimum distance
+			minimum_distance_ahead = future_distance_to_current_vehicle;
+			vehicle_ahead = current_vehicle;
+			
+		}
+		
+	}
 	
-	// calculate desired distance to vehicle in front of own vehicle in intended lane
+	// calculate desired distance of end of trajectory to vehicle in front of own vehicle in intended lane
 	desired_distance = this->Get_v() * AHEAD_DISTANCE_TIME;
 	
 	// calculate cost
-	cost = weight * (-(minimum_distance_ahead - desired_distance) / ((COST_SPACE_AHEAD_SHAPE_FACTOR * minimum_distance_ahead) + desired_distance));
+	cost_exp = exp(minimum_distance_ahead / (COST_SPACE_AHEAD_SHAPE_FACTOR * desired_distance));
+	cost = 2 / (cost_exp + 1);
 	
 	return cost;
 	
@@ -478,7 +501,7 @@ Third we need ensure that there is always enough space on the left or right side
 
 ```C
 // determine whether there is enough space in the intended lane
-double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+double Vehicle::CostSpaceInIntendedLane(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
 	
 	// define variables
 	vector<Vehicle> vehicles_ahead;
@@ -495,27 +518,32 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 	// initialize outputs
 	double cost = ZERO_COST;
 	
-	// get vehicles in front and behind of own vehicle in intended lane
-	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
-	vehicles_behind = this->Behind(vehicles, trajectory.Get_intended_lane());
-	
-	// determine vehicle and minimum distance directly in front of own vehicle
-	...
-	
-	// determine vehicle and minimum distance directly behind of own vehicle
-	...
-	
-	// determine space needed
-	enough_space = ((minimum_distance_ahead >= (AHEAD_SPACE_FACTOR * vehicle_ahead.Get_length())) && (minimum_distance_behind >= (BEHIND_SPACE_FACTOR * vehicle_behind.Get_length())));
-	
-	// calculate cost
-	if (enough_space) {
+	// check whether there is an intended lane change
+	if (!(trajectory.Get_intended_lane() == this->Get_lane())) {
 		
-		cost = ZERO_COST;
+		// get vehicles in front and behind of own vehicle in intended lane
+		vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
+		vehicles_behind = this->Behind(map, vehicles, trajectory.Get_intended_lane());
 		
-	} else {
+		// determine vehicle directly in front of own vehicle
+		...
 		
-		cost = weight * MAX_NORMALIZED_COST;
+		// determine vehicle directly behind of own vehicle
+		...
+		
+		// determine space needed
+		enough_space = ((minimum_distance_ahead >= (AHEAD_SPACE_FACTOR * vehicle_ahead.Get_length())) && (minimum_distance_behind >= (BEHIND_SPACE_FACTOR * vehicle_behind.Get_length())));
+		
+		// calculate cost
+		if (enough_space) {
+			
+			cost = ZERO_COST;
+			
+		} else {
+			
+			cost = weight * MAX_NORMALIZED_COST;
+			
+		}
 		
 	}
 	
@@ -524,11 +552,11 @@ double Vehicle::CostSpaceInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 }
 ```
 
-Fourth we need to ensure that we always pick the fastest feasible lane to advance as quickly as possible. The `CostSpeedInIntendedLane()` method within the `Vehicle` class calculates a cost based on the speed of the vehicle in the intended lane in front of our own vehicle. The cost is 0 at the maximum allowable speed and increases to 1 during a standstill as shown in the second diagram further below.
+Fourth we need to ensure that we always pick the fastest feasible lane to advance as quickly as possible. The `CostSpeedInIntendedLane()` method within the `Vehicle` class calculates a cost based on the speed of the vehicle in the intended lane in front of our own vehicle. The cost is 0 at the maximum allowable speed and increases to 1 during a standstill as shown in the third diagram further below.
 
 ```C
 // determine cost for speed in intended lane
-double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
+double Vehicle::CostSpeedInIntendedLane(Map map, Trajectory trajectory, vector<Vehicle> vehicles, const double &weight) {
 	
 	// define variables
 	vector<Vehicle> vehicles_ahead;
@@ -543,7 +571,7 @@ double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 	double cost = ZERO_COST;
 	
 	// get vehicles in front of own vehicle in intended lane
-	vehicles_ahead = this->Ahead(vehicles, trajectory.Get_intended_lane());
+	vehicles_ahead = this->Ahead(map, vehicles, trajectory.Get_intended_lane());
 	
 	// determine vehicle directly in front of own vehicle
 	...
@@ -560,18 +588,18 @@ double Vehicle::CostSpeedInIntendedLane(Trajectory trajectory, vector<Vehicle> v
 	}
 	
 	// calculate cost
-	cost = weight * (-(lane_speed - MAX_SPEED) / ((COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR * lane_speed) + MAX_SPEED));
+	cost = weight * max((-(lane_speed - MAX_SPEED) / ((COST_SPEED_IN_INTENDED_LANE_SHAPE_FACTOR * lane_speed) + MAX_SPEED)), ZERO_COST);
 	
 	return cost;
 	
 }
 ```
 
-Fifth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method within the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the third diagram further below.
+Fifth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method within the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the fourth diagram further below.
 
 ```C
 // determine cost for travel distance
-double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) {
+double Vehicle::CostTravelDistance(Map map, Trajectory trajectory, const double &weight) {
 	
 	// define variables
 	double travel_distance = 0.0;
@@ -580,21 +608,25 @@ double Vehicle::CostTravelDistance(Trajectory trajectory, const double &weight) 
 	double cost = ZERO_COST;
 	
 	// calculate travel distance
-	travel_distance = trajectory.Get_s()[trajectory.Get_s().size() - 1] - this->Get_s();
+	travel_distance = map.DeltaS(trajectory.Get_s()[trajectory.Get_s().size() - 1], this->Get_s());
 	
 	// calculate cost
-	cost = weight * (-(travel_distance - MAX_TRAVEL_DISTANCE) / ((COST_TRAVEL_DISTANCE_SHAPE_FACTOR * travel_distance) + MAX_TRAVEL_DISTANCE));
+	cost = weight * max((-(travel_distance - MAX_TRAVEL_DISTANCE) / ((COST_TRAVEL_DISTANCE_SHAPE_FACTOR * travel_distance) + MAX_TRAVEL_DISTANCE)), ZERO_COST);
 	
 	return cost;
 	
 }
 ```
 
-<img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Collision.jpg" width="32%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg" width="32%"> <img src="docu_images/190119_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg" width="32%">
+<img src="docu_images/190127_StAn_Udacity_SDCND_PP_Cost_Function_Collision.jpg" width="48%"> <img src="docu_images/190127_StAn_Udacity_SDCND_PP_Cost_Function_Space_Ahead.jpg" width="48%">
+
+<img src="docu_images/190127_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg" width="48%"> <img src="docu_images/190127_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg" width="48%">
 
 It is important to note that the absolute cost is only relevant to balance the different cost functions amongst themselves. This is what the weights of the normalized cost functions are used for. For example it is much more important to avoid a collision than travelling a longer distance per time interval.
 
-Tuning cost functions also requires to look at the relative cost difference between the individual trajectories when looking at a single cost function. Therefore, areas in the cost function with large changes lead to larger changes between trajectories with different input values to the cost function. For example a less aggressive driver that stays further away from other vehicles would need a `CostStepsToCollision()` method that has larger changes at lower number of steps before a collision (above diagram on the left). The current setting uses high, but also very flat cost at lower number of steps and hence leads to a more aggressive driving behavior.
+Tuning cost functions also requires to look at the relative cost difference between the individual trajectories when looking at a single cost function. Therefore, areas in the cost function with large changes lead to larger changes between trajectories with different input values to the cost function. For example if the cost for a collision flattens with less steps before a collision, selecting a worse cost might make sense if it reduces the total cost due to other cost functions. In case of the collision cost function this must be avoided.
+
+Another problem occurs when a cost function gets to its maximum or minimum in all scenarios. In this case the cost function becomes irrelevant. In case of collision avoidance or distance cost functions this must be avoided.
 
 ### 5. Debugging environment
 
@@ -642,7 +674,7 @@ const bool bDISPLAY_TRAJECTORY_GENERATE = false;
 const bool bDISPLAY_TRAJECTORY_VALID = false;
 const bool bDISPLAY_TRAJECTORY_REMOVEFIRSTSTEPS = false;
 const bool bDISPLAY_TRAJECTORY_KEEPFIRSTSTEPS = false;
-const bool bDISPLAY_STATE_INIT = true;
+const bool bDISPLAY_STATE_INIT = false;
 const bool bDISPLAY_STATE_SETBEHAVIOR = false;
 const bool bDISPLAY_STATE_GETNEXTPOSSIBLEBEHAVIORS = true;
 const bool bDISPLAY_STATE_GENERATETRAJECTORYFROMBEHAVIOR = false;
@@ -677,6 +709,13 @@ Passing other vehicles in traffic are the most exciting situations. The driver a
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="48%">
 
 The debugging output of this run can be found in [./out.txt](./out.txt).
+
+
+
+
+Sometimes Could add lane change timer
+
+
 
 ## 5. Discussion
 

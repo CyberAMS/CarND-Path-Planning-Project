@@ -631,8 +631,14 @@ bool Trajectory::Valid(Map map) {
 			
 		case V:
 			
-			// only use velocity gains
+			// only use xy velocity gain
 			gain = gain_v;
+			break; // switch
+			
+		case V_SA:
+			
+			// only use xy velocity gain and sd acceleration gain
+			gain = min(gain_v, gain_sa);
 			break; // switch
 			
 		case SV_V:
