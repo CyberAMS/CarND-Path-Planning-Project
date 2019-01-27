@@ -36,6 +36,15 @@ void Map::Init(vector<double> map_waypoints_x, vector<double> map_waypoints_y, v
 		
 	}
 	
+	// define variables
+	vector<double> extended_waypoint_x;
+	vector<double> extended_waypoint_y;
+	vector<double> extended_waypoint_dx;
+	vector<double> extended_waypoint_dy;
+	vector<double> extended_waypoint_s;
+	vector<double> extended_waypoint_s_neg;
+	vector<double> extended_waypoint_s_pos;
+	
 	// store waypoint data
 	this->map_waypoints_x = map_waypoints_x;
 	this->map_waypoints_y = map_waypoints_y;
@@ -43,11 +52,30 @@ void Map::Init(vector<double> map_waypoints_x, vector<double> map_waypoints_y, v
 	this->map_waypoints_dx = map_waypoints_dx;
 	this->map_waypoints_dy = map_waypoints_dy;
 	
+	// extend waypoint vectors
+	extended_waypoint_x = map_waypoints_x;
+	extended_waypoint_x.insert(extended_waypoint_x.end(), map_waypoint_x.begin(), map_waypoint_x.end());
+	extended_waypoint_x.insert(extended_waypoint_x.end(), map_waypoint_x.begin(), map_waypoint_x.end());
+	extended_waypoint_y = map_waypoints_y;
+	extended_waypoint_y.insert(extended_waypoint_y.end(), map_waypoint_y.begin(), map_waypoint_y.end());
+	extended_waypoint_y.insert(extended_waypoint_y.end(), map_waypoint_y.begin(), map_waypoint_y.end());
+	extended_waypoint_dx = map_waypoints_dx;
+	extended_waypoint_dx.insert(extended_waypoint_dx.end(), map_waypoint_dx.begin(), map_waypoint_dx.end());
+	extended_waypoint_dx.insert(extended_waypoint_dx.end(), map_waypoint_dx.begin(), map_waypoint_dx.end());
+	extended_waypoint_dy = map_waypoints_dy;
+	extended_waypoint_dy.insert(extended_waypoint_dy.end(), map_waypoint_dy.begin(), map_waypoint_dy.end());
+	extended_waypoint_dy.insert(extended_waypoint_dy.end(), map_waypoint_dy.begin(), map_waypoint_dy.end());
+	extended_waypoint_s_neg = Addition(map_waypoints_s, -MAX_TRACK_S);
+	extended_waypoint_s_pos = Addition(map_waypoints_s, +MAX_TRACK_S);
+	extended_waypoint_s = extended_waypoint_s_neg;
+	extended_waypoint_s.insert(extended_waypoint_s.end(), map_waypoint_s.begin(), map_waypoint_s.end());
+	extended_waypoint_s.insert(extended_waypoint_s.end(), extended_waypoint_s_pos.begin(), extended_waypoint_s_pos.end());
+	
 	// create waypoint splines
-	this->spline_x_s.set_points(this->map_waypoints_s, this->map_waypoints_x);
-	this->spline_y_s.set_points(this->map_waypoints_s, this->map_waypoints_y);
-	this->spline_dx_s.set_points(this->map_waypoints_s, this->map_waypoints_dx);
-	this->spline_dy_s.set_points(this->map_waypoints_s, this->map_waypoints_dy);
+	this->spline_x_s.set_points(extended_waypoint_s, extended_waypoint_x);
+	this->spline_y_s.set_points(extended_waypoint_s, extended_waypoint_y);
+	this->spline_dx_s.set_points(extended_waypoint_s, extended_waypoint_dx);
+	this->spline_dy_s.set_points(extended_waypoint_s, extended_waypoint_dy);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_MAP_INIT) {
