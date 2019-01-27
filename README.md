@@ -204,7 +204,7 @@ const double COST_COLLISON_WEIGHT = 10.0;
 const double COST_SPACEAHEAD_WEIGHT = 5.0;
 const double COST_SPACEININTENDEDLANE_WEIGHT = 5.0;
 const double COST_SPEEDININTENDEDLANE_WEIGHT = 1.0;
-const double COST_TRAVELDISTANCE_WEIGHT = 2.0;
+const double COST_TRAVELDISTANCE_WEIGHT = 1.0;
 ```
 
 The `Path` class is only used to store the segment of the vehicle's path that has not yet been executed by the simulator.
@@ -309,7 +309,7 @@ const vector<transition> TRANSITIONS
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = KEEP_LANE},
 	           {.longitudinal_state = ACCELERATE, .lateral_state = KEEP_LANE},
 	           {.longitudinal_state = KEEP_SPEED, .lateral_state = CHANGE_LANE_RIGHT}}}};
-const long LANE_CHANGE_TRANSITION_TIME = 0.0 * STEP_TIME_INTERVAL / SAMPLE_TIME; // in steps (deactivated with 0.0)
+const long LANE_CHANGE_TRANSITION_TIME = 0.25 * STEP_TIME_INTERVAL / SAMPLE_TIME; // in steps
 const long NO_STEP_INCREASE = 0;
 ```
 
@@ -595,7 +595,7 @@ double Vehicle::CostSpeedInIntendedLane(Map map, Trajectory trajectory, vector<V
 }
 ```
 
-Fifth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method within the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the fourth diagram further below.
+Fifth we must not forget that while driving safe is key we also need to advance. The `CostTravelDistance()` method within the `Vehicle` class calculates a cost based on how far the trajectory reaches. The cost is 0 at the distance that you can achieve driving at the maximum allowable speed limit in the given time interval and increases to 1 during a standstill with no travel as shown in the fourth diagram further below. Lane changes are penalized by this cost function, because one doesn't advance as much in longitudinal direction when making a lane change.
 
 ```C
 // determine cost for travel distance
@@ -700,15 +700,17 @@ The program is compiled using the `.\build.sh` command. After this it can be sta
 
 The vehicle starts very smooth from standstill without violating any of the jerk and acceleration criteria. It also stays below the speed limit at all times. During straight driving the trajectory follows the center of the lane.
 
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_start_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_straight_01_small.gif" width="48%">
+<img src="docu_images/190127_StAn_Udacity_SDC_PP_start_small.gif" width="48%"> <img src="docu_images/190127_StAn_Udacity_SDC_PP_straight_small.gif" width="48%">
 
-Passing other vehicles in traffic are the most exciting situations. The driver always picks the fastest lane and waits for gaps between vehicles to change lanes and advance.
+Passing other vehicles in traffic are the most exciting situations. The artificial driver always picks the fastest lane and waits for gaps between vehicles to change lanes and advance. Sometimes the artificial driver gets really close before making a lane change. This happens when the vehicle in front is going close to the maximum speed and neither a lane change nor slowing down are favorable.
 
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_01_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_02_small.gif" width="48%">
+<img src="docu_images/190127_StAn_Udacity_SDC_PP_passing_small.gif" width="48%"> <img src="docu_images/190127_StAn_Udacity_SDC_PP_passing_close_small.gif" width="48%">
 
 The vehicle can drive loop after loop, because the longitudinal Frenet coordinate has been implemented to wrap around after each lap.
 
-The debugging output of this run can be found in [./out.txt](./out.txt).
+<img src="docu_images/190127_StAn_Udacity_SDC_PP_full_loop_small_quick.gif" width="48%"> <img src="docu_images/190127_StAn_Udacity_SDC_PP_full_loop_top_small_quick.gif" width="48%">
+
+The debugging output of a full run can be found in [./out.txt](./out.txt).
 
 ## 5. Discussion
 
@@ -722,6 +724,6 @@ When the track widens in sharper corners, the simulator sometimes issues an "Out
 
 <img src="docu_images/190127_StAn_Udacity_SDC_PP_lane_warning.gif" width="48%">
 
-The parameters are set for a careful driver that eagerly looks for the fastest possible way to advance. Deciding to make a lane change can quickly turn out to be the wrong decision. The parameters are set to always look for the best option and revise decisions immediately if they turn out to be wrong. Quickly changing between lanes could be avoided by either adding a timer that only allows two lane changes within a given time interval or forcing the lane change to happen by setting the parameter `LANE_CHANGE_TRANSITION_TIME` above greater than 0. Unfortunately, this can also lead to some dangerous situations.
+The parameters are set for a careful driver that eagerly looks for the fastest possible way to advance. Deciding to make a lane change can quickly turn out to be the wrong decision. The parameters are set to always look for the best option and revise decisions quickly if they turn out to be wrong. Quickly changing between lanes too often could be avoided by either additing an additional cost function that penalizes making lane changes, adding a timer that only allows two lane changes within a given time interval or forcing the lane change to happen by setting the parameter `LANE_CHANGE_TRANSITION_TIME` to values greater than the equivalent of 0.25 seconds. Unfortunately, all of them can also lead to dangerous situations in case a lane change actually is the best option.
 
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="48%">
+<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_undecided_01_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_undecided_02_small.gif" width="48%">
