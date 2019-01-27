@@ -630,6 +630,12 @@ bool Trajectory::Valid(Map map) {
 			gain = NEUTRAL_GAIN;
 			break; // switch
 			
+		case V:
+			
+			// only use velocity gains
+			gain = gain_v;
+			break; // switch
+			
 		case SV_V:
 			
 			// only use velocity gains
@@ -657,8 +663,7 @@ bool Trajectory::Valid(Map map) {
 	}
 	
 	// apply gain if necessary
-	//if (gain < NEUTRAL_GAIN) {
-		if (0 == 1) { // TODO deactivated gain
+	if (gain < NEUTRAL_GAIN) {
 		
 		// determine length of previous trajectory segment
 		previous_trajectory_steps = this->Get_previous_trajectory_steps();

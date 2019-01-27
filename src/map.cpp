@@ -37,13 +37,13 @@ void Map::Init(vector<double> map_waypoints_x, vector<double> map_waypoints_y, v
 	}
 	
 	// define variables
-	vector<double> extended_waypoint_x;
-	vector<double> extended_waypoint_y;
-	vector<double> extended_waypoint_dx;
-	vector<double> extended_waypoint_dy;
-	vector<double> extended_waypoint_s;
-	vector<double> extended_waypoint_s_neg;
-	vector<double> extended_waypoint_s_pos;
+	vector<double> extended_waypoints_x;
+	vector<double> extended_waypoints_y;
+	vector<double> extended_waypoints_dx;
+	vector<double> extended_waypoints_dy;
+	vector<double> extended_waypoints_s;
+	vector<double> extended_waypoints_s_neg;
+	vector<double> extended_waypoints_s_pos;
 	
 	// store waypoint data
 	this->map_waypoints_x = map_waypoints_x;
@@ -53,29 +53,29 @@ void Map::Init(vector<double> map_waypoints_x, vector<double> map_waypoints_y, v
 	this->map_waypoints_dy = map_waypoints_dy;
 	
 	// extend waypoint vectors
-	extended_waypoint_x = map_waypoints_x;
-	extended_waypoint_x.insert(extended_waypoint_x.end(), map_waypoint_x.begin(), map_waypoint_x.end());
-	extended_waypoint_x.insert(extended_waypoint_x.end(), map_waypoint_x.begin(), map_waypoint_x.end());
-	extended_waypoint_y = map_waypoints_y;
-	extended_waypoint_y.insert(extended_waypoint_y.end(), map_waypoint_y.begin(), map_waypoint_y.end());
-	extended_waypoint_y.insert(extended_waypoint_y.end(), map_waypoint_y.begin(), map_waypoint_y.end());
-	extended_waypoint_dx = map_waypoints_dx;
-	extended_waypoint_dx.insert(extended_waypoint_dx.end(), map_waypoint_dx.begin(), map_waypoint_dx.end());
-	extended_waypoint_dx.insert(extended_waypoint_dx.end(), map_waypoint_dx.begin(), map_waypoint_dx.end());
-	extended_waypoint_dy = map_waypoints_dy;
-	extended_waypoint_dy.insert(extended_waypoint_dy.end(), map_waypoint_dy.begin(), map_waypoint_dy.end());
-	extended_waypoint_dy.insert(extended_waypoint_dy.end(), map_waypoint_dy.begin(), map_waypoint_dy.end());
-	extended_waypoint_s_neg = Addition(map_waypoints_s, -MAX_TRACK_S);
-	extended_waypoint_s_pos = Addition(map_waypoints_s, +MAX_TRACK_S);
-	extended_waypoint_s = extended_waypoint_s_neg;
-	extended_waypoint_s.insert(extended_waypoint_s.end(), map_waypoint_s.begin(), map_waypoint_s.end());
-	extended_waypoint_s.insert(extended_waypoint_s.end(), extended_waypoint_s_pos.begin(), extended_waypoint_s_pos.end());
+	extended_waypoints_x = map_waypoints_x;
+	extended_waypoints_x.insert(extended_waypoints_x.end(), map_waypoints_x.begin(), map_waypoints_x.end());
+	extended_waypoints_x.insert(extended_waypoints_x.end(), map_waypoints_x.begin(), map_waypoints_x.end());
+	extended_waypoints_y = map_waypoints_y;
+	extended_waypoints_y.insert(extended_waypoints_y.end(), map_waypoints_y.begin(), map_waypoints_y.end());
+	extended_waypoints_y.insert(extended_waypoints_y.end(), map_waypoints_y.begin(), map_waypoints_y.end());
+	extended_waypoints_dx = map_waypoints_dx;
+	extended_waypoints_dx.insert(extended_waypoints_dx.end(), map_waypoints_dx.begin(), map_waypoints_dx.end());
+	extended_waypoints_dx.insert(extended_waypoints_dx.end(), map_waypoints_dx.begin(), map_waypoints_dx.end());
+	extended_waypoints_dy = map_waypoints_dy;
+	extended_waypoints_dy.insert(extended_waypoints_dy.end(), map_waypoints_dy.begin(), map_waypoints_dy.end());
+	extended_waypoints_dy.insert(extended_waypoints_dy.end(), map_waypoints_dy.begin(), map_waypoints_dy.end());
+	extended_waypoints_s_neg = Addition(map_waypoints_s, -MAX_TRACK_S);
+	extended_waypoints_s_pos = Addition(map_waypoints_s, +MAX_TRACK_S);
+	extended_waypoints_s = extended_waypoints_s_neg;
+	extended_waypoints_s.insert(extended_waypoints_s.end(), map_waypoints_s.begin(), map_waypoints_s.end());
+	extended_waypoints_s.insert(extended_waypoints_s.end(), extended_waypoints_s_pos.begin(), extended_waypoints_s_pos.end());
 	
 	// create waypoint splines
-	this->spline_x_s.set_points(extended_waypoint_s, extended_waypoint_x);
-	this->spline_y_s.set_points(extended_waypoint_s, extended_waypoint_y);
-	this->spline_dx_s.set_points(extended_waypoint_s, extended_waypoint_dx);
-	this->spline_dy_s.set_points(extended_waypoint_s, extended_waypoint_dy);
+	this->spline_x_s.set_points(extended_waypoints_s, extended_waypoints_x);
+	this->spline_y_s.set_points(extended_waypoints_s, extended_waypoints_y);
+	this->spline_dx_s.set_points(extended_waypoints_s, extended_waypoints_dx);
+	this->spline_dy_s.set_points(extended_waypoints_s, extended_waypoints_dy);
 	
 	// display message if required
 	if (bDISPLAY && bDISPLAY_MAP_INIT) {
@@ -122,8 +122,11 @@ vector<double> Map::Xy2Frenet(const double &x, const double &y, const double &th
 	double s = 0;
 	
 	// get next waypoint
+	cout << "DEBUG: XY1" << endl;
 	next_wps = this->NextWaypoint(x, y, theta);
+	cout << "DEBUG: XY2" << endl;
 	next_wp = next_wps[0];
+	cout << "DEBUG: XY3" << endl;
 	
 	// get previous waypoint
 	if (next_wp == 0) {
@@ -137,7 +140,9 @@ vector<double> Map::Xy2Frenet(const double &x, const double &y, const double &th
 	}
 	
 	// calculate normal s direction and vector to xy
+	cout << "DEBUG: XY4" << endl;
 	normal_x = this->map_waypoints_x[next_wp] - this->map_waypoints_x[prev_wp];
+	cout << "DEBUG: XY5" << endl;
 	normal_y = this->map_waypoints_y[next_wp] - this->map_waypoints_y[prev_wp];
 	vector_x = x - this->map_waypoints_x[prev_wp];
 	vector_y = y - this->map_waypoints_y[prev_wp];
@@ -451,6 +456,8 @@ vector<unsigned int> Map::ClosestWaypoint(const double &x, const double &y) {
 	unsigned int count = 0;
 	double dist = 0;
 	vector<double> distances;
+	
+	// initialize outputs
 	vector<unsigned int> closest_waypoints;
 	
 	// calculate distances to all waypoints
@@ -497,9 +504,11 @@ vector <unsigned int> Map::NextWaypoint(const double &x, const double &y, const 
 	vector<unsigned int> closest_waypoints;
 	unsigned int count = 0;
 	unsigned int current_waypoint = 0;
-	vector<unsigned int> next_waypoints;
 	double heading = 0;
 	double angle = 0;
+	
+	// initialize outputs
+	vector<unsigned int> next_waypoints;
 	
 	// get closest waypoints
 	closest_waypoints = this->ClosestWaypoint(x, y);
@@ -519,6 +528,14 @@ vector <unsigned int> Map::NextWaypoint(const double &x, const double &y, const 
 			next_waypoints.push_back(current_waypoint);
 			
 		}
+		
+	}
+	
+	// no valid waypoint found
+	if (next_waypoints.size() <= 0) {
+		
+		// take closest waypoint
+		next_waypoints.push_back(closest_waypoints[0]);
 		
 	}
 	

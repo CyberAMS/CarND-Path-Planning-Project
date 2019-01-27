@@ -20,7 +20,7 @@ using std::vector;
 using std::string;
 
 // debug settings
-const bool bFILEOUTPUT = true;
+const bool bFILEOUTPUT = false;
 const string OUTPUT_FILENAME = "out.txt";
 const bool bDISPLAY = true;
 const bool bDISPLAY_DRIVER_PLANBEHAVIOR = true;
