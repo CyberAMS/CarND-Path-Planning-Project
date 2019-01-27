@@ -188,7 +188,7 @@ int main() {
 					if (bDISPLAY) {
 						
 						cout << ": : : : : : : : : : : : : : : : : : : : : : : : : : : : : :" << endl;
-						cout << "  msg: " << endl << msg << endl;
+						// cout << "  msg: " << endl << msg << endl;
 						cout << "--- MAIN: onMessage - End" << endl;
 						cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
 						

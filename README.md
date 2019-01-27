@@ -96,7 +96,7 @@ The map information is loaded from the file `highway_map.csv`. It is a list of w
 | 4      | x component of lateral unit normal vector (dx) |
 | 5      | y component of lateral unit normal vector (dy) |
 
-The `Map` class is used to store the map and execute all conversions from cartesian xy coordinates to Frenet sd coordinates (longitudinal and lateral distances) and back. It also manages that the track is a loop and longitudinal Frenet s coordinates must be treated accordingly. Therefore, every assignment of an s coordinate must be done using the `AssignS()` method and every difference in s coordinates must be calculated using the `DeltaS()` method. Comparing two s coordinates also uses the `DeltaS()` method by checking whether the difference is smaller, equal or larger than 0. The following list contains the most important methods of this class:
+The `Map` class is used to store the map and execute all conversions from cartesian xy coordinates to Frenet sd coordinates (longitudinal and lateral distances) and back. It also manages that the track is a loop and longitudinal Frenet s coordinates must be treated accordingly. Therefore, every assignment of an s coordinate must be done using the `AssignS()` method (e.g. adding or subtracting a distance - not coordinate - from an s coordinate) and every difference in s coordinates must be calculated using the `DeltaS()` method. Comparing two s coordinates also uses the `DeltaS()` method by checking whether the difference is smaller, equal or larger than 0. The following list contains the most important methods of this class:
 
 | Method | Description |
 |-|-|

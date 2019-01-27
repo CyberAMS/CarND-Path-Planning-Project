@@ -683,11 +683,11 @@ unsigned long Vehicle::DetectCollision(Map map, Trajectory trajectory, vector<Ve
 	for (count_t = 0; count_t < (unsigned long)min(trajectory.Get_s().size(), vehicles[0].Get_trajectory().Get_s().size()); count_t++) {
 		
 		// get corners of safety box around own vehicle following trajectory
-		ego_front_left_s = trajectory.Get_s()[count_t] + SAFETY_BOX_DISTANCE;
+		ego_front_left_s = map.AssignS(trajectory.Get_s()[count_t] + SAFETY_BOX_DISTANCE);
 		ego_front_left_d = trajectory.Get_d()[count_t] - (this->Get_width() / 2) - SAFETY_BOX_DISTANCE;
 		ego_front_right_s = ego_front_left_s;
 		ego_front_right_d = trajectory.Get_d()[count_t] + (this->Get_width() / 2) + SAFETY_BOX_DISTANCE;
-		ego_rear_right_s = trajectory.Get_s()[count_t] - this->Get_length() - SAFETY_BOX_DISTANCE;
+		ego_rear_right_s = map.AssignS(trajectory.Get_s()[count_t] - this->Get_length() - SAFETY_BOX_DISTANCE);
 		ego_rear_right_d = ego_front_right_d;
 		ego_rear_left_s = ego_rear_right_s;
 		ego_rear_left_d = ego_front_left_d;
@@ -700,7 +700,7 @@ unsigned long Vehicle::DetectCollision(Map map, Trajectory trajectory, vector<Ve
 			vehicle_front_left_d = vehicles[count_v].Get_trajectory().Get_d()[count_t] - (vehicles[count_v].Get_width() / 2);
 			vehicle_front_right_s = vehicle_front_left_s;
 			vehicle_front_right_d = vehicles[count_v].Get_trajectory().Get_d()[count_t] + (vehicles[count_v].Get_width() / 2);
-			vehicle_rear_right_s = vehicles[count_v].Get_trajectory().Get_s()[count_t] - vehicles[count_v].Get_length();
+			vehicle_rear_right_s = map.AssignS(vehicles[count_v].Get_trajectory().Get_s()[count_t] - vehicles[count_v].Get_length());
 			vehicle_rear_right_d = vehicle_front_right_d;
 			vehicle_rear_left_s = vehicle_rear_right_s;
 			vehicle_rear_left_d = vehicle_front_left_d;
@@ -858,8 +858,8 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 	vector<Vehicle> vehicles_ahead;
 	unsigned int count = 0;
 	Vehicle current_vehicle;
-	double current_back_of_vehicle = 0.0;
-	double trajectory_distance_to_current_vehicle = 0.0;
+	double future_back_of_current_vehicle = 0.0;
+	double future_distance_to_current_vehicle = 0.0;
 	double travel_distance = 0.0;
 	double distance_to_current_vehicle = 0.0;
 	double minimum_distance_ahead = std::numeric_limits<double>::max();
@@ -879,21 +879,15 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 		// get current vehicle
 		current_vehicle = vehicles_ahead[count];
 		
-		// calculate distance from end of trajectory to current vehicle
-		current_back_of_vehicle = map.DeltaS(current_vehicle.Get_s(), current_vehicle.Get_length());
-		cout << "DEBUG current_back_of_vehicle, trajectory s_end: " << current_back_of_vehicle << " " << trajectory.Get_s()[trajectory.Get_s().size() - 1] << endl; // TODO remove
-		trajectory_distance_to_current_vehicle = map.DeltaS(current_back_of_vehicle, trajectory.Get_s()[trajectory.Get_s().size() - 1]);
-		
-		// project future distance on current vehicle position
-		travel_distance = this->Get_v() * STEP_TIME_INTERVAL;
-		//travel_distance = MAX_SPEED * STEP_TIME_INTERVAL; // TODO: check whether this worked (otherwise problem with validating trajectory)
-		distance_to_current_vehicle = trajectory_distance_to_current_vehicle + travel_distance;
+		// calculate distance from end of trajectory to current vehicle in the future
+		future_back_of_current_vehicle = map.AssignS(current_vehicle.Get_trajectory().Get_s()[current_vehicle.Get_trajectory().Get_s().size() - 1] - current_vehicle.Get_length());
+		future_distance_to_current_vehicle = map.DeltaS(future_back_of_current_vehicle, trajectory.Get_s()[trajectory.Get_s().size() - 1]);
 		
 		// check whether distance is smaller than minimum distance
-		if (distance_to_current_vehicle < minimum_distance_ahead) {
+		if (future_distance_to_current_vehicle < minimum_distance_ahead) {
 			
 			// remember this distance as minimum distance
-			minimum_distance_ahead = distance_to_current_vehicle;
+			minimum_distance_ahead = future_distance_to_current_vehicle;
 			vehicle_ahead = current_vehicle;
 			
 		}

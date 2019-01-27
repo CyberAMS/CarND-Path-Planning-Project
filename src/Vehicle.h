@@ -33,7 +33,7 @@ const double STANDARD_VEHICLE_LENGTH = 4.0;
 const double SAFETY_BOX_DISTANCE = 0.5; // must have 0.5 m distance to all vehicles around own vehicle
 
 // cost parameters
-const double DESIRED_LONGITUDINAL_TIME_DISTANCE = 1.0; // keep a distance of 1 s
+const double DESIRED_LONGITUDINAL_TIME_DISTANCE = 0.2; // keep a distance of 0.2 s
 const double NO_HARMFUL_COLLISION_STEPS = DESIRED_LONGITUDINAL_TIME_DISTANCE / SAMPLE_TIME;
 const double COST_STEPS_TO_COLLISION_SHAPE_FACTOR = 10.0;
 const double AHEAD_DISTANCE_TIME = 0.5; // desired time to vehicle in front 0.5 s
@@ -48,9 +48,9 @@ const double COST_TRAVEL_DISTANCE_SHAPE_FACTOR = 10.0;
 // cost weights
 const double ZERO_COST = 0.0;
 const double MAX_NORMALIZED_COST = 1.0;
-const double COST_COLLISON_WEIGHT = 10.0;
-const double COST_SPACEAHEAD_WEIGHT = 5.0;
-const double COST_SPACEININTENDEDLANE_WEIGHT = 5.0;
+const double COST_COLLISON_WEIGHT = 3.0;
+const double COST_SPACEAHEAD_WEIGHT = 2.0;
+const double COST_SPACEININTENDEDLANE_WEIGHT = 2.0;
 const double COST_SPEEDININTENDEDLANE_WEIGHT = 1.0;
 const double COST_TRAVELDISTANCE_WEIGHT = 1.0;
 
