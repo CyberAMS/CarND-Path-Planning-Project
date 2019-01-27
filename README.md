@@ -720,6 +720,8 @@ The originally provided [Frenet](https://en.wikipedia.org/wiki/Frenet%E2%80%93Se
 
 When the track widens in sharper corners, the simulator sometimes issues an "Outside of lane!" warning when being in the most outer lane. It actually doesn't look like the vehicle left the lane. My assumption is that the detection of the vehicle position inside the simulator is also based on the poor Frenet conversion and therefore issues the warning by mistake.
 
+<img src="docu_images/190127_StAn_Udacity_SDC_PP_lane_warning.gif" width="48%">
+
 The parameters are set for a careful driver that eagerly looks for the fastest possible way to advance. Deciding to make a lane change can quickly turn out to be the wrong decision. The parameters are set to always look for the best option and revise decisions immediately if they turn out to be wrong. Quickly changing between lanes could be avoided by either adding a timer that only allows two lane changes within a given time interval or forcing the lane change to happen by setting the parameter `LANE_CHANGE_TRANSITION_TIME` above greater than 0. Unfortunately, this can also lead to some dangerous situations.
 
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="48%">
