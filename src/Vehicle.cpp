@@ -82,12 +82,19 @@ void Vehicle::Update(Map map, unsigned int id, double x, double y, double vx, do
 	this->v = Magnitude(vx, vy);
 	
 	// determine Frenet positions and velocities
+	cout << "DEBUG: VU1" << endl;
 	theta_start = this->Get_theta();
+	cout << "DEBUG: VU2" << endl;
 	svdv_start = map.Xy2Frenet(this->Get_x(), this->Get_y(), theta_start);
+	cout << "DEBUG: VU3" << endl;
 	s_start = svdv_start[0];
+	cout << "DEBUG: VU4" << endl;
 	d_start = svdv_start[1];
+	cout << "DEBUG: VU5" << endl;
 	svdv_end = map.Xy2Frenet((this->Get_x() + this->Get_vx()), (this->Get_y() + this->Get_vy()), theta_start);
+	cout << "DEBUG: VU6" << endl;
 	sv_start = svdv_end[0] - s_start;
+	cout << "DEBUG: VU7" << endl;
 	dv_start = svdv_end[1] - d_start;
 	
 	// predict future trajectory
@@ -881,6 +888,7 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 		
 		// calculate distance from end of trajectory to current vehicle
 		current_back_of_vehicle = map.DeltaS(current_vehicle.Get_s(), current_vehicle.Get_length());
+		cout << "DEBUG trajectory s_end: " << trajectory.Get_s()[trajectory.Get_s().size() - 1]; // TODO remove
 		trajectory_distance_to_current_vehicle = map.DeltaS(current_back_of_vehicle, trajectory.Get_s()[trajectory.Get_s().size() - 1]);
 		
 		// project future distance on current vehicle position
