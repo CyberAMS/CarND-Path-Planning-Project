@@ -547,7 +547,6 @@ bool Trajectory::Valid(Map map) {
 	
 	// initialize outputs
 	bool is_valid = true;
-	//return is_valid; // TODO: eliminated validation
 	
 	// calculate distance, speed, acceleration and jerk values based on s and d values
 	max_sv = Maximum(this->Get_sv());
@@ -572,7 +571,7 @@ bool Trajectory::Valid(Map map) {
 	average_dj = AbsAverage(this->Get_dj());
 	
 	// calculate speed, acceleration and jerk values based on xy values
-	// TODO: Sometimes the v and a values don't make sense and jump
+	// Needs improvement: Sometimes the v and a values don't make sense and jump
 	v_values = Multiply(Magnitude(Differential(this->Get_x()), Differential(this->Get_y())), (1 / SAMPLE_TIME));
 	v_values.erase(v_values.begin(), v_values.begin() + 1); // make sure to not use first values that came from Differential and are ZERO_DIFFERENTIAL_VALUE
 	max_v = Maximum(v_values);

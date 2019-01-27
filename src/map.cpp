@@ -122,11 +122,8 @@ vector<double> Map::Xy2Frenet(const double &x, const double &y, const double &th
 	double s = 0;
 	
 	// get next waypoint
-	cout << "DEBUG: XY1" << endl;
 	next_wps = this->NextWaypoint(x, y, theta);
-	cout << "DEBUG: XY2" << endl;
 	next_wp = next_wps[0];
-	cout << "DEBUG: XY3" << endl;
 	
 	// get previous waypoint
 	if (next_wp == 0) {
@@ -140,9 +137,7 @@ vector<double> Map::Xy2Frenet(const double &x, const double &y, const double &th
 	}
 	
 	// calculate normal s direction and vector to xy
-	cout << "DEBUG: XY4" << endl;
 	normal_x = this->map_waypoints_x[next_wp] - this->map_waypoints_x[prev_wp];
-	cout << "DEBUG: XY5" << endl;
 	normal_y = this->map_waypoints_y[next_wp] - this->map_waypoints_y[prev_wp];
 	vector_x = x - this->map_waypoints_x[prev_wp];
 	vector_y = y - this->map_waypoints_y[prev_wp];
@@ -354,9 +349,6 @@ double Map::DeltaS(const double &s1, const double &s2) {
 		cout << "  s2: " << s2 << endl;
 		
 	}
-	
-	// TODO: remove this shortcut
-	//return (s1 - s2);
 	
 	// define variables
 	double reference_s1 = 0.0;

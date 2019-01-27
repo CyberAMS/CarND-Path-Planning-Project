@@ -82,19 +82,12 @@ void Vehicle::Update(Map map, unsigned int id, double x, double y, double vx, do
 	this->v = Magnitude(vx, vy);
 	
 	// determine Frenet positions and velocities
-	cout << "DEBUG: VU1" << endl;
 	theta_start = this->Get_theta();
-	cout << "DEBUG: VU2" << endl;
 	svdv_start = map.Xy2Frenet(this->Get_x(), this->Get_y(), theta_start);
-	cout << "DEBUG: VU3" << endl;
 	s_start = svdv_start[0];
-	cout << "DEBUG: VU4" << endl;
 	d_start = svdv_start[1];
-	cout << "DEBUG: VU5" << endl;
 	svdv_end = map.Xy2Frenet((this->Get_x() + this->Get_vx()), (this->Get_y() + this->Get_vy()), theta_start);
-	cout << "DEBUG: VU6" << endl;
 	sv_start = svdv_end[0] - s_start;
-	cout << "DEBUG: VU7" << endl;
 	dv_start = svdv_end[1] - d_start;
 	
 	// predict future trajectory
