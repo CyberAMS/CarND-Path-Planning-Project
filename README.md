@@ -622,7 +622,7 @@ double Vehicle::CostTravelDistance(Map map, Trajectory trajectory, const double 
 
 <img src="docu_images/190127_StAn_Udacity_SDCND_PP_Cost_Function_Speed.jpg" width="48%"> <img src="docu_images/190127_StAn_Udacity_SDCND_PP_Cost_Function_Travel.jpg" width="48%">
 
-It is important to note that the absolute cost is only relevant to balance the different cost functions amongst themselves. This is what the weights of the normalized cost functions are used for. For example it is much more important to avoid a collision than travelling a longer distance per time interval.
+It is important to note that the absolute cost is only relevant to balance the different cost functions amongst themselves. This is what the weights of the normalized cost functions are used for. For example it is much more important to avoid a collision than traveling a longer distance per time interval.
 
 Tuning cost functions also requires to look at the relative cost difference between the individual trajectories when looking at a single cost function. Therefore, areas in the cost function with large changes lead to larger changes between trajectories with different input values to the cost function. For example if the cost for a collision flattens with less steps before a collision, selecting a worse cost might make sense if it reduces the total cost due to other cost functions. In case of the collision cost function this must be avoided.
 
@@ -720,6 +720,6 @@ The originally provided [Frenet](https://en.wikipedia.org/wiki/Frenet%E2%80%93Se
 
 When the track widens in sharper corners, the simulator sometimes issues an "Outside of lane!" warning when being in the most outer lane. It actually doesn't look like the vehicle left the lane. My assumption is that the detection of the vehicle position inside the simulator is also based on the poor Frenet conversion and therefore issues the warning by mistake.
 
-The parameters are set for a careful driver that eagerly looks for the fastest possible way to advance. Deciding to make a lane change can quickly turn out to be the wrong decision. The parameters are set to always look for the best option and revise decisions immediately if they turn out to be wrong. Quickly changing between lanes could be avoided by either adding a timer that only allows two lane changes within a given time interval or forcing the lane change to happen which could be dangerous.
+The parameters are set for a careful driver that eagerly looks for the fastest possible way to advance. Deciding to make a lane change can quickly turn out to be the wrong decision. The parameters are set to always look for the best option and revise decisions immediately if they turn out to be wrong. Quickly changing between lanes could be avoided by either adding a timer that only allows two lane changes within a given time interval or forcing the lane change to happen by setting the parameter `LANE_CHANGE_TRANSITION_TIME` above greater than 0. Unfortunately, this can also lead to some dangerous situations.
 
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="48%">
