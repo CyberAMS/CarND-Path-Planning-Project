@@ -702,20 +702,13 @@ The vehicle starts very smooth from standstill without violating any of the jerk
 
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_start_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_straight_01_small.gif" width="48%">
 
-Passing other vehicles in traffic are the most exciting situations. The driver always picks the fastest lane and uses gaps between vehicles to change lanes and advance.
+Passing other vehicles in traffic are the most exciting situations. The driver always picks the fastest lane and waits for gaps between vehicles to change lanes and advance.
 
 <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_01_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_02_small.gif" width="48%">
 
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="48%">
+The vehicle can drive loop after loop, because the longitudinal Frenet coordinate has been implemented to wrap around after each lap.
 
 The debugging output of this run can be found in [./out.txt](./out.txt).
-
-
-
-
-Sometimes Could add lane change timer
-
-
 
 ## 5. Discussion
 
@@ -727,10 +720,6 @@ The originally provided [Frenet](https://en.wikipedia.org/wiki/Frenet%E2%80%93Se
 
 When the track widens in sharper corners, the simulator sometimes issues an "Outside of lane!" warning when being in the most outer lane. It actually doesn't look like the vehicle left the lane. My assumption is that the detection of the vehicle position inside the simulator is also based on the poor Frenet conversion and therefore issues the warning by mistake.
 
-The parameters are set for a very aggressive driver that looks for small gaps between vehicles to advance as fast as possible. Sometimes the driver gets very close to the vehicle in front before being able to start a lane change to pass it. After starting the lane change, the own vehicle can be faster than the vehicle in front. In this case the cost for collision spikes and the driver immediately makes another lane change further to the side to avoid a collision.
+The parameters are set for a careful driver that eagerly looks for the fastest possible way to advance. Deciding to make a lane change can quickly turn out to be the wrong decision. The parameters are set to always look for the best option and revise decisions immediately if they turn out to be wrong. Quickly changing between lanes could be avoided by either adding a timer that only allows two lane changes within a given time interval or forcing the lane change to happen which could be dangerous.
 
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_04_small.gif" width="48%">
-
-At the end of the track the path planning program terminates with a [core dump](https://en.wikipedia.org/wiki/Core_dump), because several distances and velocities are calculated using longitudinal Frenet coordinates. These switch from the maximal value back to zero which leads to errors.
-
-<img src="docu_images/190119_StAn_Udacity_SDC_PP_end_small.gif" width="48%">
+<img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_03_small.gif" width="48%"> <img src="docu_images/190119_StAn_Udacity_SDC_PP_passing_05_small.gif" width="48%">
