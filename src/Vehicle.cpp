@@ -888,11 +888,12 @@ double Vehicle::CostSpaceAhead(Map map, Trajectory trajectory, vector<Vehicle> v
 		
 		// calculate distance from end of trajectory to current vehicle
 		current_back_of_vehicle = map.DeltaS(current_vehicle.Get_s(), current_vehicle.Get_length());
-		cout << "DEBUG trajectory s_end: " << trajectory.Get_s()[trajectory.Get_s().size() - 1]; // TODO remove
+		cout << "DEBUG current_back_of_vehicle, trajectory s_end: " << current_back_of_vehicle << " " << trajectory.Get_s()[trajectory.Get_s().size() - 1] << endl; // TODO remove
 		trajectory_distance_to_current_vehicle = map.DeltaS(current_back_of_vehicle, trajectory.Get_s()[trajectory.Get_s().size() - 1]);
 		
 		// project future distance on current vehicle position
 		travel_distance = this->Get_v() * STEP_TIME_INTERVAL;
+		//travel_distance = MAX_SPEED * STEP_TIME_INTERVAL; // TODO: check whether this worked (otherwise problem with validating trajectory)
 		distance_to_current_vehicle = trajectory_distance_to_current_vehicle + travel_distance;
 		
 		// check whether distance is smaller than minimum distance

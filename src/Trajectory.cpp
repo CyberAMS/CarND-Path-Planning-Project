@@ -657,7 +657,8 @@ bool Trajectory::Valid(Map map) {
 	}
 	
 	// apply gain if necessary
-	if (gain < NEUTRAL_GAIN) {
+	//if (gain < NEUTRAL_GAIN) {
+		if (0 == 1) { // TODO deactivated gain
 		
 		// determine length of previous trajectory segment
 		previous_trajectory_steps = this->Get_previous_trajectory_steps();
