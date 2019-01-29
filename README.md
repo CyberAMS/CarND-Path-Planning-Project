@@ -46,6 +46,7 @@ The following table shows an overview of the most important files:
     1. Commands to start the simulation
     1. Simulation results
 1. Discussion
+1. Known issues and possible improvements
 
 [//]: # (Image References)
 
@@ -727,3 +728,19 @@ When the track widens in sharper corners, the simulator sometimes issues an "Out
 The parameters are set for a careful driver that eagerly looks for the fastest possible way to advance. Deciding to make a lane change can quickly turn out to be the wrong decision. The parameters are set to always look for the best option and revise decisions quickly if they turn out to be wrong. Quickly changing between lanes too often could be avoided by either additing an additional cost function that penalizes making lane changes, adding a timer that only allows two lane changes within a given time interval or forcing the lane change to happen by setting the parameter `LANE_CHANGE_TRANSITION_TIME` to values greater than the equivalent of 0.25 seconds. Unfortunately, all of these options can also lead to dangerous situations in case a lane change actually is the best option.
 
 <img src="docu_images/190127_StAn_Udacity_SDC_PP_passing_undecided_01_small.gif" width="48%"> <img src="docu_images/190127_StAn_Udacity_SDC_PP_passing_undecided_02_small.gif" width="48%">
+
+### 6. Known issues and possible improvements
+
+The following issues are known and will be corrected in future versions:
+
+1. In seldom instances the own vehicle runs into the vehicle directly in front of it although it could slow down or change lanes. The reason for this is unknown.
+1. The `Trajectory::Valid()` method unnecessarily adjusts trajectories or says they are invalid. This might happen, because the first previous path steps get connected to the new jerk minimized trajectory without considering the jerk at the end of the used previous path steps. Instead the jerk minimized trajectory always starts with zero jerk. Hence, acceleration, velocity and position would peak at the transition point when the stepped jerk values get integrated.
+1. In case there is no valid next trajectory, a trajectory will be predicted based on the own vehicle's state. This prediction fails during lane changes when the lateral velocity `dv` is not zero. The vehicle starts to spiral with increasing diameter and speed. The cause might be related to the poor stitching of the first path steps and the new jerk minimized trajectory as mentioned in the issue before.
+1. The vehicle switches too wild between lanes and even starts making lane changes and reverts back and back again. This can lead to staying outside of a lane for too long. The exact reason for this as well as an effective and simple countermeasure are unknown.
+
+The following improvements are possible and will be implemented in future versions:
+
+1. Overload the function `Vehicle::PredictTrajectory(Map map, const double &s_start, const double &sv_start, const double &theta_start)` so it can be called by the own vehicle to predict a straight trajectory without mentioning the variables `d_start` and `dv_start`. Use this to always drive straight along the lanes when no real trajectory was determined.
+1. Make sure to also add the first previous path steps when predicting the own vehicle's trajectory.
+1. Instead of generating one maximum gain to adjust a trajectory in `Trajectory::Valid()` apply a speed, accerleration or jerk specific gain and then generate the other values by differentiation or integration. Or can it be a multiplication with `SAMPLE-TIME` or `1 / SAMPLE_TIME`?
+1. Consider which next possible states are really needed. For example it is not necessary to allow to jump back to KEEP_LANE when PREAPE_LANE_CHANGE is selected. Force the lane change by either waiting for it to happen or actually executing it.
