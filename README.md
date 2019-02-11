@@ -713,8 +713,6 @@ The vehicle can drive loop after loop, because the longitudinal Frenet coordinat
 
 The debugging output of a full run can be found in [./out.txt](./out.txt).
 
-Test
-
 ## 5. Discussion
 
 Connecting to the simulator that executes a varying amount of time steps per iteration can be very challenging at the beginning. It is important to provide a first trajectory that gets the vehicle going. After this the executed number of time steps needs to be carefully subtracted from the intended trajectory. And finally a continuous smooth extension and update of the intended trajectory is key. I implemented an object based framework for the path planning program that manages this very well and is easily extendable.
